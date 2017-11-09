@@ -1,6 +1,7 @@
 package FrontEnd;
 
 import Network.ChatClient;
+import Network.ChatClientThread;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -23,9 +24,11 @@ public class Main extends Application {
 
 
         primaryStage.show();
-//        chatClient = new ChatClient("localhost", 3388, myController);
+        chatClient = new ChatClient("localhost", 3388, myController);
         myController.setSocket(chatClient);
-        Platform.runLater(new ChatClient("localhost", 3388, myController));
+
+        Platform.runLater(chatClient);
+        Platform.runLater(new ChatClientThread(chatClient, chatClient.socket));
     }
 
 

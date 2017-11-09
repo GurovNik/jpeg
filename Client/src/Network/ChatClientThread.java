@@ -10,7 +10,7 @@ public class ChatClientThread extends Thread {
     private DataInputStream streamIn = null;
     private boolean work = true;
 
-    protected ChatClientThread(ChatClient _client, Socket _socket) {
+    public ChatClientThread(ChatClient _client, Socket _socket) {
         client = _client;
         socket = _socket;
         open();

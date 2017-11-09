@@ -9,8 +9,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ChatClient implements Runnable {
-    private Socket socket = null;
-    private Thread thread = null;
+    public Socket socket = null;
+//    private Thread thread = null;
     private DataInputStream console = null;
     private DataOutputStream streamOut = null;
     private ChatClientThread client = null;
@@ -71,21 +71,25 @@ public class ChatClient implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (thread == null) {
-            client = new ChatClientThread(this, socket);
-            thread = new Thread(this);
-            thread.start();
-        }
-//        while (thread != null) {
-//
+//        if (thread == null) {
+//            client = new ChatClientThread(this, socket);
+//            thread = new Thread(this) {
+//                @Override
+//                public void run() {
+//                    while (true);
+//                }
+//            };
+////            thread = new Thread(this);
+//            thread.start();
 //        }
+//        while (thread != null);
     }
 
     public void stop() {
-        if (thread != null) {
-            thread.stop();
-            thread = null;
-        }
+//        if (thread != null) {
+//            thread.stop();
+//            thread = null;
+//        }
         try {
             if (console != null) console.close();
             if (streamOut != null) streamOut.close();

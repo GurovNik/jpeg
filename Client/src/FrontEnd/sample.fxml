@@ -11,7 +11,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 
-<GridPane alignment="center" hgap="10" minHeight="700.0" minWidth="900.0" prefHeight="700.0" prefWidth="900.0" vgap="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrontEnd.sample.Controller">
+<GridPane alignment="center" hgap="10" minHeight="700.0" minWidth="900.0" prefHeight="700.0" prefWidth="900.0" vgap="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrontEnd.Controller">
    <columnConstraints>
       <ColumnConstraints />
       <ColumnConstraints />
@@ -32,12 +32,10 @@
                            <children>
                               <Label alignment="CENTER" layoutX="4.0" prefHeight="70.0" prefWidth="262.0" text="Lorem ipsum ist dalor" />
                               <ImageView blendMode="GREEN" fitHeight="130.0" fitWidth="262.0" layoutX="70.0" layoutY="70.0" pickOnBounds="true" preserveRatio="true" rotate="42.9">
-                                 <image>
-                                    <Image url="@../../../../Users/evger/Desktop/nFLCCrHR.jpeg" />
-                                 </image>
                                  <viewport>
                                     <Rectangle2D />
                                  </viewport>
+
                               </ImageView>
                            </children>
                         </Pane>
@@ -62,7 +60,7 @@
                   <Pane layoutX="2.0" layoutY="624.0" minHeight="50.0" minWidth="630.0" prefHeight="50.0" prefWidth="630.0">
                      <children>
                         <Button layoutX="573.0" layoutY="13.0" mnemonicParsing="false" onAction="#addText" text="Send" />
-                        <TextField layoutX="14.0" layoutY="13.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="500.0" promptText="Text to write" />
+                        <TextField fx:id="textBar" layoutX="14.0" layoutY="13.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="500.0" promptText="Text to write" />
                      </children>
                   </Pane>
                </children></AnchorPane>

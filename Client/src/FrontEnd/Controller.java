@@ -1,5 +1,6 @@
-package FrontEnd.sample;
+package FrontEnd;
 
+import Network.ChatClient;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -11,40 +12,48 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.io.IOException;
+
 public class Controller {
     @FXML
     private VBox vboxMessages;
     @FXML
     private ListView listView;
-    Integer clientsocket;
-
-    int i = 1;
+    @FXML
+    private TextField textBar;
+    private ChatClient socket = null;
 
     @FXML
     public void initialize() {
-        clientsocket = new Integer(5);
-
         VBox.setVgrow(vboxMessages, Priority.ALWAYS);
     }
+
+
+    public void sendText() {
+        String s = textBar.getText();
+
+        try {
+            socket.write(s);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void receiveMessage(String text) {
+        ListCell<Node> listCell = new ListCell<>();
+        Node l = new Label(text + " :: received");
+        listCell.setItem(l);
+        listView.getItems().add(l);
+    }
+
     @FXML
     public void addText() {
-        ListCell<Node> listCell = new ListCell<>();
-        Node l = new Label("Kekoza" + Integer.toString(i++));
-        listCell.setItem(l);
-        listCell.setOnMouseClicked(new EventHandler<Event>() {
+        sendText();
+        textBar.clear();
+    }
 
-            @Override
-            public void handle(Event me) {
-                System.out.println(((Control)me.getSource()).getId());
-            }
-        });
-        if (i % 2 == 0) {
-            listCell.setId("chosen");
-        }
 
-//        VBox.setMargin(l, new Insets(10, 10, 10, 10));
-//        vboxMessages.getChildren().add(l);
-//        ListView.
-        listView.getItems().add(l);
+    public void setSocket(ChatClient socket) {
+        this.socket = socket;
     }
 }

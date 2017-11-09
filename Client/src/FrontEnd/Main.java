@@ -1,6 +1,8 @@
-package FrontEnd.sample;
+package FrontEnd;
 
+import Network.ChatClient;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -8,6 +10,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     static Controller myController;
+    static ChatClient chatClient;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -20,7 +23,9 @@ public class Main extends Application {
 
 
         primaryStage.show();
-        TempThread myThread = new TempThread(myController);
+//        chatClient = new ChatClient("localhost", 3388, myController);
+        myController.setSocket(chatClient);
+        Platform.runLater(new ChatClient("localhost", 3388, myController));
     }
 
 

@@ -1,5 +1,3 @@
-package Network.Server;
-
 import java.io.*;
 import java.net.Socket;
 
@@ -10,7 +8,7 @@ public class ChatServerThread extends Thread {
     private DataInputStream streamIn = null;
     private DataOutputStream streamOut = null;
 
-    public ChatServerThread(ChatServer _server, Socket _socket) {
+    protected ChatServerThread(ChatServer _server, Socket _socket) {
         super();
         server = _server;
         socket = _socket;

@@ -1,5 +1,3 @@
-package Network.Client;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -9,7 +7,7 @@ public class ChatClientThread extends Thread {
     private ChatClient client = null;
     private DataInputStream streamIn = null;
 
-    public ChatClientThread(ChatClient _client, Socket _socket) {
+    protected ChatClientThread(ChatClient _client, Socket _socket) {
         client = _client;
         socket = _socket;
         open();

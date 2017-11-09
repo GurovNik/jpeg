@@ -1,5 +1,3 @@
-package Network.Client;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -13,7 +11,7 @@ public class ChatClient implements Runnable {
     private DataOutputStream streamOut = null;
     private ChatClientThread client = null;
 
-    public ChatClient(String serverName, int serverPort) {
+    protected ChatClient(String serverName, int serverPort) {
         System.out.println("Establishing connection. Please wait ...");
         try {
             socket = new Socket(serverName, serverPort);

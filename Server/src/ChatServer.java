@@ -1,5 +1,3 @@
-package Network.Server;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,7 +8,7 @@ public class ChatServer implements Runnable {
     private Thread thread = null;
     private int clientCount = 0;
 
-    public ChatServer(int port) {
+    protected ChatServer(int port) {
         try {
             System.out.println("Binding to port " + port + ", please wait  ...");
             server = new ServerSocket(port);

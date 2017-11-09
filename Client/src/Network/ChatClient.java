@@ -1,5 +1,7 @@
 package Network;
 
+import FrontEnd.Controller;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,13 +14,15 @@ public class ChatClient implements Runnable {
     private DataInputStream console = null;
     private DataOutputStream streamOut = null;
     private ChatClientThread client = null;
+    private Controller frontEndController = null;
 
-    protected ChatClient(String serverName, int serverPort) {
+    public ChatClient(String serverName, int serverPort, Controller controller) {
         System.out.println("Establishing connection. Please wait ...");
         try {
             socket = new Socket(serverName, serverPort);
+            frontEndController = controller;
             System.out.println("Connected: " + socket);
-            start();
+//            start();
         } catch (UnknownHostException uhe) {
             System.out.println("Host unknown: " + uhe.getMessage());
         } catch (IOException ioe) {
@@ -28,37 +32,53 @@ public class ChatClient implements Runnable {
 
     public static void main(String args[]) {
         ChatClient client = null;
-        client = new ChatClient("localhost", 3388);
+        // Huevo
+        client = new ChatClient("localhost", 3388, null);
     }
 
+//    public void run() {
+//        while (thread != null) {
+//
+//        }
+//    }
+
+    public void write(String msg) throws IOException {
+        streamOut.writeUTF(msg);
+        streamOut.flush();
+        System.out.println(msg);
+    }
+
+    public void handle(String msg) throws IOException {
+        System.out.println(msg);
+        frontEndController.receiveMessage(msg);
+    }
+
+//    public void start() throws IOException {
+//        console = new DataInputStream(System.in);
+//        streamOut = new DataOutputStream(socket.getOutputStream());
+//        if (thread == null) {
+//            client = new ChatClientThread(this, socket);
+//            thread = new Thread(this);
+//            thread.start();
+//        }
+//    }
+
+    @Override
     public void run() {
-        while (thread != null) {
-            try {
-                streamOut.writeUTF(console.readLine());
-                streamOut.flush();
-            } catch (IOException ioe) {
-                System.out.println("Sending error: " + ioe.getMessage());
-                stop();
-            }
-        }
-    }
-
-    public void handle(String msg) {
-        if (msg.equals(".bye")) {
-            System.out.println("Good bye. Press RETURN to exit ...");
-            stop();
-        } else
-            System.out.println(msg);
-    }
-
-    public void start() throws IOException {
         console = new DataInputStream(System.in);
-        streamOut = new DataOutputStream(socket.getOutputStream());
+        try {
+            streamOut = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         if (thread == null) {
             client = new ChatClientThread(this, socket);
             thread = new Thread(this);
             thread.start();
         }
+//        while (thread != null) {
+//
+//        }
     }
 
     public void stop() {

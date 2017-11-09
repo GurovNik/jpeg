@@ -1,4 +1,4 @@
-package Server;
+package Network.Server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -14,7 +14,7 @@ public class ChatServer implements Runnable {
         try {
             System.out.println("Binding to port " + port + ", please wait  ...");
             server = new ServerSocket(port);
-            System.out.println("Server started: " + server);
+            System.out.println("Network.Server started: " + server);
             start();
         } catch (IOException ioe) {
             System.out.println("Can not bind to port " + port + ": " + ioe.getMessage());
@@ -32,7 +32,7 @@ public class ChatServer implements Runnable {
                 System.out.println("Waiting for a client ...");
                 addThread(server.accept());
             } catch (IOException ioe) {
-                System.out.println("Server accept error: " + ioe);
+                System.out.println("Network.Server accept error: " + ioe);
                 stop();
             }
         }
@@ -89,7 +89,7 @@ public class ChatServer implements Runnable {
 
     private void addThread(Socket socket) {
         if (clientCount < clients.length) {
-            System.out.println("Client accepted: " + socket);
+            System.out.println("Network.Client accepted: " + socket);
             clients[clientCount] = new ChatServerThread(this, socket);
             try {
                 clients[clientCount].open();
@@ -99,6 +99,6 @@ public class ChatServer implements Runnable {
                 System.out.println("Error opening thread: " + ioe);
             }
         } else
-            System.out.println("Client refused: maximum " + clients.length + " reached.");
+            System.out.println("Network.Client refused: maximum " + clients.length + " reached.");
     }
 }

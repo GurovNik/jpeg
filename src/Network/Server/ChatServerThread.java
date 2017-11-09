@@ -1,4 +1,4 @@
-package Server;
+package Network.Server;
 
 import java.io.*;
 import java.net.Socket;
@@ -33,7 +33,7 @@ public class ChatServerThread extends Thread {
     }
 
     public void run() {
-        System.out.println("Server Thread " + ID + " running.");
+        System.out.println("Network.Server Thread " + ID + " running.");
         while (true) {
             try {
                 server.handle(ID, streamIn.readUTF());

@@ -1,4 +1,4 @@
-package Client;
+package Network.Client;
 
 import java.io.DataInputStream;
 import java.io.IOException;

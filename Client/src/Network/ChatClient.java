@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class ChatClient implements Runnable {
+public class ChatClient extends Thread {
     private Socket socket = null;
     private Thread thread = null;
     private DataInputStream console = null;
@@ -22,7 +22,7 @@ public class ChatClient implements Runnable {
             socket = new Socket(serverName, serverPort);
             frontEndController = controller;
             System.out.println("Connected: " + socket);
-//            start();
+            start();
         } catch (UnknownHostException uhe) {
             System.out.println("Host unknown: " + uhe.getMessage());
         } catch (IOException ioe) {
@@ -30,29 +30,8 @@ public class ChatClient implements Runnable {
         }
     }
 
-    public static void main(String args[]) {
-        ChatClient client = null;
-        // Huevo
-        client = new ChatClient("localhost", 3388, null);
-    }
 
     public void run() {
-        console = new DataInputStream(System.in);
-        try {
-            streamOut = new DataOutputStream(socket.getOutputStream());
-            System.out.println("Write your name:");
-            streamOut.writeUTF(console.readLine());
-            streamOut.flush();
-            System.out.println("Name received.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (thread == null) {
-            client = new ChatClientThread(this, socket);
-            thread = new Thread(this);
-            thread.start();
-        }
     }
 
     public void write(String msg) throws IOException {
@@ -71,7 +50,30 @@ public class ChatClient implements Runnable {
         }
     }
 
-    public void stop() {
+    @Override
+    public void start() {
+        console = new DataInputStream(System.in);
+        try {
+            streamOut = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (thread == null) {
+            client = new ChatClientThread(this, socket);
+            thread = new Thread(this);
+            thread.start();
+            System.out.println("Write your name:");
+            try {
+                streamOut.writeUTF(console.readLine());
+                streamOut.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Name received.");
+        }
+    }
+
+    public void stope() {
         if (thread != null) {
             thread.stop();
             thread = null;

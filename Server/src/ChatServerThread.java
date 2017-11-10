@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class ChatServerThread extends Thread {
     private ChatServer server = null;
@@ -35,7 +36,10 @@ public class ChatServerThread extends Thread {
         while (true) {
             try {
                 String s = streamIn.readUTF();
-                server.handle(getName(), , receiver);
+                Scanner scan = new Scanner(s);
+                String receiver = scan.next();
+                s = s.replace(receiver, "");
+                server.handle(getName(), s, receiver);
             } catch (IOException ioe) {
                 System.out.println(getName() + " ERROR reading: " + ioe.getMessage());
                 server.remove(ID);
@@ -50,8 +54,7 @@ public class ChatServerThread extends Thread {
         streamOut = new DataOutputStream(new
                 BufferedOutputStream(socket.getOutputStream()));
         System.out.println("Waiting for a name...");
-        while(getName() == null)
-            setName(streamIn.readUTF());
+        setName(streamIn.readUTF());
         System.out.println(getName() + " has logged in.");
     }
 

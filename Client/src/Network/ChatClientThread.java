@@ -1,11 +1,8 @@
 package Network;
 
-import FrontEnd.Controller;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.rmi.server.ExportException;
 
 public class ChatClientThread extends Thread  {
     private Socket socket = null;
@@ -43,7 +40,7 @@ public class ChatClientThread extends Thread  {
                 client.handle(streamIn.readUTF());
             } catch (IOException ioe) {
                 System.out.println("Listening error: " + ioe.getMessage());
-                client.stop();
+                client.stope();
             } catch (IllegalStateException e) {
                 System.out.println("Mne pohui");
             }

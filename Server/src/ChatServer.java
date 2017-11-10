@@ -60,10 +60,11 @@ public class ChatServer implements Runnable {
     }
 
     public synchronized void handle(String name, String input, String receiver) {
-        for (int i = 0; i < clientCount; i++)
-            if(clients[i].getName().equals(receiver)){
+        for (int i = 0; i < clientCount; i++) {
+            if (clients[i].getName().equals(receiver)) {
                 clients[i].send(name + ": " + input);
             }
+        }
     }
 
     public synchronized void remove(int ID) {
@@ -90,7 +91,6 @@ public class ChatServer implements Runnable {
             clients[clientCount] = new ChatServerThread(this, socket);
             try {
                 clients[clientCount].open();
-
                 clients[clientCount].start();
                 clientCount++;
             } catch (IOException ioe) {

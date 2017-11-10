@@ -1,3 +1,7 @@
+import jdk.nashorn.internal.parser.JSONParser;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
@@ -36,10 +40,21 @@ public class ChatServerThread extends Thread {
         while (true) {
             try {
                 String s = streamIn.readUTF();
-                Scanner scan = new Scanner(s);
-                String receiver = scan.next();
-                s = s.replace(receiver, "");
-                server.handle(getName(), s, receiver);
+
+                JSONObject obj = null;
+                JSONObject send = new JSONObject();
+                org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
+                try {
+                    obj = (JSONObject) parser.parse(s);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                String receiver = (String) obj.get("address");
+                System.out.println(receiver);
+                send.put("address", getName());
+                send.put("format", -1);
+                send.put("message", obj.get("message"));
+                server.handle(getName(), send.toJSONString(), receiver);
             } catch (IOException ioe) {
                 System.out.println(getName() + " ERROR reading: " + ioe.getMessage());
                 server.remove(ID);

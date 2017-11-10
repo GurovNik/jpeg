@@ -34,9 +34,10 @@ public class ChatServerThread extends Thread {
         System.out.println("Network.Server Thread " + ID + " running.");
         while (true) {
             try {
-                server.handle(ID, streamIn.readUTF());
+                String s = streamIn.readUTF();
+                server.handle(getName(), , receiver);
             } catch (IOException ioe) {
-                System.out.println(ID + " ERROR reading: " + ioe.getMessage());
+                System.out.println(getName() + " ERROR reading: " + ioe.getMessage());
                 server.remove(ID);
                 stop();
             }
@@ -48,6 +49,10 @@ public class ChatServerThread extends Thread {
                 BufferedInputStream(socket.getInputStream()));
         streamOut = new DataOutputStream(new
                 BufferedOutputStream(socket.getOutputStream()));
+        System.out.println("Waiting for a name...");
+        while(getName() == null)
+            setName(streamIn.readUTF());
+        System.out.println(getName() + " has logged in.");
     }
 
     public void close() throws IOException {

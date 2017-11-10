@@ -40,9 +40,14 @@ public class ChatClient implements Runnable {
         console = new DataInputStream(System.in);
         try {
             streamOut = new DataOutputStream(socket.getOutputStream());
+            System.out.println("Write your name:");
+            streamOut.writeUTF(console.readLine());
+            streamOut.flush();
+            System.out.println("Name received.");
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         if (thread == null) {
             client = new ChatClientThread(this, socket);
             thread = new Thread(this);

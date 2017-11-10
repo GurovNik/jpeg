@@ -56,7 +56,7 @@ public class Controller {
         jsonObject.put("encoding", -1);
         jsonObject.put("initial_size", -1);
         jsonObject.put("compressed_size", -1);
-        jsonObject.put("final_size", -1);
+        jsonObject.put("encoded_size", -1);
         jsonObject.put("format", -1);
         jsonObject.put("message", data);
 

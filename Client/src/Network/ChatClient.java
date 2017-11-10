@@ -9,8 +9,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ChatClient implements Runnable {
-    public Socket socket = null;
-//    private Thread thread = null;
+    private Socket socket = null;
+    private Thread thread = null;
     private DataInputStream console = null;
     private DataOutputStream streamOut = null;
     private ChatClientThread client = null;
@@ -36,11 +36,19 @@ public class ChatClient implements Runnable {
         client = new ChatClient("localhost", 3388, null);
     }
 
-//    public void run() {
-//        while (thread != null) {
-//
-//        }
-//    }
+    public void run() {
+        console = new DataInputStream(System.in);
+        try {
+            streamOut = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (thread == null) {
+            client = new ChatClientThread(this, socket);
+            thread = new Thread(this);
+            thread.start();
+        }
+    }
 
     public void write(String msg) throws IOException {
         streamOut.writeUTF(msg);
@@ -50,46 +58,19 @@ public class ChatClient implements Runnable {
 
     public void handle(String msg) throws IOException {
         System.out.println(msg);
-        frontEndController.receiveMessage(msg);
-    }
-
-//    public void start() throws IOException {
-//        console = new DataInputStream(System.in);
-//        streamOut = new DataOutputStream(socket.getOutputStream());
-//        if (thread == null) {
-//            client = new ChatClientThread(this, socket);
-//            thread = new Thread(this);
-//            thread.start();
-//        }
-//    }
-
-    @Override
-    public void run() {
-        console = new DataInputStream(System.in);
         try {
-            streamOut = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
+            frontEndController.receiveMessage(msg);
+        } catch (java.lang.IllegalStateException exc) {
+            frontEndController.receiveMessage(msg);
+            System.out.println("Mne pohui2");
         }
-//        if (thread == null) {
-//            client = new ChatClientThread(this, socket);
-//            thread = new Thread(this) {
-//                @Override
-//                public void run() {
-//                    while (true);
-//                }
-//            };
-////            thread = new Thread(this);
-//            thread.start();
-//        }
-//        while (thread != null);
     }
 
     public void stop() {
-//        if (thread != null) {
-//            thread.stop();
-//            thread = null;
-//        }
+        if (thread != null) {
+            thread.stop();
+            thread = null;
+        }
         try {
             if (console != null) console.close();
             if (streamOut != null) streamOut.close();

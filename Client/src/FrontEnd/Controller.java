@@ -43,7 +43,11 @@ public class Controller {
         ListCell<Node> listCell = new ListCell<>();
         Node l = new Label(text + " :: received");
         listCell.setItem(l);
-        listView.getItems().add(l);
+        try {
+            listView.getItems().add(l);
+        } catch (java.lang.IllegalStateException exc) {
+            System.out.println("Mne pohui");
+        }
     }
 
     @FXML

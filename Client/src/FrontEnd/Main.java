@@ -19,16 +19,14 @@ public class Main extends Application {
         Parent root = loader.load();
         myController = (Controller)loader.getController();
 
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("Messenger v0.01");
         primaryStage.setScene(new Scene(root));
 
 
         primaryStage.show();
         chatClient = new ChatClient("localhost", 3388, myController);
         myController.setSocket(chatClient);
-
-        Platform.runLater(chatClient);
-        Platform.runLater(new ChatClientThread(chatClient, chatClient.socket));
+        chatClient.run();
     }
 
 

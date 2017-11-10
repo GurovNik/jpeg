@@ -1,13 +1,17 @@
-package Client;
+package Network;
+
+import FrontEnd.Controller;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.rmi.server.ExportException;
 
-public class ChatClientThread extends Thread {
+public class ChatClientThread extends Thread  {
     private Socket socket = null;
     private ChatClient client = null;
     private DataInputStream streamIn = null;
+    private boolean work = true;
 
     public ChatClientThread(ChatClient _client, Socket _socket) {
         client = _client;
@@ -21,7 +25,7 @@ public class ChatClientThread extends Thread {
             streamIn = new DataInputStream(socket.getInputStream());
         } catch (IOException ioe) {
             System.out.println("Error getting input stream: " + ioe);
-            client.stop();
+            work = false;
         }
     }
 
@@ -33,13 +37,15 @@ public class ChatClientThread extends Thread {
         }
     }
 
-    public void run() {
-        while (true) {
+    public void run() throws java.lang.IllegalStateException {
+        while (work) {
             try {
                 client.handle(streamIn.readUTF());
             } catch (IOException ioe) {
                 System.out.println("Listening error: " + ioe.getMessage());
                 client.stop();
+            } catch (IllegalStateException e) {
+                System.out.println("Mne pohui");
             }
         }
     }

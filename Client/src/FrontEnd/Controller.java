@@ -22,12 +22,15 @@ public class Controller {
 
     }
 
-
-    public void sendText() {
-        String s = textBar.getText();
+    @FXML
+    public void sendData() {
+        Object obj = textBar.getText();
+        textBar.clear();
+        String json = createJSON(obj);
+        System.out.println(json);
 
         try {
-            socket.write(s);
+            socket.write(json);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -43,13 +46,6 @@ public class Controller {
             System.out.println("Mne pohui");
         }
     }
-
-    @FXML
-    public void addText() {
-        sendText();
-        textBar.clear();
-    }
-
 
 
     private String createJSON(Object data) {

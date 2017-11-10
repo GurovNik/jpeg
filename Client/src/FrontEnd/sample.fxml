@@ -28,11 +28,36 @@
                <children>
                   <VBox layoutX="-4.0" minHeight="700.0" minWidth="270.0" prefHeight="700.0" prefWidth="270.0">
                      <children>
-                        <Pane minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="270.0">
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                           <center>
+                              <TextField fx:id="alias" promptText="\@alias" BorderPane.alignment="CENTER" />
+                           </center>
+                           <top>
+                              <Label alignment="CENTER" prefHeight="70.0" prefWidth="262.0" text="Messenger v0.01" BorderPane.alignment="CENTER" />
+                           </top>
+                        </BorderPane>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                           <center>
+                              <TextField prefHeight="24.0" prefWidth="209.0" styleClass="fieldInBorderPane" BorderPane.alignment="CENTER" />
+                           </center>
+                           <top>
+                              <Label text="Send message to" BorderPane.alignment="CENTER" />
+                           </top>
+                        </BorderPane>
+                        <HBox prefHeight="28.0" prefWidth="270.0">
                            <children>
-                              <Label alignment="CENTER" layoutX="4.0" prefHeight="70.0" prefWidth="262.0" text="Lorem ipsum ist dalor" />
+                              <RadioButton mnemonicParsing="false" text="Compression1" />
+                              <RadioButton mnemonicParsing="false" text="Compression2" />
+                              <RadioButton mnemonicParsing="false" text="Compression3" />
                            </children>
-                        </Pane>
+                        </HBox>
+                        <HBox fx:id="encodingSelect" prefHeight="30.0" prefWidth="270.0">
+                           <children>
+                              <RadioButton mnemonicParsing="false" text="Encoding1" />
+                              <RadioButton mnemonicParsing="false" text="Encoding3" />
+                              <RadioButton mnemonicParsing="false" text="Encoding2" />
+                           </children>
+                        </HBox>
                      </children>
                   </VBox>
                </children>
@@ -43,8 +68,15 @@
                      <children>
                       <AnchorPane minHeight="650.0" minWidth="630.0" prefHeight="650.0" prefWidth="630.0">
                            <children>
-                              <ListView fx:id="listView" prefHeight="627.0" prefWidth="615.0" />
-                              <VBox fx:id="vboxMessages" prefHeight="624.0" prefWidth="615.0" />
+                              <TabPane fx:id="tabs" prefHeight="624.0" prefWidth="615.0" tabClosingPolicy="UNAVAILABLE">
+                                <tabs>
+                                  <Tab text="Untitled Tab 1">
+                                       <content>
+                                          <ListView fx:id="listView" prefHeight="627.0" prefWidth="615.0" />
+                                       </content>
+                                    </Tab>
+                                </tabs>
+                              </TabPane>
                            </children>
                         </AnchorPane>
                      </children>

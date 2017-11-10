@@ -1,22 +1,16 @@
 package FrontEnd;
 
 import Network.ChatClient;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import org.json.simple.JSONObject;
 
 import java.io.IOException;
 
 public class Controller {
-    @FXML
-    private VBox vboxMessages;
     @FXML
     private ListView listView;
     @FXML
@@ -25,7 +19,7 @@ public class Controller {
 
     @FXML
     public void initialize() {
-        VBox.setVgrow(vboxMessages, Priority.ALWAYS);
+
     }
 
 
@@ -54,6 +48,23 @@ public class Controller {
     public void addText() {
         sendText();
         textBar.clear();
+    }
+
+
+
+    private String createJSON(Object data) {
+        String sendTo = "ViPivaso";
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("address", sendTo);
+        jsonObject.put("compression", -1);
+        jsonObject.put("encoding", -1);
+        jsonObject.put("initial_size", -1);
+        jsonObject.put("compressed_size", -1);
+        jsonObject.put("final_size", -1);
+        jsonObject.put("format", -1);
+        jsonObject.put("message", data);
+
+        return jsonObject.toJSONString();
     }
 
 

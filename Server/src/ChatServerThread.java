@@ -1,5 +1,10 @@
+import jdk.nashorn.internal.parser.JSONParser;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
+
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class ChatServerThread extends Thread {
     private ChatServer server = null;
@@ -34,9 +39,24 @@ public class ChatServerThread extends Thread {
         System.out.println("Network.Server Thread " + ID + " running.");
         while (true) {
             try {
-                server.handle(ID, streamIn.readUTF());
+                String s = streamIn.readUTF();
+
+                JSONObject obj = null;
+                JSONObject send = new JSONObject();
+                org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
+                try {
+                    obj = (JSONObject) parser.parse(s);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                String receiver = (String) obj.get("address");
+                System.out.println(receiver);
+                send.put("address", getName());
+                send.put("format", -1);
+                send.put("message", obj.get("message"));
+                server.handle(getName(), send.toJSONString(), receiver);
             } catch (IOException ioe) {
-                System.out.println(ID + " ERROR reading: " + ioe.getMessage());
+                System.out.println(getName() + " ERROR reading: " + ioe.getMessage());
                 server.remove(ID);
                 stop();
             }
@@ -48,6 +68,9 @@ public class ChatServerThread extends Thread {
                 BufferedInputStream(socket.getInputStream()));
         streamOut = new DataOutputStream(new
                 BufferedOutputStream(socket.getOutputStream()));
+        System.out.println("Waiting for a name...");
+        setName(streamIn.readUTF());
+        System.out.println(getName() + " has logged in.");
     }
 
     public void close() throws IOException {

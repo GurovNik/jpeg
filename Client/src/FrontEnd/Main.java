@@ -26,7 +26,8 @@ public class Main extends Application {
         primaryStage.show();
         chatClient = new ChatClient("localhost", 3388, myController);
         myController.setSocket(chatClient);
-        chatClient.run();
+//        chatClient.run();
+        Platform.runLater(chatClient);
     }
 
 

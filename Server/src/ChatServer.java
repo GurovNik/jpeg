@@ -8,6 +8,7 @@ public class ChatServer implements Runnable {
     private Thread thread = null;
     private int clientCount = 0;
 
+
     protected ChatServer(int port) {
         try {
             System.out.println("Binding to port " + port + ", please wait  ...");
@@ -58,13 +59,12 @@ public class ChatServer implements Runnable {
         return -1;
     }
 
-    public synchronized void handle(int ID, String input) {
-        if (input.equals(".bye")) {
-            clients[findClient(ID)].send(".bye");
-            remove(ID);
-        } else
-            for (int i = 0; i < clientCount; i++)
-                clients[i].send(ID + ": " + input);
+    public synchronized void handle(String name, String input, String receiver) {
+        for (int i = 0; i < clientCount; i++) {
+            if (clients[i].getName().equals(receiver)) {
+                clients[i].send(name + ": " + input);
+            }
+        }
     }
 
     public synchronized void remove(int ID) {

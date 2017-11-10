@@ -3,3 +3,13 @@
 	-fx-padding: 10;
 	-fx-background-color: #ff2d00;
 }
+
+.fieldInBorderPane {
+	-fx-padding-left: 20px;
+	-fx-padding-right: 20px;
+    -fx-pref-height: 10px;
+}
+
+.borderPane {
+	-fx-padding: 40px;
+}

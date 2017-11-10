@@ -31,12 +31,6 @@
                         <Pane minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="270.0">
                            <children>
                               <Label alignment="CENTER" layoutX="4.0" prefHeight="70.0" prefWidth="262.0" text="Lorem ipsum ist dalor" />
-                              <ImageView blendMode="GREEN" fitHeight="130.0" fitWidth="262.0" layoutX="70.0" layoutY="70.0" pickOnBounds="true" preserveRatio="true" rotate="42.9">
-                                 <viewport>
-                                    <Rectangle2D />
-                                 </viewport>
-
-                              </ImageView>
                            </children>
                         </Pane>
                      </children>
@@ -45,21 +39,19 @@
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="678.0" prefWidth="667.0">
                <children>
-                  <ScrollPane hbarPolicy="NEVER" layoutX="-8.0" pannable="true" prefHeight="624.0" prefWidth="632.0">
-                    <content>
+                  <Pane prefHeight="624.0" prefWidth="622.0">
+                     <children>
                       <AnchorPane minHeight="650.0" minWidth="630.0" prefHeight="650.0" prefWidth="630.0">
                            <children>
-                              <VBox fx:id="vboxMessages" prefHeight="624.0" prefWidth="615.0">
-                                 <children>
-                                    <ListView fx:id="listView" prefHeight="200.0" prefWidth="200.0" />
-                                 </children></VBox>
+                              <ListView fx:id="listView" prefHeight="627.0" prefWidth="615.0" />
+                              <VBox fx:id="vboxMessages" prefHeight="624.0" prefWidth="615.0" />
                            </children>
                         </AnchorPane>
-                    </content>
-                  </ScrollPane>
+                     </children>
+                  </Pane>
                   <Pane layoutX="2.0" layoutY="624.0" minHeight="50.0" minWidth="630.0" prefHeight="50.0" prefWidth="630.0">
                      <children>
-                        <Button layoutX="573.0" layoutY="13.0" mnemonicParsing="false" onAction="#addText" text="Send" />
+                        <Button layoutX="573.0" layoutY="13.0" mnemonicParsing="false" onAction="#sendData" text="Send" />
                         <TextField fx:id="textBar" layoutX="14.0" layoutY="13.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="500.0" promptText="Text to write" />
                      </children>
                   </Pane>

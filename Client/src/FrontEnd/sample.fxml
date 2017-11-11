@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -22,19 +23,29 @@
                   <VBox layoutX="-4.0" minHeight="700.0" minWidth="270.0" prefHeight="700.0" prefWidth="270.0">
                      <children>
                         <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="borderPane">
-                           <center>
-                              <TextField fx:id="alias" promptText="\@alias" styleClass="fieldInBorderPane" BorderPane.alignment="CENTER" />
-                           </center>
                            <top>
-                              <Label alignment="CENTER" prefHeight="70.0" prefWidth="262.0" text="Messenger v0.01" BorderPane.alignment="CENTER" />
+                              <Label alignment="CENTER" prefHeight="70.0" prefWidth="262.0" text="Messenger v0.01" BorderPane.alignment="CENTER">
+                                 <font>
+                                    <Font name="Comic Sans MS" size="22.0" />
+                                 </font></Label>
                            </top>
+                           <center>
+                              <Label fx:id="alias" text="Label" BorderPane.alignment="CENTER">
+                                 <font>
+                                    <Font name="Comic Sans MS Bold Italic" size="32.0" />
+                                 </font>
+                              </Label>
+                           </center>
                         </BorderPane>
                         <BorderPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #ff2d00;" styleClass="borderPane">
                            <center>
-                              <TextField prefHeight="25.0" prefWidth="209.0" styleClass="fieldInBorderPane" BorderPane.alignment="CENTER" />
+                              <TextField fx:id="sendTo" prefHeight="25.0" prefWidth="209.0" promptText="Add tab" styleClass="fieldInBorderPane" BorderPane.alignment="CENTER" />
                            </center>
                            <top>
-                              <Label text="Send message to" BorderPane.alignment="CENTER" />
+                              <Label text="Send message to" BorderPane.alignment="CENTER">
+                                 <font>
+                                    <Font name="Comic Sans MS" size="20.0" />
+                                 </font></Label>
                            </top>
                         </BorderPane>
                         <HBox prefHeight="28.0" prefWidth="270.0">
@@ -61,15 +72,7 @@
                      <children>
                       <AnchorPane minHeight="650.0" minWidth="630.0" prefHeight="650.0" prefWidth="630.0">
                            <children>
-                              <TabPane fx:id="tabs" prefHeight="624.0" prefWidth="615.0" tabClosingPolicy="UNAVAILABLE">
-                                <tabs>
-                                  <Tab text="Untitled Tab 1">
-                                       <content>
-                                          <ListView fx:id="listView" prefHeight="627.0" prefWidth="615.0" />
-                                       </content>
-                                    </Tab>
-                                </tabs>
-                              </TabPane>
+                              <TabPane fx:id="tabs" prefHeight="624.0" prefWidth="615.0" tabClosingPolicy="UNAVAILABLE" />
                            </children>
                         </AnchorPane>
                      </children>

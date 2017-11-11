@@ -54,6 +54,9 @@ public class ChatServerThread extends Thread {
                 send.put("address", getName());
                 send.put("format", -1);
                 send.put("message", obj.get("message"));
+                send.put("compression", obj.get("compression"));
+                send.put("encoding", obj.get("encoding"));
+
                 server.handle(getName(), send.toJSONString(), receiver);
             } catch (IOException ioe) {
                 System.out.println(getName() + " ERROR reading: " + ioe.getMessage());

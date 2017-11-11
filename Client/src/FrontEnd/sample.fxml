@@ -37,7 +37,7 @@
                               </Label>
                            </center>
                         </BorderPane>
-                        <BorderPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #ff2d00;" styleClass="borderPane">
+                        <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="borderPane">
                            <center>
                               <TextField fx:id="sendTo" prefHeight="25.0" prefWidth="209.0" promptText="Add tab" styleClass="fieldInBorderPane" BorderPane.alignment="CENTER" />
                            </center>

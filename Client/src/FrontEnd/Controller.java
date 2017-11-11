@@ -23,8 +23,10 @@ public class Controller {
     private TabPane tabs;
     @FXML
     private TextField sendTo;
+    @FXML
+    private Label alias;
 
-    private ChatClient socket = null;
+    private ChatClient socket;
     private Set<String> dialogue;
     private Map<String, Tab> tabMap;
 
@@ -44,8 +46,24 @@ public class Controller {
 
         tabMap = new HashMap<>();
         dialogue = new HashSet<>();
-        //TODO :: шото тут хотел
         sendTo.setOnKeyReleased(keyHandler);
+
+        startDialogue();
+
+    }
+
+    private void startDialogue() {
+        TextInputDialog dialog = new TextInputDialog("@alias");
+        dialog.setTitle("Alias");
+        dialog.setHeaderText("Insert your alias");
+        dialog.setContentText("Please enter your alias:");
+
+        Optional<String> result = dialog.showAndWait();
+
+        if (result.isPresent())
+            alias.setText(result.get());
+        else
+            startDialogue();
     }
 
 
@@ -141,7 +159,6 @@ public class Controller {
     }
 
     private Tab findTabByAlias(String alias) {
-        //        TODO :: ХешМэп tab -> alias
         if (tabMap.containsKey(alias))
             return tabMap.get(alias);
         return null;

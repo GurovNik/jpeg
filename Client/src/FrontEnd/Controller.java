@@ -1,9 +1,12 @@
 package FrontEnd;
 
 import Network.ChatClient;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.json.simple.JSONObject;
@@ -25,12 +28,25 @@ public class Controller {
 
     private ChatClient socket = null;
     private Set<String> dialogue;
+    private EventHandler<KeyEvent> keyHandler;
 
 
     @FXML
     public void initialize() {
+        keyHandler = new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.ENTER) {
+                    requestHistory();
+                }
+            }
+        };
+
         dialogue = new TreeSet<>();
+        //TODO :: шото тут хотел
+        sendTo.setOnKeyReleased(keyHandler);
     }
+
 
     @FXML
     public void sendData() {
@@ -44,6 +60,26 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void requestHistory() {
+        JSONObject object = createHistoryRequest();
+
+        try {
+            socket.handle(object.toJSONString());
+        } catch (IOException e) {
+            System.out.println("Wrong json");
+            e.printStackTrace();
+        }
+    }
+
+    private JSONObject createHistoryRequest() {
+        String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
+        System.out.printf("Send to is equal to :: %s\n", sendTo);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("address", sendTo);
+        jsonObject.put("database", 1);
+        return jsonObject;
     }
 
     public void receiveMessage(String text) {
@@ -68,6 +104,7 @@ public class Controller {
         ListCell<Node> cell = new ListCell<>();
         Node n;
 
+        //TODO :: New data types
         switch (format) {
             case "text":
                 String data = (String) obj.get("message");
@@ -109,7 +146,8 @@ public class Controller {
     }
 
     private String createJSON(Object data) {
-        String sendTo = "ViPivaso";
+        String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
+        System.out.printf("Send to is equal to :: %s\n", sendTo);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", sendTo);
         jsonObject.put("compression", -1);

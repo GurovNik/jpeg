@@ -59,10 +59,10 @@ public class ChatServer implements Runnable {
         return -1;
     }
 
-    public synchronized void handle(String name, String input, String receiver) {
+    public synchronized void handle(String input, String receiver) {
         for (int i = 0; i < clientCount; i++) {
             if (clients[i].getName().equals(receiver)) {
-                clients[i].send(name + ": " + input);
+                clients[i].send(input);
             }
         }
     }

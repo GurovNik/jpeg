@@ -4,6 +4,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class ChatServerThread extends Thread {
@@ -39,25 +40,57 @@ public class ChatServerThread extends Thread {
         System.out.println("Network.Server Thread " + ID + " running.");
         while (true) {
             try {
-                String s = streamIn.readUTF();
-
-                JSONObject obj = null;
-                JSONObject send = new JSONObject();
+                String s = streamIn.readUTF();  //read data
+                JSONObject obj = null;  //Create and setup JSON object
                 org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
                 try {
                     obj = (JSONObject) parser.parse(s);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                String receiver = (String) obj.get("address");
-                System.out.println(receiver);
-                send.put("address", getName());
-                send.put("format", -1);
-                send.put("message", obj.get("message"));
-                send.put("compression", obj.get("compression"));
-                send.put("encoding", obj.get("encoding"));
 
-                server.handle(getName(), send.toJSONString(), receiver);
+                //If it is for database synchronisation
+                if (obj.containsKey("database")) {
+                    System.out.println("Got database request.");
+                    DB db = new DB();
+                    try {
+                        db.makeSelection(getName(), (String) obj.get("address"));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    while (db.hasNext()) {
+                        JSONObject send = new JSONObject();
+                        String receiver = (String) obj.get("address");
+                        try {
+                            db.next();
+                            send.put("chat", receiver);
+                            send.put("address", db.get("string", "user"));
+                            send.put("format", db.get("string", "format"));
+                            send.put("message", db.get("string", "content"));
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        server.handle(send.toJSONString(), getName());
+                    }
+                } else {
+                    //Or send message to user.
+                    DB db = new DB();
+                    db.insert((double) obj.get("encoded_size"), (double) obj.get("compressed_size"), getName(),
+                            (String) obj.get("address"), (byte) obj.get("compression"), (byte) obj.get("encoding"),
+                            (String) obj.get("format"), (String) obj.get("message"));
+                    JSONObject send = new JSONObject();
+                    String receiver = (String) obj.get("address");
+                    System.out.println(receiver);
+
+
+                    send.put("address", getName());
+                    send.put("format", -1);
+                    send.put("message", obj.get("message"));
+                    send.put("compression", obj.get("compression"));
+                    send.put("encoding", obj.get("encoding"));
+
+                    server.handle(send.toJSONString(), receiver);
+                }
             } catch (IOException ioe) {
                 System.out.println(getName() + " ERROR reading: " + ioe.getMessage());
                 server.remove(ID);

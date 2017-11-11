@@ -30,8 +30,12 @@ public class ChatClient extends Thread {
         }
     }
 
+    public void throughAlias(String alias) {
+        frontEndController.receiveAlias(alias);
+    }
 
     public void run() {
+
     }
 
     public void write(String msg) throws IOException {
@@ -50,6 +54,17 @@ public class ChatClient extends Thread {
         }
     }
 
+    public void login(String login){
+        System.out.println("Write your name:");
+        try {
+            streamOut.writeUTF(login);
+            streamOut.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Name received.");
+    }
+
     @Override
     public void start() {
         console = new DataInputStream(System.in);
@@ -62,14 +77,6 @@ public class ChatClient extends Thread {
             client = new ChatClientThread(this, socket);
             thread = new Thread(this);
             thread.start();
-            System.out.println("Write your name:");
-            try {
-                streamOut.writeUTF(console.readLine());
-                streamOut.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            System.out.println("Name received.");
         }
     }
 

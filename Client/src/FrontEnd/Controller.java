@@ -48,23 +48,10 @@ public class Controller {
         dialogue = new HashSet<>();
         sendTo.setOnKeyReleased(keyHandler);
 
-        startDialogue();
-
+//        startDialogue();
     }
 
-    private void startDialogue() {
-        TextInputDialog dialog = new TextInputDialog("@alias");
-        dialog.setTitle("Alias");
-        dialog.setHeaderText("Insert your alias");
-        dialog.setContentText("Please enter your alias:");
 
-        Optional<String> result = dialog.showAndWait();
-
-        if (result.isPresent())
-            alias.setText(result.get());
-        else
-            startDialogue();
-    }
 
 
     @FXML
@@ -81,22 +68,31 @@ public class Controller {
         }
     }
 
+    public void receiveAlias(String alias) {
+        this.alias.setText(alias);
+    }
+
     private void requestHistory() {
         JSONObject object = createHistoryRequest();
-
-        try {
-            socket.handle(object.toJSONString());
-        } catch (IOException e) {
-            System.out.println("Wrong json");
-            e.printStackTrace();
+        if (object != null) {
+            try {
+                socket.handle(object.toJSONString());
+            } catch (IOException e) {
+                System.out.println("Wrong json");
+                e.printStackTrace();
+            }
         }
     }
 
     private JSONObject createHistoryRequest() {
-        String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
-        System.out.printf("Send to is equal to :: %s\n", sendTo);
+        String address = sendTo.getText();
+
+        if (address.equals(""))
+            return null;
+
+        System.out.printf("Send to is equal to :: %s\n", address);
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("address", sendTo);
+        jsonObject.put("address", address);
         jsonObject.put("database", 1);
         return jsonObject;
     }
@@ -122,6 +118,8 @@ public class Controller {
         String format = (String) obj.get("format");
         ListCell<Node> cell = new ListCell<>();
         Node n;
+
+        System.out.println(obj.toJSONString());
 
         //TODO :: New data types
         //TODO :: NOT ONLY FOR STRING SAY NAME

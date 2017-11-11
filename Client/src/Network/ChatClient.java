@@ -54,6 +54,7 @@ public class ChatClient extends Thread {
         }
     }
 
+    @Deprecated
     public void login(String login){
         System.out.println("Write your name:");
         try {

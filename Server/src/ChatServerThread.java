@@ -53,11 +53,7 @@ public class ChatServerThread extends Thread {
                 if (obj.containsKey("database")) {
                     System.out.println("Got database request.");
                     DB db = new DB();
-                    try {
-                        db.makeSelection(getName(), (String) obj.get("address"));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    db.makeSelection(getName(), (String) obj.get("address"));
                     while (db.hasNext()) {
                         JSONObject send = new JSONObject();
                         String receiver = (String) obj.get("address");

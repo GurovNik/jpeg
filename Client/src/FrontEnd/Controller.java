@@ -59,7 +59,6 @@ public class Controller {
         Object obj = textBar.getText();
         textBar.clear();
         String json = createJSON(obj);
-        System.out.println(json);
 
         try {
             socket.write(json);
@@ -76,7 +75,7 @@ public class Controller {
         JSONObject object = createHistoryRequest();
         if (object != null) {
             try {
-                socket.handle(object.toJSONString());
+                socket.write(object.toJSONString());
             } catch (IOException e) {
                 System.out.println("Wrong json");
                 e.printStackTrace();
@@ -90,7 +89,6 @@ public class Controller {
         if (address.equals(""))
             return null;
 
-        System.out.printf("Send to is equal to :: %s\n", address);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", address);
         jsonObject.put("database", 1);
@@ -119,7 +117,7 @@ public class Controller {
         ListCell<Node> cell = new ListCell<>();
         Node n;
 
-        System.out.println(obj.toJSONString());
+        System.out.println("Received msg :: " + obj.toJSONString());
 
         //TODO :: New data types
         //TODO :: NOT ONLY FOR STRING SAY NAME
@@ -164,7 +162,6 @@ public class Controller {
 
     private String createJSON(Object data) {
         String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
-        System.out.printf("Send to is equal to :: %s\n", sendTo);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", sendTo);
         jsonObject.put("compression", -1);

@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * Created by pivaso on 10.11.17.
@@ -6,23 +8,34 @@ import java.sql.*;
 public class DB {
 
     private int ID;
-    private ResultSet results;
+    private ArrayList<Hashtable<String, String>> results;
+    private int cursor = 0;
 
     public DB() {
         ID = selectID();
     }
 
-    public static void main(String[] args) throws SQLException {
-        DB app = new DB();
-        app.makeSelection("ViPivaso", "evgerher");
-        app.next();
-        System.out.println(app.get("string", "user"));
-        // insert three new rows
-    }
+//    public static void main(String[] args) throws SQLException {
+//        DB app = new DB();
+//        app.makeSelection("texet", "evgerher");
+//        System.out.println(app.results.size());
+//        System.out.println(app.hasNext());
+//        System.out.println(app.get("user"));
+//        System.out.println(app.get("recepient"));
+//        app.next();
+//        System.out.println(app.get("user"));
+//        System.out.println(app.get("recepient"));
+//        app.next();
+//        System.out.println(app.hasNext());
+//        System.out.println(app.get("user"));
+//        System.out.println(app.get("recepient"));
+//        app.reset();
+//        // insert three new rows
+//    }
 
-    private Connection connect() {
+    public Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:Server/messenger";
+        String url = "jdbc:sqlite:messenger";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -34,17 +47,30 @@ public class DB {
 
     private void getResult(String name, String recipient) {
         String sql = "SELECT * FROM messages WHERE (user = ? AND recepient = ?)OR (user = ? AND recepient = ?) ORDER BY id ASC";
-        Connection conn = this.connect();
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+        ArrayList<Hashtable<String, String>> result = new ArrayList<>();
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ;
             pstmt.setString(1, name);
             pstmt.setString(2, recipient);
             pstmt.setString(3, recipient);
             pstmt.setString(4, name);
-            results = pstmt.executeQuery();
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Hashtable<String, String> temp = new Hashtable<>(10);
+                temp.put("user", rs.getString(2));
+                temp.put("recepient", rs.getString(3));
+                temp.put("format", rs.getString(5));
+                temp.put("content", rs.getString(10));
+                result.add(temp);
+            }
+            results = result;
         } catch (SQLException e) {
+            System.out.println("null");
             System.out.println(e.getMessage());
         }
+
     }
 
     public void makeSelection(String name, String recepient) {
@@ -52,28 +78,17 @@ public class DB {
     }
 
 
-    public Object get(String format, String param) throws SQLException {
-        try {
-            switch (format.toLowerCase()) {
-                case "int":
-                    return results.getInt(param);
-                case "string":
-                    return results.getString(param);
-                case "float":
-                    return results.getFloat(param);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "hui";
-        }
-        return null;
+    public String get(String param) {
+        return results.get(cursor).get(param);
     }
 
-    public void next() throws SQLException {
-        results.next();
-        if (results.isAfterLast()) {
-            results.close();
-        }
+    public void next() {
+        ++cursor;
+    }
+
+    public void reset() {
+        cursor = 0;
+        results = null;
     }
 
     public int selectID() {
@@ -94,16 +109,7 @@ public class DB {
     }
 
     public boolean hasNext() {
-        if (results != null) {
-            try {
-                return results.isLast();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return cursor < results.size();
     }
 
     public void insert(double size, double compressed, String user, String recipient, byte compression, byte coding,
@@ -111,6 +117,7 @@ public class DB {
         if (ID == -1) {
             selectID();
         }
+        System.out.println("Inserting");
         String sql =
                 "INSERT INTO messages (id, size, compressed, user, recepient, compression, coding, format, content) " +
                         "VALUES (?,?,?,?,?,?,?,?,?)";

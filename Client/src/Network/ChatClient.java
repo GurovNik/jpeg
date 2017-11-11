@@ -49,7 +49,6 @@ public class ChatClient extends Thread {
         try {
             frontEndController.receiveMessage(msg);
         } catch (java.lang.IllegalStateException exc) {
-            frontEndController.receiveMessage(msg);
             System.out.println("Mne pohui2");
         }
     }

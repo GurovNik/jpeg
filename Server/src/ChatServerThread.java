@@ -41,6 +41,7 @@ public class ChatServerThread extends Thread {
         while (true) {
             try {
                 String s = streamIn.readUTF();  //read data
+                System.out.println(s);
                 JSONObject obj = null;  //Create and setup JSON object
                 org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
                 try {
@@ -48,28 +49,37 @@ public class ChatServerThread extends Thread {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-
                 //If it is for database synchronisation
                 if (obj.containsKey("database")) {
                     System.out.println("Got database request.");
                     DB db = new DB();
                     db.makeSelection(getName(), (String) obj.get("address"));
-                    while (db.hasNext()) {
+                    if (!db.hasNext()) {
                         JSONObject send = new JSONObject();
                         String receiver = (String) obj.get("address");
-                        try {
-                            db.next();
-                            send.put("chat", receiver);
-                            send.put("address", db.get("string", "user"));
-                            send.put("format", db.get("string", "format"));
-                            send.put("message", db.get("string", "content"));
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                        send.put("chat", receiver);
+                        send.put("address", "null");
+                        send.put("format", "null");
+                        send.put("message", "null");
                         server.handle(send.toJSONString(), getName());
+                    } else {
+                        while (db.hasNext()) {
+                            JSONObject send = new JSONObject();
+                            String receiver = (String) obj.get("address");
+                            send.put("chat", receiver);
+                            send.put("address", db.get("user"));
+                            send.put("format", db.get("format"));
+                            send.put("message", db.get("content"));
+
+                            System.out.println(send.toJSONString());
+                            server.handle(send.toJSONString(), getName());
+                            db.next();
+                        }
                     }
+                    db.reset();
                 } else {
                     //Or send message to user.
+                    System.out.println("Pidor");
                     DB db = new DB();
                     db.insert((double) obj.get("encoded_size"), (double) obj.get("compressed_size"), getName(),
                             (String) obj.get("address"), (byte) obj.get("compression"), (byte) obj.get("encoding"),

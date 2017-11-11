@@ -14,9 +14,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class Controller {
     @FXML
@@ -28,6 +26,8 @@ public class Controller {
 
     private ChatClient socket = null;
     private Set<String> dialogue;
+    private Map<String, Tab> tabMap;
+
     private EventHandler<KeyEvent> keyHandler;
 
 
@@ -42,7 +42,8 @@ public class Controller {
             }
         };
 
-        dialogue = new TreeSet<>();
+        tabMap = new HashMap<>();
+        dialogue = new HashSet<>();
         //TODO :: шото тут хотел
         sendTo.setOnKeyReleased(keyHandler);
     }
@@ -86,8 +87,8 @@ public class Controller {
         JSONParser parser = new JSONParser();
         try {
             JSONObject obj = (JSONObject) parser.parse(text);
-            String sender = (String) obj.get("sender");
-            Tab tab = selectDialogue(sender);
+            String room = (String) obj.get("chat");
+            Tab tab = selectDialogue(room);
             if (tab != null) {
                 applyMessage(tab, obj);
             }// TODO :: выебон сета!
@@ -105,10 +106,11 @@ public class Controller {
         Node n;
 
         //TODO :: New data types
+        //TODO :: NOT ONLY FOR STRING SAY NAME
         switch (format) {
             case "text":
                 String data = (String) obj.get("message");
-                n = new Label(data);
+                n = new Label(obj.get("address") + " :: " + data);
                 break;
             default:
                 n = new Label("No data");
@@ -122,13 +124,15 @@ public class Controller {
     private Tab selectDialogue(String alias) {
         Tab tab;
         if (!dialogue.contains(alias)) {
-            dialogue.add(alias);
             tab = new Tab();
             tab.setText(alias);
             ListView lv = new ListView();
             tab.setContent(lv);
-//            TODO :: наполнение таба
             tabs.getTabs().add(tab);
+
+            tabMap.put(alias, tab);
+            dialogue.add(alias);
+//            TODO :: наполнение таба
         } else {
             tab = findTabByAlias(alias);
         }
@@ -138,10 +142,8 @@ public class Controller {
 
     private Tab findTabByAlias(String alias) {
         //        TODO :: ХешМэп tab -> alias
-        for (Tab tab: tabs.getTabs()) {
-            if (tab.getText().equals(alias))
-                return tab;
-        }
+        if (tabMap.containsKey(alias))
+            return tabMap.get(alias);
         return null;
     }
 

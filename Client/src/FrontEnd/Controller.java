@@ -2,6 +2,7 @@ package FrontEnd;
 
 import Network.ChatClient;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -10,8 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -33,6 +33,8 @@ public class Controller {
     private HBox encodingHBOX;
     @FXML
     private HBox compressionHBOX;
+    @FXML
+    private Button attachment;
 
     private ChatClient socket;
     private Set<String> dialogue;
@@ -71,6 +73,28 @@ public class Controller {
     @FXML
     public void sendData() {
         Object obj = textBar.getText();
+
+        attachment.setOnAction(
+                new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(final ActionEvent e) {
+                        final FileChooser fileChooser = new FileChooser();
+                        final File selectedFile = fileChooser.showOpenDialog(null);
+                        if (selectedFile != null) {
+                            sendData(selectedFile);
+                        }
+                    }
+                }
+        );
+    }
+
+
+
+    public void submitTextMessage() {
+        sendData(textBar.getText());
+    }
+
+    private void sendData(Object obj) {
         textBar.clear();
         String json = createJSON(obj);
 
@@ -224,6 +248,7 @@ public class Controller {
 
         return jsonObject.toJSONString();
     }
+
 
 
     public void setSocket(ChatClient socket) {

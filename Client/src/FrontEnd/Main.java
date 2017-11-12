@@ -30,7 +30,7 @@ public class Main extends Application {
 
         primaryStage.show();
         System.out.println("Huila ebanaya");
-        chatClient = new ChatClient("localhost", 3388, myController);
+        chatClient = new ChatClient("10.240.23.214", 3388, myController);
         myController.setSocket(chatClient);
         Platform.runLater(chatClient);
 //        chatClient.run();

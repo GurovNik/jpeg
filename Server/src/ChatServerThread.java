@@ -49,10 +49,11 @@ public class ChatServerThread extends Thread {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
+
+                DB db = new DB();
                 //If it is for database synchronisation
                 if (obj.containsKey("database")) {
                     System.out.println("Got database request.");
-                    DB db = new DB();
                     db.makeSelection(getName(), (String) obj.get("address"));
                     if (!db.hasNext()) {
                         JSONObject send = new JSONObject();
@@ -79,24 +80,22 @@ public class ChatServerThread extends Thread {
                     db.reset();
                 } else {
                     //Or send message to user.
-                    System.out.println("Pidor");
-                    DB db = new DB();
-                    db.insert((double) obj.get("encoded_size"), (double) obj.get("compressed_size"), getName(),
-                            (String) obj.get("address"), (byte) obj.get("compression"), (byte) obj.get("encoding"),
-                            (String) obj.get("format"), (String) obj.get("message"));
+                    db.insert(obj.get("encoded_size"), obj.get("compressed_size"),
+                            getName(), obj.get("address"), obj.get("compression"), obj.get("encoding"),
+                            obj.get("format"), obj.get("message"));
                     JSONObject send = new JSONObject();
                     String receiver = (String) obj.get("address");
-                    System.out.println(receiver);
-
 
                     send.put("address", getName());
-                    send.put("format", -1);
+                    send.put("format", obj.get("format"));
                     send.put("message", obj.get("message"));
                     send.put("compression", obj.get("compression"));
                     send.put("encoding", obj.get("encoding"));
 
                     server.handle(send.toJSONString(), receiver);
+                    server.handle(send.toJSONString(), getName());
                 }
+                db.close();
             } catch (IOException ioe) {
                 System.out.println(getName() + " ERROR reading: " + ioe.getMessage());
                 server.remove(ID);

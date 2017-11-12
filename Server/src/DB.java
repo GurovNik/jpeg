@@ -10,33 +10,25 @@ public class DB {
     private int ID;
     private ArrayList<Hashtable<String, String>> results;
     private int cursor = 0;
+    private Connection conn;
 
     public DB() {
+        connect();
+        System.out.println("conn open");
         ID = selectID();
     }
 
-//    public static void main(String[] args) throws SQLException {
-//        DB app = new DB();
-//        app.makeSelection("texet", "evgerher");
-//        System.out.println(app.results.size());
-//        System.out.println(app.hasNext());
-//        System.out.println(app.get("user"));
-//        System.out.println(app.get("recepient"));
-//        app.next();
-//        System.out.println(app.get("user"));
-//        System.out.println(app.get("recepient"));
-//        app.next();
-//        System.out.println(app.hasNext());
-//        System.out.println(app.get("user"));
-//        System.out.println(app.get("recepient"));
-//        app.reset();
-//        // insert three new rows
-//    }
+    public static void main(String[] args) throws SQLException {
+        DB app = new DB();
+        app.makeSelection("evgerher", "ViPivaso");
+        System.out.println(app.hasNext());
+        // insert three new rows
+    }
 
     public Connection connect() {
         // SQLite connection string
         String url = "jdbc:sqlite:messenger";
-        Connection conn = null;
+        conn = null;
         try {
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
@@ -48,9 +40,8 @@ public class DB {
     private void getResult(String name, String recipient) {
         String sql = "SELECT * FROM messages WHERE (user = ? AND recepient = ?)OR (user = ? AND recepient = ?) ORDER BY id ASC";
         ArrayList<Hashtable<String, String>> result = new ArrayList<>();
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            ;
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, name);
             pstmt.setString(2, recipient);
             pstmt.setString(3, recipient);
@@ -70,6 +61,7 @@ public class DB {
             System.out.println("null");
             System.out.println(e.getMessage());
         }
+
 
     }
 
@@ -95,7 +87,6 @@ public class DB {
         String sql = "SELECT MAX(id) FROM messages";
 
         try {
-            Connection conn = this.connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
@@ -112,8 +103,8 @@ public class DB {
         return cursor < results.size();
     }
 
-    public void insert(double size, double compressed, String user, String recipient, byte compression, byte coding,
-                       String format, String content) {
+    public void insert(Object size, Object compressed, Object user, Object recipient, Object compression, Object coding,
+                       Object format, Object content) {
         if (ID == -1) {
             selectID();
         }
@@ -122,23 +113,33 @@ public class DB {
                 "INSERT INTO messages (id, size, compressed, user, recepient, compression, coding, format, content) " +
                         "VALUES (?,?,?,?,?,?,?,?,?)";
 
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        Long sz = new Long((long) size);
+        Long compr = new Long((long) compressed);
+        Long comppr = new Long((long) compression);
+        Long cod = new Long((long) coding);
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, ++ID);
-            pstmt.setDouble(2, size);
-            pstmt.setDouble(3, compressed);
-            pstmt.setString(4, user);
-            pstmt.setString(5, recipient);
-            pstmt.setByte(6, compression);
-            pstmt.setByte(7, coding);
-            pstmt.setString(8, format);
-            pstmt.setString(9, content);
+            pstmt.setDouble(2, sz.doubleValue());
+            pstmt.setDouble(3, compr.doubleValue());
+            pstmt.setString(4, (String) user);
+            pstmt.setString(5, (String) recipient);
+            pstmt.setInt(6, comppr.intValue());
+            pstmt.setInt(7, cod.intValue());
+            pstmt.setString(8, (String) format);
+            pstmt.setString(9, (String) content);
             pstmt.executeUpdate();
-            conn.commit();
-            conn.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
 
+    public void close() {
+        try {
+            conn.close();
+            System.out.println("conn closed");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

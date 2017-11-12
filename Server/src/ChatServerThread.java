@@ -86,14 +86,21 @@ public class ChatServerThread extends Thread {
                     JSONObject send = new JSONObject();
                     String receiver = (String) obj.get("address");
 
+                    send.put("chat", obj.get("address"));
                     send.put("address", getName());
                     send.put("format", obj.get("format"));
                     send.put("message", obj.get("message"));
                     send.put("compression", obj.get("compression"));
                     send.put("encoding", obj.get("encoding"));
 
-                    server.handle(send.toJSONString(), receiver);
                     server.handle(send.toJSONString(), getName());
+
+                    send.put("chat", getName());
+                    send.put("address", getName());
+
+                    server.handle(send.toJSONString(), receiver);
+
+
                 }
                 db.close();
             } catch (IOException ioe) {

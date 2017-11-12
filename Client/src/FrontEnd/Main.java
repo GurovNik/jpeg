@@ -32,29 +32,9 @@ public class Main extends Application {
         primaryStage.show();
 
         chatClient = new ChatClient("localhost", 3388, myController);
-//        chatClientThread = new ChatClientThread(chatClient, chatClient.getSocket());
-
         myController.setSocket(chatClient);
-//        chatClient.setClient(chatClientThread);
 
         Platform.runLater(chatClient);
-//        Task task = new Task<Integer>() {
-//            @Override
-//            public Integer call() throws Exception {
-////                while (true) {
-//                    Platform.runLater(chatClientThread);
-////                    Thread.sleep(100);
-////                    if (true == false)
-////                        break;
-////                }
-//                return 1;
-//            }
-//        };
-//        Thread th = new Thread(task);
-//        th.setDaemon(true);
-//        th.start();
-
-//        chatClientThread.run();
         startDialogue();
     }
 
@@ -74,7 +54,7 @@ public class Main extends Application {
         if (result.isPresent()) {
             String answer = result.get();
             chatClient.login(answer);
-            chatClient.throughAlias(answer);
+            chatClient.throwAlias(answer);
         }
         else
             startDialogue();

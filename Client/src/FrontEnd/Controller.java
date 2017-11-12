@@ -50,8 +50,10 @@ public class Controller {
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
                     String alias = sendTo.getText();
-                    requestHistory(alias);
-                    sendTo.clear();
+                    if (!alias.equals("")) {
+                        requestHistory(alias);
+                        sendTo.clear();
+                    }
                 }
             }
         };
@@ -60,7 +62,8 @@ public class Controller {
             @Override
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
-                    sendData();
+                    sendData(textBar.getText());
+                    textBar.clear();
                 }
             }
         };
@@ -68,11 +71,6 @@ public class Controller {
         tabMap = new HashMap<>();
         sendTo.setOnKeyReleased(keyHandler);
         textBar.setOnKeyReleased(sendHandler);
-    }
-
-    @FXML
-    public void sendData() {
-        Object obj = textBar.getText();
 
         attachment.setOnAction(
                 new EventHandler<ActionEvent>() {
@@ -88,14 +86,11 @@ public class Controller {
         );
     }
 
-
-
     public void submitTextMessage() {
         sendData(textBar.getText());
     }
 
     private void sendData(Object obj) {
-        textBar.clear();
         String json = createJSON(obj);
 
         try {
@@ -109,30 +104,40 @@ public class Controller {
         this.alias.setText(alias);
     }
 
-    private void requestHistory(String alias) {
-        Tab tab = new Tab(alias);
-        fillTab(alias, tab);
-        tabs.getTabs().add(tab);
+    private Tab requestHistory(String alias) {
+        Task<Tab> tabTask = new Task<Tab>() {
+            @Override
+            protected Tab call() throws Exception {
+                Tab tab = new Tab(alias);
+                fillTab(alias, tab);
+                tabs.getTabs().add(tab);
 
-        JSONObject object = createHistoryRequest();
-        if (object != null) {
-            try {
-                socket.write(object.toJSONString());
-            } catch (IOException e) {
-                System.out.println("Wrong json");
-                e.printStackTrace();
+                return tab;
             }
-        }
+        };
+
+        tabTask.setOnSucceeded(event -> {
+            JSONObject object = createHistoryRequest(alias);ev
+            if (object != null) {
+                try {
+                    socket.write(object.toJSONString());
+                } catch (IOException e) {
+                    System.out.println("Wrong json");
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Thread th = new Thread(tabTask);
+        th.setDaemon(true);
+        th.start();
+
+        return tabTask.getValue();
     }
 
-    private JSONObject createHistoryRequest() {
-        String address = sendTo.getText();
-
-        if (address.equals(""))
-            return null;
-
+    private JSONObject createHistoryRequest(String alias) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("address", address);
+        jsonObject.put("address", alias);
         jsonObject.put("database", 1);
         return jsonObject;
     }
@@ -191,7 +196,6 @@ public class Controller {
         };
 
         task.setOnSucceeded(event -> {
-            System.out.println("Adding...");
             ListView lv = (ListView) tab.getContent();
             lv.getItems().add(task.getValue());
         });
@@ -203,20 +207,33 @@ public class Controller {
 
     private Tab selectDialogue(String alias) {
         Tab tab;
-//        if (!dialogue.contains(alias)) {
+        if (!tabMap.containsKey(alias)) {
+//            Task<Tab> taskTab = new Task<Tab>() {
+//                @Override
+//                protected Tab call() throws Exception {
+//                    Tab tab = new Tab(alias);
+//                    ListView lv = new ListView();
+//                    tab.setContent(lv);
+//                    tabMap.put(alias, tab);
+//
+//                    return tab;
+//                }
+//            };
+//
+//            taskTab.setOnSucceeded(event -> {
+//                requestHistory(alias);
+//            });
+            tab = requestHistory(alias);
+
 //            tab = new Tab(alias);
 //            fillTab(alias, tab);
 //            tabs.getTabs().add(tab);
-//
 //            tabMap.put(alias, tab);
 //            dialogue.add(alias);
-////            TODO :: наполнение таба
-//        } else {
-//            tab = null;
-//            //TODO :: поменять нахождение таба
-//        }
+        } else {
+            tab = tabMap.get(alias);
+        }
 
-        tab = findTabByAlias(alias);
 
 
         return tab;
@@ -226,12 +243,6 @@ public class Controller {
         ListView lv = new ListView();
         tab.setContent(lv);
         tabMap.put(alias, tab);
-    }
-
-    private Tab findTabByAlias(String alias) {
-        if (tabMap.containsKey(alias))
-            return tabMap.get(alias);
-        return null;
     }
 
     private String createJSON(Object data) {

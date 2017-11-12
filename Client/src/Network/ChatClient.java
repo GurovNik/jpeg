@@ -30,7 +30,7 @@ public class ChatClient extends Thread {
         }
     }
 
-    public void throughAlias(String alias) {
+    public void throwAlias(String alias) {
         frontEndController.receiveAlias(alias);
     }
 
@@ -55,14 +55,12 @@ public class ChatClient extends Thread {
 
     @Deprecated
     public void login(String login){
-        System.out.println("Write your name:");
         try {
             streamOut.writeUTF(login);
             streamOut.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Name received.");
     }
 
     @Override

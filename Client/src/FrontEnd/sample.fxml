@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
@@ -48,14 +49,14 @@
                                  </font></Label>
                            </top>
                         </BorderPane>
-                        <HBox prefHeight="28.0" prefWidth="270.0">
+                        <HBox fx:id="compressionHBOX" prefHeight="28.0" prefWidth="270.0">
                            <children>
                               <RadioButton mnemonicParsing="false" text="Compression1" />
                               <RadioButton mnemonicParsing="false" text="Compression2" />
                               <RadioButton mnemonicParsing="false" text="Compression3" />
                            </children>
                         </HBox>
-                        <HBox fx:id="encodingSelect" prefHeight="30.0" prefWidth="270.0">
+                        <HBox fx:id="encodingHBOX" prefHeight="30.0" prefWidth="270.0">
                            <children>
                               <RadioButton mnemonicParsing="false" text="Encoding1" />
                               <RadioButton mnemonicParsing="false" text="Encoding3" />
@@ -72,7 +73,14 @@
                      <children>
                       <AnchorPane minHeight="650.0" minWidth="630.0" prefHeight="650.0" prefWidth="630.0">
                            <children>
-                              <TabPane fx:id="tabs" prefHeight="624.0" prefWidth="615.0" tabClosingPolicy="UNAVAILABLE" />
+                              <TabPane fx:id="tabs" prefHeight="624.0" prefWidth="615.0" tabClosingPolicy="UNAVAILABLE">
+                                 <tabs>
+                                    <Tab text="n1">
+                                      <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                      </content>
+                                    </Tab>
+                                 </tabs></TabPane>
                            </children>
                         </AnchorPane>
                      </children>
@@ -81,6 +89,7 @@
                      <children>
                         <Button layoutX="573.0" layoutY="13.0" mnemonicParsing="false" onAction="#sendData" text="Send" />
                         <TextField fx:id="textBar" layoutX="14.0" layoutY="13.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="500.0" promptText="Text to write" />
+                        <Button fx:id="addTab" layoutX="521.0" layoutY="13.0" mnemonicParsing="false" onAction="#tabme" text="addTab" />
                      </children>
                   </Pane>
                </children></AnchorPane>

@@ -5,14 +5,17 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -25,6 +28,12 @@ public class Controller {
     private TextField sendTo;
     @FXML
     private Label alias;
+    @FXML
+    private Button addTab;
+    @FXML
+    private HBox encodingHBOX;
+    @FXML
+    private HBox compressionHBOX;
 
     private ChatClient socket;
     private Set<String> dialogue;
@@ -39,7 +48,10 @@ public class Controller {
             @Override
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
-                    requestHistory();
+                    String alias = sendTo.getText();
+                    requestHistory(alias);
+                    dialogue.add(alias);
+                    sendTo.clear();
                 }
             }
         };
@@ -47,12 +59,14 @@ public class Controller {
         tabMap = new HashMap<>();
         dialogue = new HashSet<>();
         sendTo.setOnKeyReleased(keyHandler);
-
-//        startDialogue();
     }
 
 
-
+    @FXML
+    public void tabme() {
+        Tab tab = new Tab("Hello");
+        tabs.getTabs().add(tab);
+    }
 
     @FXML
     public void sendData() {
@@ -71,7 +85,11 @@ public class Controller {
         this.alias.setText(alias);
     }
 
-    private void requestHistory() {
+    private void requestHistory(String alias) {
+        Tab tab = new Tab(alias);
+        fillTab(alias, tab);
+        tabs.getTabs().add(tab);
+
         JSONObject object = createHistoryRequest();
         if (object != null) {
             try {
@@ -114,34 +132,38 @@ public class Controller {
     private void applyMessage(Tab tab, JSONObject obj) {
         ListView lv = (ListView) tab.getContent();
         String format = (String) obj.get("format");
-        ListCell<Node> cell = new ListCell<>();
         Node n;
-
-        System.out.println("Received msg :: " + obj.toJSONString());
-
-        //TODO :: New data types
-        //TODO :: NOT ONLY FOR STRING SAY NAME
+//        Cell<Node> cell = new Cell<>();
+//        Node n;
+//
+//        System.out.println("Received msg :: " + obj.toJSONString());
+//
+//        //TODO :: New data types
+//        //TODO :: NOT ONLY FOR STRING SAY NAME
         switch (format) {
             case "text":
                 String data = (String) obj.get("message");
                 n = new Label(obj.get("address") + " :: " + data);
+                break;
+            case "jpeg":
+                n = new ImageView("@../../image.jpeg");
+                // Image has to be in Client/src folder
                 break;
             default:
                 n = new Label("No data");
                 break;
         }
 
-        cell.setItem(n);
-        lv.getItems().add(cell);
+
+//        n = new ImageView("@../../image.jpeg");
+        lv.getItems().add(n);
     }
 
     private Tab selectDialogue(String alias) {
         Tab tab;
         if (!dialogue.contains(alias)) {
-            tab = new Tab();
-            tab.setText(alias);
-            ListView lv = new ListView();
-            tab.setContent(lv);
+            tab = new Tab(alias);
+            fillTab(alias, tab);
             tabs.getTabs().add(tab);
 
             tabMap.put(alias, tab);
@@ -152,6 +174,12 @@ public class Controller {
         }
 
         return tab;
+    }
+
+    private void fillTab(String alias, Tab tab) {
+        ListView lv = new ListView();
+        tab.setContent(lv);
+        tabMap.put(alias, tab);
     }
 
     private Tab findTabByAlias(String alias) {

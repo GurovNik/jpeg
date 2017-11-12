@@ -43,7 +43,7 @@ public class Main extends Application {
     }
 
     private void startDialogue() {
-        TextInputDialog dialog = new TextInputDialog("@alias");
+        TextInputDialog dialog = new TextInputDialog("alias");
         dialog.setTitle("Alias");
         dialog.setHeaderText("Insert your alias");
         dialog.setContentText("Please enter your alias:");

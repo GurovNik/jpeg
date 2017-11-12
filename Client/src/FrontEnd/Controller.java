@@ -1,6 +1,7 @@
 package FrontEnd;
 
 import Network.ChatClient;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -29,8 +30,6 @@ public class Controller {
     @FXML
     private Label alias;
     @FXML
-    private Button addTab;
-    @FXML
     private HBox encodingHBOX;
     @FXML
     private HBox compressionHBOX;
@@ -40,7 +39,7 @@ public class Controller {
     private Map<String, Tab> tabMap;
 
     private EventHandler<KeyEvent> keyHandler;
-
+    private EventHandler<KeyEvent> sendHandler;
 
     @FXML
     public void initialize() {
@@ -50,22 +49,23 @@ public class Controller {
                 if (event.getCode() == KeyCode.ENTER) {
                     String alias = sendTo.getText();
                     requestHistory(alias);
-                    dialogue.add(alias);
                     sendTo.clear();
                 }
             }
         };
 
+        sendHandler = new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.ENTER) {
+                    sendData();
+                }
+            }
+        };
+
         tabMap = new HashMap<>();
-        dialogue = new HashSet<>();
         sendTo.setOnKeyReleased(keyHandler);
-    }
-
-
-    @FXML
-    public void tabme() {
-        Tab tab = new Tab("Hello");
-        tabs.getTabs().add(tab);
+        textBar.setOnKeyReleased(sendHandler);
     }
 
     @FXML
@@ -113,7 +113,7 @@ public class Controller {
         return jsonObject;
     }
 
-    public void receiveMessage(String text) {
+    public synchronized void receiveMessage(String text) {
         JSONParser parser = new JSONParser();
         try {
             JSONObject obj = (JSONObject) parser.parse(text);
@@ -130,48 +130,70 @@ public class Controller {
     }
 
     private void applyMessage(Tab tab, JSONObject obj) {
-        ListView lv = (ListView) tab.getContent();
-        String format = (String) obj.get("format");
-        Node n;
-//        Cell<Node> cell = new Cell<>();
-//        Node n;
-//
-//        System.out.println("Received msg :: " + obj.toJSONString());
-//
-//        //TODO :: New data types
-//        //TODO :: NOT ONLY FOR STRING SAY NAME
-        switch (format) {
-            case "text":
-                String data = (String) obj.get("message");
-                n = new Label(obj.get("address") + " :: " + data);
-                break;
-            case "jpeg":
-                n = new ImageView("@../../image.jpeg");
-                // Image has to be in Client/src folder
-                break;
-            default:
-                n = new Label("No data");
-                break;
-        }
+
+        Task<Node> task = new Task<Node>() {
+
+            @Override
+            public Node call() throws Exception {
+                String format = (String) obj.get("format");
+                Node n;
+        //        Cell<Node> cell = new Cell<>();
+        //        Node n;
+        //
+        //        System.out.println("Received msg :: " + obj.toJSONString());
+        //
+        //        //TODO :: New data types
+        //        //TODO :: NOT ONLY FOR STRING SAY NAME
+                switch (format)
+
+                {
+                    case "text":
+                        String data = (String) obj.get("message");
+                        n = new Label(obj.get("address") + " :: " + data);
+                        break;
+                    case "jpeg":
+                        n = new ImageView("@../../image.jpeg");
+                        // Image has to be in Client/src folder
+                        break;
+                    default:
+                        n = new Label("No data");
+                        break;
+                }
 
 
 //        n = new ImageView("@../../image.jpeg");
-        lv.getItems().add(n);
+                return n;
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            System.out.println("Adding...");
+            ListView lv = (ListView) tab.getContent();
+            lv.getItems().add(task.getValue());
+        });
+
+        Thread t = new Thread(task);
+        t.setDaemon(true);
+        t.start();
     }
 
     private Tab selectDialogue(String alias) {
         Tab tab;
-        if (!dialogue.contains(alias)) {
-            tab = new Tab(alias);
-            fillTab(alias, tab);
-            tabs.getTabs().add(tab);
+//        if (!dialogue.contains(alias)) {
+//            tab = new Tab(alias);
+//            fillTab(alias, tab);
+//            tabs.getTabs().add(tab);
+//
+//            tabMap.put(alias, tab);
+//            dialogue.add(alias);
+////            TODO :: наполнение таба
+//        } else {
+//            tab = null;
+//            //TODO :: поменять нахождение таба
+//        }
 
-            tabMap.put(alias, tab);
-            dialogue.add(alias);
-//            TODO :: наполнение таба
-        } else {
-            tab = findTabByAlias(alias);
-        }
+        tab = findTabByAlias(alias);
+
 
         return tab;
     }
@@ -197,7 +219,7 @@ public class Controller {
         jsonObject.put("initial_size", -1);
         jsonObject.put("compressed_size", -1);
         jsonObject.put("encoded_size", -1);
-        jsonObject.put("format", -1);
+        jsonObject.put("format", "text");
         jsonObject.put("message", data);
 
         return jsonObject.toJSONString();

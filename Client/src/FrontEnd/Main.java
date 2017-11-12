@@ -4,6 +4,7 @@ import Network.ChatClient;
 import Network.ChatClientThread;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -15,6 +16,7 @@ import java.util.Optional;
 public class Main extends Application {
     static Controller myController;
     static ChatClient chatClient;
+    static ChatClientThread chatClientThread;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -27,13 +29,32 @@ public class Main extends Application {
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         primaryStage.setScene(scene);
 
-
         primaryStage.show();
-        System.out.println("Huila ebanaya");
-        chatClient = new ChatClient("10.240.23.214", 3388, myController);
+
+        chatClient = new ChatClient("localhost", 3388, myController);
+//        chatClientThread = new ChatClientThread(chatClient, chatClient.getSocket());
+
         myController.setSocket(chatClient);
+//        chatClient.setClient(chatClientThread);
+
         Platform.runLater(chatClient);
-//        chatClient.run();
+//        Task task = new Task<Integer>() {
+//            @Override
+//            public Integer call() throws Exception {
+////                while (true) {
+//                    Platform.runLater(chatClientThread);
+////                    Thread.sleep(100);
+////                    if (true == false)
+////                        break;
+////                }
+//                return 1;
+//            }
+//        };
+//        Thread th = new Thread(task);
+//        th.setDaemon(true);
+//        th.start();
+
+//        chatClientThread.run();
         startDialogue();
     }
 

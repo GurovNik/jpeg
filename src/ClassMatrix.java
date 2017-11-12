@@ -9,7 +9,9 @@ import java.io.IOException;
 public class ClassMatrix {
 
     public static void main(String[] args) throws IOException {
-        Service run= new Service();
-        run.compress("/Users/Nikita/Desktop/IMG_2768.jpg");
+        Service JPEG= new Service();
+        JPEG.compress("/Users/Nikita/Desktop/2017-11-08 11.27.10.jpg");
+        System.out.println("сжато");
+        JPEG.decompress();
     }
 }

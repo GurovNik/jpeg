@@ -374,6 +374,8 @@ public class Algorithm {
         int y=Integer.parseInt(scan.nextLine());
         int x=Integer.parseInt(scan.nextLine());
         int size=x*y;
+        height=y;
+        width=x;
          universalDecompositionFromFile();
     }
     public void  universalDecompositionFromFile() throws IOException {

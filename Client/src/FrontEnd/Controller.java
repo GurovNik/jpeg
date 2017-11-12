@@ -104,20 +104,20 @@ public class Controller {
         this.alias.setText(alias);
     }
 
-    private Tab requestHistory(String alias) {
+    private void requestHistory(String u_name) {
+
         Task<Tab> tabTask = new Task<Tab>() {
             @Override
             protected Tab call() throws Exception {
-                Tab tab = new Tab(alias);
-                fillTab(alias, tab);
-                tabs.getTabs().add(tab);
+                Tab tab = new Tab(u_name);
+                fillTab(u_name, tab);
 
                 return tab;
             }
         };
 
         tabTask.setOnSucceeded(event -> {
-            JSONObject object = createHistoryRequest(alias);ev
+            JSONObject object = createHistoryRequest(u_name);
             if (object != null) {
                 try {
                     socket.write(object.toJSONString());
@@ -126,13 +126,13 @@ public class Controller {
                     e.printStackTrace();
                 }
             }
+
+            tabs.getTabs().add(tabTask.getValue());
         });
 
         Thread th = new Thread(tabTask);
         th.setDaemon(true);
         th.start();
-
-        return tabTask.getValue();
     }
 
     private JSONObject createHistoryRequest(String alias) {
@@ -223,16 +223,18 @@ public class Controller {
 //            taskTab.setOnSucceeded(event -> {
 //                requestHistory(alias);
 //            });
-            tab = requestHistory(alias);
+            requestHistory(alias);
+
 
 //            tab = new Tab(alias);
 //            fillTab(alias, tab);
 //            tabs.getTabs().add(tab);
 //            tabMap.put(alias, tab);
 //            dialogue.add(alias);
-        } else {
-            tab = tabMap.get(alias);
         }
+
+        tab = tabMap.get(alias);
+
 
 
 

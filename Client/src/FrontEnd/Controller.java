@@ -3,6 +3,7 @@ package FrontEnd;
 import Network.ChatClient;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -10,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import org.json.simple.JSONObject;
@@ -37,11 +39,11 @@ public class Controller {
     private Button attachment;
 
     private ChatClient socket;
-    private Set<String> dialogue;
     private Map<String, Tab> tabMap;
 
     private EventHandler<KeyEvent> keyHandler;
     private EventHandler<KeyEvent> sendHandler;
+    private EventHandler<Event> tabCloseHandler;
 
     @FXML
     public void initialize() {
@@ -68,6 +70,17 @@ public class Controller {
             }
         };
 
+        tabCloseHandler = new EventHandler<Event>()
+        {
+            @Override
+            public void handle(Event e)
+            {
+                Tab t = (Tab)(e.getSource());
+                String name = t.getText();
+                tabMap.remove(name);
+            }
+        };
+
         tabMap = new HashMap<>();
         sendTo.setOnKeyReleased(keyHandler);
         textBar.setOnKeyReleased(sendHandler);
@@ -84,6 +97,8 @@ public class Controller {
                     }
                 }
         );
+
+        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
 
     public void submitTextMessage() {
@@ -110,6 +125,7 @@ public class Controller {
             @Override
             protected Tab call() throws Exception {
                 Tab tab = new Tab(u_name);
+                tab.setOnCloseRequest(tabCloseHandler);
                 fillTab(u_name, tab);
 
                 return tab;

@@ -87,15 +87,7 @@
                      <children>
                       <AnchorPane minHeight="650.0" minWidth="630.0" prefHeight="650.0" prefWidth="630.0">
                            <children>
-                              <TabPane fx:id="tabs" prefHeight="624.0" prefWidth="622.0" tabClosingPolicy="UNAVAILABLE">
-                                 <tabs>
-                                    <Tab text="Untitled Tab">
-                                      <content>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                                      </content>
-                                    </Tab>
-                                 </tabs>
-                              </TabPane>
+                              <TabPane fx:id="tabs" prefHeight="624.0" prefWidth="622.0" tabClosingPolicy="UNAVAILABLE" />
                            </children>
                         </AnchorPane>
                      </children>

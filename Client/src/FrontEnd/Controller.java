@@ -2,6 +2,8 @@ package FrontEnd;
 
 import Network.ChatClient;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -9,9 +11,9 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -33,13 +35,15 @@ public class Controller {
     private HBox encodingHBOX;
     @FXML
     private HBox compressionHBOX;
+    @FXML
+    private Button attachment;
 
     private ChatClient socket;
-    private Set<String> dialogue;
     private Map<String, Tab> tabMap;
 
     private EventHandler<KeyEvent> keyHandler;
     private EventHandler<KeyEvent> sendHandler;
+    private EventHandler<Event> tabCloseHandler;
 
     @FXML
     public void initialize() {
@@ -48,8 +52,10 @@ public class Controller {
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
                     String alias = sendTo.getText();
-                    requestHistory(alias);
-                    sendTo.clear();
+                    if (!alias.equals("")) {
+                        requestHistory(alias);
+                        sendTo.clear();
+                    }
                 }
             }
         };
@@ -58,20 +64,48 @@ public class Controller {
             @Override
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
-                    sendData();
+                    sendData(textBar.getText());
+                    textBar.clear();
                 }
+            }
+        };
+
+        tabCloseHandler = new EventHandler<Event>()
+        {
+            @Override
+            public void handle(Event e)
+            {
+                Tab t = (Tab)(e.getSource());
+                String name = t.getText();
+                tabMap.remove(name);
             }
         };
 
         tabMap = new HashMap<>();
         sendTo.setOnKeyReleased(keyHandler);
         textBar.setOnKeyReleased(sendHandler);
+
+        attachment.setOnAction(
+                new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(final ActionEvent e) {
+                        final FileChooser fileChooser = new FileChooser();
+                        final File selectedFile = fileChooser.showOpenDialog(null);
+                        if (selectedFile != null) {
+                            sendData(selectedFile);
+                        }
+                    }
+                }
+        );
+
+        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
 
-    @FXML
-    public void sendData() {
-        Object obj = textBar.getText();
-        textBar.clear();
+    public void submitTextMessage() {
+        sendData(textBar.getText());
+    }
+
+    private void sendData(Object obj) {
         String json = createJSON(obj);
 
         try {
@@ -85,30 +119,41 @@ public class Controller {
         this.alias.setText(alias);
     }
 
-    private void requestHistory(String alias) {
-        Tab tab = new Tab(alias);
-        fillTab(alias, tab);
-        tabs.getTabs().add(tab);
+    private void requestHistory(String u_name) {
 
-        JSONObject object = createHistoryRequest();
-        if (object != null) {
-            try {
-                socket.write(object.toJSONString());
-            } catch (IOException e) {
-                System.out.println("Wrong json");
-                e.printStackTrace();
+        Task<Tab> tabTask = new Task<Tab>() {
+            @Override
+            protected Tab call() throws Exception {
+                Tab tab = new Tab(u_name);
+                tab.setOnCloseRequest(tabCloseHandler);
+                fillTab(u_name, tab);
+
+                return tab;
             }
-        }
+        };
+
+        tabTask.setOnSucceeded(event -> {
+            JSONObject object = createHistoryRequest(u_name);
+            if (object != null) {
+                try {
+                    socket.write(object.toJSONString());
+                } catch (IOException e) {
+                    System.out.println("Wrong json");
+                    e.printStackTrace();
+                }
+            }
+
+            tabs.getTabs().add(tabTask.getValue());
+        });
+
+        Thread th = new Thread(tabTask);
+        th.setDaemon(true);
+        th.start();
     }
 
-    private JSONObject createHistoryRequest() {
-        String address = sendTo.getText();
-
-        if (address.equals(""))
-            return null;
-
+    private JSONObject createHistoryRequest(String alias) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("address", address);
+        jsonObject.put("address", alias);
         jsonObject.put("database", 1);
         return jsonObject;
     }
@@ -167,7 +212,6 @@ public class Controller {
         };
 
         task.setOnSucceeded(event -> {
-            System.out.println("Adding...");
             ListView lv = (ListView) tab.getContent();
             lv.getItems().add(task.getValue());
         });
@@ -179,20 +223,35 @@ public class Controller {
 
     private Tab selectDialogue(String alias) {
         Tab tab;
-//        if (!dialogue.contains(alias)) {
+        if (!tabMap.containsKey(alias)) {
+//            Task<Tab> taskTab = new Task<Tab>() {
+//                @Override
+//                protected Tab call() throws Exception {
+//                    Tab tab = new Tab(alias);
+//                    ListView lv = new ListView();
+//                    tab.setContent(lv);
+//                    tabMap.put(alias, tab);
+//
+//                    return tab;
+//                }
+//            };
+//
+//            taskTab.setOnSucceeded(event -> {
+//                requestHistory(alias);
+//            });
+            requestHistory(alias);
+
+
 //            tab = new Tab(alias);
 //            fillTab(alias, tab);
 //            tabs.getTabs().add(tab);
-//
 //            tabMap.put(alias, tab);
 //            dialogue.add(alias);
-////            TODO :: наполнение таба
-//        } else {
-//            tab = null;
-//            //TODO :: поменять нахождение таба
-//        }
+        }
 
-        tab = findTabByAlias(alias);
+        tab = tabMap.get(alias);
+
+
 
 
         return tab;
@@ -202,12 +261,6 @@ public class Controller {
         ListView lv = new ListView();
         tab.setContent(lv);
         tabMap.put(alias, tab);
-    }
-
-    private Tab findTabByAlias(String alias) {
-        if (tabMap.containsKey(alias))
-            return tabMap.get(alias);
-        return null;
     }
 
     private String createJSON(Object data) {
@@ -224,6 +277,7 @@ public class Controller {
 
         return jsonObject.toJSONString();
     }
+
 
 
     public void setSocket(ChatClient socket) {

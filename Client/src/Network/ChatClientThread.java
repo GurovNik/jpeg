@@ -8,8 +8,9 @@ public class ChatClientThread extends Thread {
     private Socket socket = null;
     private ChatClient client = null;
     private DataInputStream streamIn = null;
+    private boolean work = true;
 
-    protected ChatClientThread(ChatClient _client, Socket _socket) {
+    public ChatClientThread(ChatClient _client, Socket _socket) {
         client = _client;
         socket = _socket;
         open();
@@ -21,7 +22,7 @@ public class ChatClientThread extends Thread {
             streamIn = new DataInputStream(socket.getInputStream());
         } catch (IOException ioe) {
             System.out.println("Error getting input stream: " + ioe);
-            client.stop();
+            work = false;
         }
     }
 
@@ -33,13 +34,15 @@ public class ChatClientThread extends Thread {
         }
     }
 
-    public void run() {
-        while (true) {
+    public void run() throws java.lang.IllegalStateException {
+        while (work) {
             try {
                 client.handle(streamIn.readUTF());
             } catch (IOException ioe) {
                 System.out.println("Listening error: " + ioe.getMessage());
-                client.stop();
+                client.stope();
+            } catch (IllegalStateException e) {
+                System.out.println("Mne pohui");
             }
         }
     }

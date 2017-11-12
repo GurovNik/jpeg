@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<GridPane alignment="center" hgap="10" minHeight="700.0" minWidth="900.0" prefHeight="700.0" prefWidth="900.0" vgap="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FrontEnd.Controller">
+   <columnConstraints>
+      <ColumnConstraints />
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+   </rowConstraints>
+   <children>
+      <SplitPane dividerPositions="0.29797979797979796" minHeight="700.0" minWidth="900.0" prefHeight="700.0" prefWidth="900.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+        <items>
+          <AnchorPane minHeight="700.0" minWidth="270.0" prefHeight="700.0" prefWidth="270.0">
+               <children>
+                  <VBox layoutX="-4.0" minHeight="700.0" minWidth="270.0" prefHeight="700.0" prefWidth="270.0">
+                     <children>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="borderPane">
+                           <top>
+                              <Label alignment="CENTER" prefHeight="70.0" prefWidth="262.0" text="Messenger v0.01" BorderPane.alignment="CENTER">
+                                 <font>
+                                    <Font name="Comic Sans MS" size="22.0" />
+                                 </font></Label>
+                           </top>
+                           <center>
+                              <Label fx:id="alias" text="Label" BorderPane.alignment="CENTER">
+                                 <font>
+                                    <Font name="Comic Sans MS Bold Italic" size="32.0" />
+                                 </font>
+                              </Label>
+                           </center>
+                        </BorderPane>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="borderPane">
+                           <center>
+                              <TextField fx:id="sendTo" prefHeight="25.0" prefWidth="209.0" promptText="Add tab" styleClass="fieldInBorderPane" BorderPane.alignment="CENTER" />
+                           </center>
+                           <top>
+                              <Label text="Send message to" BorderPane.alignment="CENTER">
+                                 <font>
+                                    <Font name="Comic Sans MS" size="20.0" />
+                                 </font></Label>
+                           </top>
+                        </BorderPane>
+                        <HBox fx:id="compressionHBOX" prefHeight="28.0" prefWidth="270.0">
+                           <children>
+                              <RadioButton mnemonicParsing="false" text="Compression1" />
+                              <RadioButton mnemonicParsing="false" text="Compression2" />
+                              <RadioButton mnemonicParsing="false" text="Compression3" />
+                           </children>
+                        </HBox>
+                        <HBox fx:id="encodingHBOX" prefHeight="30.0" prefWidth="270.0">
+                           <children>
+                              <RadioButton mnemonicParsing="false" text="Encoding1" />
+                              <RadioButton mnemonicParsing="false" text="Encoding3" />
+                              <RadioButton mnemonicParsing="false" text="Encoding2" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="678.0" prefWidth="667.0">
+               <children>
+                  <Pane prefHeight="624.0" prefWidth="622.0">
+                     <children>
+                      <AnchorPane minHeight="650.0" minWidth="630.0" prefHeight="650.0" prefWidth="630.0">
+                           <children>
+                              <TabPane fx:id="tabs" prefHeight="624.0" prefWidth="622.0" tabClosingPolicy="UNAVAILABLE" />
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </Pane>
+                  <Pane layoutX="2.0" layoutY="624.0" minHeight="50.0" minWidth="630.0" prefHeight="50.0" prefWidth="630.0">
+                     <children>
+                        <Button layoutX="573.0" layoutY="13.0" mnemonicParsing="false" onAction="#submitTextMessage" text="Send" />
+                        <TextField fx:id="textBar" layoutX="14.0" layoutY="13.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="450.0" promptText="Text to write" />
+                        <Button fx:id="attachment" layoutX="510.0" layoutY="13.0" mnemonicParsing="false" text="Attach" />
+                     </children>
+                  </Pane>
+               </children></AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</GridPane>

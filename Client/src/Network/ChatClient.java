@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class ChatClient extends Thread {
+public class ChatClient implements Runnable {
     private Socket socket = null;
     private Thread thread = null;
     private DataInputStream console = null;
@@ -22,7 +22,7 @@ public class ChatClient extends Thread {
             socket = new Socket(serverName, serverPort);
             frontEndController = controller;
             System.out.println("Connected: " + socket);
-            start();
+            startui();
         } catch (UnknownHostException uhe) {
             System.out.println("Host unknown: " + uhe.getMessage());
         } catch (IOException ioe) {
@@ -65,8 +65,7 @@ public class ChatClient extends Thread {
         System.out.println("Name received.");
     }
 
-    @Override
-    public void start() {
+    public void startui() {
         console = new DataInputStream(System.in);
         try {
             streamOut = new DataOutputStream(socket.getOutputStream());
@@ -74,10 +73,12 @@ public class ChatClient extends Thread {
             e.printStackTrace();
         }
         if (thread == null) {
-            client = new ChatClientThread(this, socket);
             thread = new Thread(this);
-            thread.start();
         }
+    }
+
+    public void setClient(ChatClientThread thr) {
+        client = thr;
     }
 
     public void stope() {
@@ -93,6 +94,5 @@ public class ChatClient extends Thread {
             System.out.println("Error closing ...");
         }
         client.close();
-        client.stop();
     }
 }

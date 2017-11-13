@@ -1,5 +1,3 @@
 # TOI_messenger
-.
-.
-.
-Commit this shit. 
+The Information Theory project.
+Add your compression and coding methods.

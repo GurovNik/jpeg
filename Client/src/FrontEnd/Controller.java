@@ -1,5 +1,7 @@
 package FrontEnd;
 
+import Algorithm.CompressionAlgorithm;
+import Algorithm.EncodeAlgorithm;
 import Network.ChatClient;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -20,9 +22,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import javax.print.attribute.standard.Compression;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class Controller {
@@ -161,10 +161,10 @@ public class Controller {
         int compression =  getHBOXindex(compressionHBOX);
         int encoding =  getHBOXindex(encodingHBOX);
 
-        CompressionAlgorithm cAlg = getCompressionAlgorithm(link, compression);
-        File cFile = cAlg.compress();
-        EncoderAlgorithm eAlg = getEncodingAlgorithm(cFile,  encoding);
-        File eFile = eAlg.encode();
+        CompressionAlgorithm cAlg = getCompressionAlgorithm(compression);
+        File cFile = cAlg.compress(link);
+        EncodeAlgorithm eAlg = getEncodingAlgorithm(encoding);
+        File eFile = eAlg.encode(cFile);
 
         String json = createJSON(eFile, format);
 
@@ -248,11 +248,7 @@ public class Controller {
     }
 
     private void applyMessage(Tab tab, JSONObject obj) {
-        File link = saveObject(obj);
-        EncodingAlgorithm eAlg = getEncodingAlgorithm(link, (int)obj.get("encoding"));
-        File eFile = eAlg.decode();
-        CompressionAlgorithm cAlg = getCompressionAlgorithm(eFile, (int)obj.get("compression"));
-        File cFile = cAlg.decompress();
+
         //TODO :: decompress data for TASK
         //TODO :: Перенести код выше в TASK
 
@@ -260,7 +256,14 @@ public class Controller {
 
             @Override
             public Node call() throws Exception {
+                File link = saveObject(obj);
+                EncodeAlgorithm eAlg = getEncodingAlgorithm((int)obj.get("encoding"));
+                File eFile = eAlg.decode(link);
+                CompressionAlgorithm cAlg = getCompressionAlgorithm((int)obj.get("compression"));
+                File cFile = cAlg.decompress(eFile);
+
                 String format = (String) obj.get("format");
+
                 Node n;
         //        //TODO :: New data types
         //        //TODO :: NOT ONLY FOR STRING SAY NAME
@@ -270,12 +273,13 @@ public class Controller {
                         String data = (String) obj.get("message");
                         n = new Label(obj.get("address") + " :: " + data);
                         break;
-                    case "jpeg":
-                        n = new ImageView("@../../image.jpeg");
-                        // Image has to be in Client/src folder
-                        break;
+//                    case "jpeg":
+//                        n = new ImageView("@../../image.jpeg");
+//                        // Image has to be in Client/src folder
+//                        break;
                     default:
-                        n = new Label("File %name has come, stored in %path");
+                        String fileMessage = String.format("File [%s] :: stored in [%s]", cFile.getName(), cFile.getPath());
+                        n = new Label(fileMessage);
                         break;
                 }
 
@@ -321,45 +325,66 @@ public class Controller {
         jsonObject.put("compressed_size", -1);
         jsonObject.put("encoded_size", -1);
         jsonObject.put("format", format);
-        jsonObject.put("message", BINARY_link);
+
+        String msg = readFile(link);
+
+        jsonObject.put("message", msg);
         // TODO :: LINK INTO BASE64
 
         return jsonObject.toJSONString();
     }
 
-    private CompressionAlgorithm getCompressionAlgorithm(File link, int compressionMethod) {
+    private String readFile(File link) {
+        BufferedInputStream bin = null;
+        try {
+            bin = new BufferedInputStream(new FileInputStream(link));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        int data;
+        StringBuilder factory = new StringBuilder();
+        try {
+            while((data = bin.read())!=-1){
+                factory.append((char)data);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return factory.toString();
+    }
+
+    private CompressionAlgorithm getCompressionAlgorithm(int compressionMethod) {
         switch (compressionMethod) {
             // First method
             default:
             case 0:
-                return Algorithm.Compression.huffman(link);
-                break;
+                return new Algorithm.Huffman("asdf");
             // Second method
-            case 1:
-                return Algorithm.Compression.huffman(link);
-                break;
-            // Third method
-            case 2:
-                return Algorithm.Compression.huffman(link);
-                break;
+//            case 1:
+//                return new Algorithm.Compression.huffman(link);
+//                break;
+//            // Third method
+//            case 2:
+//                return new Algorithm.Compression.huffman(link);
+//                break;
             }
     }
 
-    private EncodingAlgorithm getEncodingAlgorithm(File link, int encodingMethod) {
+    private EncodeAlgorithm getEncodingAlgorithm(int encodingMethod) {
         switch (encodingMethod){
             // First method
             default:
             case 0:
-                return Algorithm.Encoding.huffman(link);
-                break;
+                return new Algorithm.Repetition(3);
             // Second method
-            case 1:
-                return Algorithm.Encoding.huffman(link);
-                break;
-            // Third method
-            case 2:
-                return Algorithm.Encoding.huffman(link);
-                break;
+//            case 1:
+//                return new Algorithm.Encoding.huffman(link);
+//                break;
+//            // Third method
+//            case 2:
+//                return new Algorithm.Encode.huffman(link);
+//                break;
         }
     }
 

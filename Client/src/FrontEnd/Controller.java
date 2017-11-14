@@ -128,11 +128,20 @@ public class Controller {
     }
 
     public void submitTextMessage() {
-        sendData(textBar.getText());
+        sendData(textBar.getText(), "text");
     }
 
-    private void sendData(Object obj) {
-        String json = createJSON(obj);
+    private void sendData(Object obj, String format) {
+        int compression =  getHBOXindex(compressionHBOX);
+        int encoding =  getHBOXindex(encodingHBOX);
+
+        File objLink = saveObject(obj);
+        CompressionAlgorithm cAlg = performCompression(objLink,  compression);
+        File cFile = cAlg.compress();
+        EncoderAlgorithm eAlg = performEncoding(cFile,  encoding);
+        File eFile = eAlg.encode();
+
+        String json = createJSON(eFile, format);
 
         try {
             socket.write(json);
@@ -190,10 +199,8 @@ public class Controller {
             JSONObject obj = (JSONObject) parser.parse(text);
             String room = (String) obj.get("chat");
             Tab tab = selectDialogue(room);
-            if (tab != null) {
+            if (tab != null)
                 applyMessage(tab, obj);
-            }// TODO :: выебон сета!
-
         } catch (ParseException pe) {
             System.err.println("Invalid json");
             pe.printStackTrace();
@@ -208,11 +215,6 @@ public class Controller {
             public Node call() throws Exception {
                 String format = (String) obj.get("format");
                 Node n;
-        //        Cell<Node> cell = new Cell<>();
-        //        Node n;
-        //
-        //        System.out.println("Received msg :: " + obj.toJSONString());
-        //
         //        //TODO :: New data types
         //        //TODO :: NOT ONLY FOR STRING SAY NAME
                 switch (format)
@@ -248,37 +250,11 @@ public class Controller {
     }
 
     private Tab selectDialogue(String alias) {
-        Tab tab;
         if (!tabMap.containsKey(alias)) {
-//            Task<Tab> taskTab = new Task<Tab>() {
-//                @Override
-//                protected Tab call() throws Exception {
-//                    Tab tab = new Tab(alias);
-//                    ListView lv = new ListView();
-//                    tab.setContent(lv);
-//                    tabMap.put(alias, tab);
-//
-//                    return tab;
-//                }
-//            };
-//
-//            taskTab.setOnSucceeded(event -> {
-//                requestHistory(alias);
-//            });
-            requestHistory(alias);
-
-
-//            tab = new Tab(alias);
-//            fillTab(alias, tab);
-//            tabs.getTabs().add(tab);
-//            tabMap.put(alias, tab);
-//            dialogue.add(alias);
+          requestHistory(alias);
         }
 
-        tab = tabMap.get(alias);
-
-
-
+        Tab tab = tabMap.get(alias);
 
         return tab;
     }
@@ -289,7 +265,7 @@ public class Controller {
         tabMap.put(alias, tab);
     }
 
-    private String createJSON(Object data) {
+    private String createJSON(File link, String format) {
         String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", sendTo);
@@ -298,13 +274,48 @@ public class Controller {
         jsonObject.put("initial_size", -1);
         jsonObject.put("compressed_size", -1);
         jsonObject.put("encoded_size", -1);
-        jsonObject.put("format", "text");
-        jsonObject.put("message", data);
+        jsonObject.put("format", format);
+        jsonObject.put("message", BINARY_link);
+        // TODO :: LINK INTO BASE64
 
         return jsonObject.toJSONString();
     }
 
+    private CompressionAlgorithm performCompression(File link, int compressionMethod) {
+        switch (compressionMethod) {
+            // First method
+            default:
+            case 0:
+                return Algorithms.Compression.huffman(link);
+                break;
+            // Second method
+            case 1:
+                return Algorithms.Compression.huffman(link);
+                break;
+            // Third method
+            case 2:
+                return Algorithms.Compression.huffman(link);
+                break;
+            }
+    }
 
+    private EncodingAlgorithm performEncoding(File link, int encodingMethod) {
+        switch (encodingMethod){
+            // First method
+            default:
+            case 0:
+                return Algorithms.Encoding.huffman(link);
+                break;
+            // Second method
+            case 1:
+                return Algorithms.Encoding.huffman(link);
+                break;
+            // Third method
+            case 2:
+                return Algorithms.Encoding.huffman(link);
+                break;
+        }
+    }
 
     public void setSocket(ChatClient socket) {
         this.socket = socket;

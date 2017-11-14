@@ -65,14 +65,14 @@
                         </BorderPane>
                         <HBox fx:id="compressionHBOX" prefHeight="28.0" prefWidth="270.0">
                            <children>
-                              <RadioButton mnemonicParsing="false" text="Compression1" />
+                              <RadioButton mnemonicParsing="false" selected="true" text="Compression1" />
                               <RadioButton mnemonicParsing="false" text="Compression2" />
                               <RadioButton mnemonicParsing="false" text="Compression3" />
                            </children>
                         </HBox>
                         <HBox fx:id="encodingHBOX" prefHeight="30.0" prefWidth="270.0">
                            <children>
-                              <RadioButton mnemonicParsing="false" text="Encoding1" />
+                              <RadioButton mnemonicParsing="false" selected="true" text="Encoding1" />
                               <RadioButton mnemonicParsing="false" text="Encoding3" />
                               <RadioButton mnemonicParsing="false" text="Encoding2" />
                            </children>

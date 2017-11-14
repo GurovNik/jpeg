@@ -1,6 +1,7 @@
 package FrontEnd;
 
 import Network.ChatClient;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -40,6 +41,8 @@ public class Controller {
 
     private ChatClient socket;
     private Map<String, Tab> tabMap;
+    private ToggleGroup compression;
+    private ToggleGroup encoding;
 
     private EventHandler<KeyEvent> keyHandler;
     private EventHandler<KeyEvent> sendHandler;
@@ -99,6 +102,29 @@ public class Controller {
         );
 
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
+
+        compression = new ToggleGroup();
+        encoding = new ToggleGroup();
+        ObservableList<Node> compressionButtons = compressionHBOX.getChildren();
+        for (Node n: compressionButtons) {
+            ((RadioButton)(n)).setToggleGroup(compression);
+        }
+
+        ObservableList<Node> encodingnButtons = encodingHBOX.getChildren();
+        for (Node n: encodingnButtons) {
+            ((RadioButton)(n)).setToggleGroup(encoding);
+        }
+
+    }
+
+    public int getHBOXindex(HBox hBox) {
+        ObservableList<Node> ol = hBox.getChildren();
+        for (int i = 0; i < ol.size(); i++) {
+            RadioButton rb = (RadioButton) ol.get(i);
+            if (rb.isSelected())
+                return i;
+        }
+        return -1;
     }
 
     public void submitTextMessage() {
@@ -267,8 +293,8 @@ public class Controller {
         String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", sendTo);
-        jsonObject.put("compression", -1);
-        jsonObject.put("encoding", -1);
+        jsonObject.put("compression", getHBOXindex(compressionHBOX));
+        jsonObject.put("encoding", getHBOXindex(encodingHBOX));
         jsonObject.put("initial_size", -1);
         jsonObject.put("compressed_size", -1);
         jsonObject.put("encoded_size", -1);

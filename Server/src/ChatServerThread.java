@@ -79,8 +79,11 @@ public class ChatServerThread extends Thread {
                     }
                     db.reset();
                 } else {
-                    //Or send message to user.
-                    db.insert(obj.get("encoded_size"), obj.get("compressed_size"),
+//                    Or send message to user.
+//                    (size, compressed, encoded, encodedTime, compressedTime,
+//                     user, recipient, compression, coding,
+//                     format, content)
+                    db.insert(obj.get("encoded_size"), obj.get("compressed_size"), -1, -1, -1,
                             getName(), obj.get("address"), obj.get("compression"), obj.get("encoding"),
                             obj.get("format"), obj.get("message"));
                     JSONObject send = new JSONObject();

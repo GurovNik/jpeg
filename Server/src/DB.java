@@ -113,24 +113,19 @@ public class DB {
                 "INSERT INTO messages (id, intial_size, compressed, encoded, coding_time, user, recepient, compression, coding, compres_time, format, content, noises) " +
                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-//        Long sz = new Long(size);
-//        Long encod = new Long((long) encoded);
         Double dTime = new Double((int) encodedTime);
         Double cTime = new Double((int) compressedTime);
-//        Long compr = new Long((long) compressed);
-//        Long comppr = new Long((long) compression);
-//        Long cod = new Long((long) coding);
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, ++ID);                           //id
-            pstmt.setInt(2, (int) size);                     //initial_size
-            pstmt.setInt(3, (int) compressed);                //compressed
-            pstmt.setInt(4, (int) encoded);                   //encoded
+            pstmt.setInt(2, Integer.parseInt((String) size));                     //initial_size
+            pstmt.setInt(3, Integer.parseInt((String) compressed));                //compressed
+            pstmt.setInt(4, Integer.parseInt((String) encoded));                   //encoded
             pstmt.setDouble(5, dTime);                          //coding_time
             pstmt.setString(6, (String) user);                  //user
             pstmt.setString(7, (String) recipient);             //recepient
-            pstmt.setInt(8, (int) compression);               //compression
-            pstmt.setInt(9, (int) coding);                    //coding
+            pstmt.setInt(8, Integer.parseInt((String) compression));               //compression
+            pstmt.setInt(9, Integer.parseInt((String) coding));                    //coding
             pstmt.setDouble(10, cTime);                         //compres_time
             pstmt.setString(11, (String) format);               //format
             pstmt.setString(12, (String) content);              //message

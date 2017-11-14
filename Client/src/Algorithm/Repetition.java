@@ -46,13 +46,8 @@ public class Repetition implements EncodeAlgorithm {
 
     public static void main(String[] args) {
         Repetition r = new Repetition(5);
-        File f = new File("file");
-        try {
-            f.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        f = r.encode(f);
+        File f = new File("outerf");
+        f = r.decode(f);
         System.out.println(f.getAbsoluteFile());
     }
 

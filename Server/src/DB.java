@@ -1,3 +1,4 @@
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -18,8 +19,10 @@ public class DB {
         ID = selectID();
     }
 
-//    public static void main(String[] args) throws SQLException {
-//    }
+    public static void main(String[] args) throws SQLException {
+        File file = new File("Server/file");
+
+    }
 
     public Connection connect() {
         // SQLite connection string

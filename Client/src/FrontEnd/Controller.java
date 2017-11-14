@@ -1,6 +1,7 @@
 package FrontEnd;
 
 import Network.ChatClient;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -40,6 +41,8 @@ public class Controller {
 
     private ChatClient socket;
     private Map<String, Tab> tabMap;
+    private ToggleGroup compression;
+    private ToggleGroup encoding;
 
     private EventHandler<KeyEvent> keyHandler;
     private EventHandler<KeyEvent> sendHandler;
@@ -99,6 +102,23 @@ public class Controller {
         );
 
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
+
+        compression = new ToggleGroup();
+        encoding = new ToggleGroup();
+        ObservableList<Node> compressionButtons = compressionHBOX.getChildren();
+        for (Node n: compressionButtons) {
+            ((RadioButton)(n)).setToggleGroup(compression);
+        }
+
+        ObservableList<Node> encodingnButtons = encodingHBOX.getChildren();
+        for (Node n: encodingnButtons) {
+            ((RadioButton)(n)).setToggleGroup(encoding);
+        }
+
+    }
+
+    public void watchCompression() {
+        compressionHBOX.getChildren();
     }
 
     public void submitTextMessage() {

@@ -92,9 +92,9 @@ public class ChatServerThread extends Thread {
                     send.put("compression", obj.get("compression"));
                     send.put("encoding", obj.get("encoding"));
 
-                    db.insert(obj.get("encoded_size"), obj.get("compressed_size"), (int) noise[1], -1, -1, -1,
-                            getName(), obj.get("address"), obj.get("compression"), obj.get("encoding"),
-                            obj.get("format"), obj.get("message"));
+                    db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1], -1, -1, -1,
+                            getName(), (String) obj.get("address"), (String) obj.get("compression"), (String) obj.get("encoding"),
+                            (String) obj.get("format"), (String) obj.get("message"));
 
 
                     server.handle(send.toJSONString(), getName());

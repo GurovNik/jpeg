@@ -301,8 +301,6 @@ public class Controller {
         jsonObject.put("format", "text");
         jsonObject.put("message", data);
 
-        System.out.printf("I would send :: %s\n", jsonObject.toJSONString());
-
         return jsonObject.toJSONString();
     }
 

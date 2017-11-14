@@ -41,8 +41,6 @@ public class ChatClientThread extends Thread {
             } catch (IOException ioe) {
                 System.out.println("Listening error: " + ioe.getMessage());
                 client.stope();
-            } catch (IllegalStateException e) {
-                System.out.println("Mne pohui");
             }
         }
     }

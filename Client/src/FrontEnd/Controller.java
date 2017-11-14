@@ -21,6 +21,7 @@ import org.json.simple.parser.ParseException;
 
 import javax.print.attribute.standard.Compression;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -49,6 +50,8 @@ public class Controller {
     private EventHandler<KeyEvent> sendHandler;
     private EventHandler<Event> tabCloseHandler;
 
+    private int temporaryIndex = 0;
+
     @FXML
     public void initialize() {
         keyHandler = new EventHandler<KeyEvent>() {
@@ -68,7 +71,10 @@ public class Controller {
             @Override
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
-                    sendData(textBar.getText());
+                    JSONObject json = new JSONObject();
+                    json.put("message", textBar.getText());
+                    
+                    sendData(saveObject(json), "text");
                     textBar.clear();
                 }
             }
@@ -94,8 +100,9 @@ public class Controller {
                     public void handle(final ActionEvent e) {
                         final FileChooser fileChooser = new FileChooser();
                         final File selectedFile = fileChooser.showOpenDialog(null);
+                        String format = getFilenameExtension(selectedFile);
                         if (selectedFile != null) {
-                            sendData(selectedFile);
+                            sendData(selectedFile, format);
                         }
                     }
                 }
@@ -127,16 +134,34 @@ public class Controller {
         return -1;
     }
 
-    public void submitTextMessage() {
-        sendData(textBar.getText(), "text");
+    private String getFilenameExtension(File link) {
+        String name = link.getName();
+        try {
+            return name.substring(name.lastIndexOf(".") + 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
-    private void sendData(Object obj, String format) {
+    public void submitTextMessage() {
+        try {
+            FileWriter fw = new FileWriter("temp_text.data");
+            fw.write(textBar.getText());
+            fw.close();
+
+            File link = new File("temp_text.data");
+            sendData(link, "text");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendData(File link, String format) {
         int compression =  getHBOXindex(compressionHBOX);
         int encoding =  getHBOXindex(encodingHBOX);
 
-        File objLink = saveObject(obj);
-        CompressionAlgorithm cAlg = getCompressionAlgorithm(objLink,  compression);
+        CompressionAlgorithm cAlg = getCompressionAlgorithm(link, compression);
         File cFile = cAlg.compress();
         EncoderAlgorithm eAlg = getEncodingAlgorithm(cFile,  encoding);
         File eFile = eAlg.encode();
@@ -150,9 +175,19 @@ public class Controller {
         }
     }
 
-    private File saveObject(Object obj) {
-        return File(obj);
-        //TODO :: Сделать это
+    private File saveObject(JSONObject json) {
+        String s = (String) json.get("message");
+        String fileName = "temporary" + Integer.toString(temporaryIndex++);
+        try {
+            FileWriter fw = new FileWriter(fileName);
+            fw.write(s);
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        File link = new File(fileName);
+        return link;
     }
 
     public void receiveAlias(String alias) {
@@ -213,7 +248,7 @@ public class Controller {
     }
 
     private void applyMessage(Tab tab, JSONObject obj) {
-        File link = obj;
+        File link = saveObject(obj);
         EncodingAlgorithm eAlg = getEncodingAlgorithm(link, (int)obj.get("encoding"));
         File eFile = eAlg.decode();
         CompressionAlgorithm cAlg = getCompressionAlgorithm(eFile, (int)obj.get("compression"));
@@ -297,15 +332,15 @@ public class Controller {
             // First method
             default:
             case 0:
-                return Algorithms.Compression.huffman(link);
+                return Algorithm.Compression.huffman(link);
                 break;
             // Second method
             case 1:
-                return Algorithms.Compression.huffman(link);
+                return Algorithm.Compression.huffman(link);
                 break;
             // Third method
             case 2:
-                return Algorithms.Compression.huffman(link);
+                return Algorithm.Compression.huffman(link);
                 break;
             }
     }
@@ -315,15 +350,15 @@ public class Controller {
             // First method
             default:
             case 0:
-                return Algorithms.Encoding.huffman(link);
+                return Algorithm.Encoding.huffman(link);
                 break;
             // Second method
             case 1:
-                return Algorithms.Encoding.huffman(link);
+                return Algorithm.Encoding.huffman(link);
                 break;
             // Third method
             case 2:
-                return Algorithms.Encoding.huffman(link);
+                return Algorithm.Encoding.huffman(link);
                 break;
         }
     }

@@ -18,13 +18,8 @@ public class DB {
         ID = selectID();
     }
 
-    public static void main(String[] args) throws SQLException {
-        DB app = new DB();
-        app.makeSelection("evgerher", "ViPivaso");
-        app.insert(1, 1, 1, -1, -1, "evgerher", "ViPivaso",
-                1, 1, "test", "privet, Jeniwyawa.");
-        // insert three new rows
-    }
+//    public static void main(String[] args) throws SQLException {
+//    }
 
     public Connection connect() {
         // SQLite connection string
@@ -104,7 +99,7 @@ public class DB {
         return cursor < results.size();
     }
 
-    public void insert(Object size, Object compressed, Object encoded, Object encodedTime, Object compressedTime,
+    public void insert(Object size, Object compressed, int noiseTimes, Object encoded, Object encodedTime, Object compressedTime,
                        Object user, Object recipient, Object compression, Object coding,
                        Object format, Object content) {
         if (ID == -1) {
@@ -112,8 +107,8 @@ public class DB {
         }
         System.out.println("Inserting");
         String sql =
-                "INSERT INTO messages (id, intial_size, compressed, encoded, coding_time, user, recepient, compression, coding, compres_time, format, content) " +
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                "INSERT INTO messages (id, intial_size, compressed, encoded, coding_time, user, recepient, compression, coding, compres_time, format, content, noises) " +
+                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 //        Long sz = new Long(size);
 //        Long encod = new Long((long) encoded);
@@ -136,6 +131,7 @@ public class DB {
             pstmt.setDouble(10, cTime);                         //compres_time
             pstmt.setString(11, (String) format);               //format
             pstmt.setString(12, (String) content);              //message
+            pstmt.setInt(13, noiseTimes);                    //noises
 
             pstmt.executeUpdate();
         } catch (SQLException e) {

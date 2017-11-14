@@ -117,8 +117,14 @@ public class Controller {
 
     }
 
-    public void watchCompression() {
-        compressionHBOX.getChildren();
+    public int getHBOXindex(HBox hBox) {
+        ObservableList<Node> ol = hBox.getChildren();
+        for (int i = 0; i < ol.size(); i++) {
+            RadioButton rb = (RadioButton) ol.get(i);
+            if (rb.isSelected())
+                return i;
+        }
+        return -1;
     }
 
     public void submitTextMessage() {
@@ -287,13 +293,15 @@ public class Controller {
         String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", sendTo);
-        jsonObject.put("compression", -1);
-        jsonObject.put("encoding", -1);
+        jsonObject.put("compression", getHBOXindex(compressionHBOX));
+        jsonObject.put("encoding", getHBOXindex(encodingHBOX));
         jsonObject.put("initial_size", -1);
         jsonObject.put("compressed_size", -1);
         jsonObject.put("encoded_size", -1);
         jsonObject.put("format", "text");
         jsonObject.put("message", data);
+
+        System.out.printf("I would send :: %s\n", jsonObject.toJSONString());
 
         return jsonObject.toJSONString();
     }

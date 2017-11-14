@@ -45,12 +45,7 @@ public class ChatClient extends Thread {
     }
 
     public void handle(String msg) throws IOException {
-        System.out.println(msg);
-        try {
-            frontEndController.receiveMessage(msg);
-        } catch (java.lang.IllegalStateException exc) {
-            System.out.println("Mne pohui2");
-        }
+        frontEndController.receiveMessage(msg);
     }
 
     @Deprecated

@@ -161,12 +161,15 @@ public class Controller {
         int compression =  getHBOXindex(compressionHBOX);
         int encoding =  getHBOXindex(encodingHBOX);
 
-        CompressionAlgorithm cAlg = getCompressionAlgorithm(compression);
-        File cFile = cAlg.compress(link);
-        EncodeAlgorithm eAlg = getEncodingAlgorithm(encoding);
-        File eFile = eAlg.encode(cFile);
+//        CompressionAlgorithm cAlg = getCompressionAlgorithm(compression);
+//        File cFile = cAlg.compress(link);
+//        EncodeAlgorithm eAlg = getEncodingAlgorithm(encoding);
+//        File eFile = eAlg.encode(cFile);
 
-        String json = createJSON(eFile, format);
+        EncodeAlgorithm eAlg = getEncodingAlgorithm(encoding);
+        File eFile = eAlg.encode(link);
+
+        String json = createJSON(eFile, format, link.length(), -1);
 
         try {
             socket.write(json);
@@ -177,7 +180,7 @@ public class Controller {
 
     private File saveObject(JSONObject json) {
         String s = (String) json.get("message");
-        String fileName = "temporary" + Integer.toString(temporaryIndex++);
+        String fileName = "temporary" + Integer.toString(temporaryIndex);
         try {
             FileWriter fw = new FileWriter(fileName);
             fw.write(s);
@@ -251,16 +254,19 @@ public class Controller {
 
         //TODO :: decompress data for TASK
         //TODO :: Перенести код выше в TASK
+        System.out.println("Я заебался :: " + obj.toJSONString());
 
         Task<Node> task = new Task<Node>() {
 
             @Override
             public Node call() throws Exception {
                 File link = saveObject(obj);
-                EncodeAlgorithm eAlg = getEncodingAlgorithm((int)obj.get("encoding"));
+                EncodeAlgorithm eAlg = getEncodingAlgorithm(Integer.parseInt((String)obj.get("encoding")));
                 File eFile = eAlg.decode(link);
-                CompressionAlgorithm cAlg = getCompressionAlgorithm((int)obj.get("compression"));
-                File cFile = cAlg.decompress(eFile);
+//                CompressionAlgorithm cAlg = getCompressionAlgorithm((int)obj.get("compression"));
+//                File cFile = cAlg.decompress(link);
+//                File cFile = cAlg.decompress(eFile);
+                File cFile = eFile;
 
                 String format = (String) obj.get("format");
 
@@ -270,7 +276,9 @@ public class Controller {
                 switch (format)
                 {
                     case "text":
-                        String data = (String) obj.get("message");
+                        String data = readFile(cFile);
+                        // Добавить декомпрессию
+                        System.out.println("Data from file :: " + data);
                         n = new Label(obj.get("address") + " :: " + data);
                         break;
 //                    case "jpeg":
@@ -285,6 +293,7 @@ public class Controller {
 
 
 //        n = new ImageView("@../../image.jpeg");
+                System.out.println("Около окончания");
                 return n;
             }
         };
@@ -315,15 +324,16 @@ public class Controller {
         tabMap.put(alias, tab);
     }
 
-    private String createJSON(File link, String format) {
+    private String createJSON(File link, String format, long initial_size, long compressed_size) {
         String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", sendTo);
-        jsonObject.put("compression", getHBOXindex(compressionHBOX));
-        jsonObject.put("encoding", getHBOXindex(encodingHBOX));
-        jsonObject.put("initial_size", -1);
-        jsonObject.put("compressed_size", -1);
-        jsonObject.put("encoded_size", -1);
+        jsonObject.put("compression", Long.toString(getHBOXindex(compressionHBOX)));
+        jsonObject.put("encoding", Long.toString(getHBOXindex(encodingHBOX)));
+        jsonObject.put("initial_size", Long.toString(initial_size));
+        jsonObject.put("compressed_size", "-1");
+        jsonObject.put("encoded_size", Long.toString(link.length()));
         jsonObject.put("format", format);
 
         String msg = readFile(link);

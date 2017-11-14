@@ -19,6 +19,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.print.attribute.standard.Compression;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -73,8 +74,7 @@ public class Controller {
             }
         };
 
-        tabCloseHandler = new EventHandler<Event>()
-        {
+        tabCloseHandler = new EventHandler<Event>() {
             @Override
             public void handle(Event e)
             {
@@ -136,9 +136,9 @@ public class Controller {
         int encoding =  getHBOXindex(encodingHBOX);
 
         File objLink = saveObject(obj);
-        CompressionAlgorithm cAlg = performCompression(objLink,  compression);
+        CompressionAlgorithm cAlg = getCompressionAlgorithm(objLink,  compression);
         File cFile = cAlg.compress();
-        EncoderAlgorithm eAlg = performEncoding(cFile,  encoding);
+        EncoderAlgorithm eAlg = getEncodingAlgorithm(cFile,  encoding);
         File eFile = eAlg.encode();
 
         String json = createJSON(eFile, format);
@@ -208,6 +208,13 @@ public class Controller {
     }
 
     private void applyMessage(Tab tab, JSONObject obj) {
+        File link = obj;
+        EncodingAlgorithm eAlg = getEncodingAlgorithm(link, (int)obj.get("encoding"));
+        File eFile = eAlg.decode();
+        CompressionAlgorithm cAlg = getCompressionAlgorithm(eFile, (int)obj.get("compression"));
+        File cFile = cAlg.decompress();
+        //TODO :: decompress data for TASK
+        //TODO :: Перенести код выше в TASK
 
         Task<Node> task = new Task<Node>() {
 
@@ -281,7 +288,7 @@ public class Controller {
         return jsonObject.toJSONString();
     }
 
-    private CompressionAlgorithm performCompression(File link, int compressionMethod) {
+    private CompressionAlgorithm getCompressionAlgorithm(File link, int compressionMethod) {
         switch (compressionMethod) {
             // First method
             default:
@@ -299,7 +306,7 @@ public class Controller {
             }
     }
 
-    private EncodingAlgorithm performEncoding(File link, int encodingMethod) {
+    private EncodingAlgorithm getEncodingAlgorithm(File link, int encodingMethod) {
         switch (encodingMethod){
             // First method
             default:

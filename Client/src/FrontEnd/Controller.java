@@ -150,6 +150,11 @@ public class Controller {
         }
     }
 
+    private File saveObject(Object obj) {
+        return File(obj);
+        //TODO :: Сделать это
+    }
+
     public void receiveAlias(String alias) {
         this.alias.setText(alias);
     }
@@ -225,7 +230,6 @@ public class Controller {
         //        //TODO :: New data types
         //        //TODO :: NOT ONLY FOR STRING SAY NAME
                 switch (format)
-
                 {
                     case "text":
                         String data = (String) obj.get("message");
@@ -236,7 +240,7 @@ public class Controller {
                         // Image has to be in Client/src folder
                         break;
                     default:
-                        n = new Label("No data");
+                        n = new Label("File %name has come, stored in %path");
                         break;
                 }
 

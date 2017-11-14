@@ -120,7 +120,8 @@ public class DB {
             pstmt.setInt(1, ++ID);                           //id
             pstmt.setInt(2, Integer.parseInt((String) size));                     //initial_size
             pstmt.setInt(3, Integer.parseInt((String) compressed));                //compressed
-            pstmt.setInt(4, Integer.parseInt((String) encoded));                   //encoded
+//            pstmt.setInt(4, Integer.parseInt((String) encoded));                   //encoded
+            pstmt.setInt(4, (int) encoded);
             pstmt.setDouble(5, dTime);                          //coding_time
             pstmt.setString(6, (String) user);                  //user
             pstmt.setString(7, (String) recipient);             //recepient

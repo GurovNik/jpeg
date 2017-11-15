@@ -7,6 +7,5 @@ import java.io.File;
  */
 public interface CompressionAlgorithm {
     public File compress(File file);
-
     public File decompress(File file);
 }

@@ -1,8 +1,9 @@
 package Algorithm;
 
+import java.io.File;
 import java.util.*;
 
-public class Huffman {
+public class Huffman implements CompressionAlgorithm {
 
     private String string;
     private HuffmanNode root;
@@ -12,7 +13,15 @@ public class Huffman {
         string = s;
     }
 
-    public String decodeString(String code){
+    public File decompress(File link) {
+        return null;
+    }
+
+    public File compress(File link) {
+        return null;
+    }
+
+    public String decompress(String code){
         StringBuilder result = new StringBuilder();
         StringBuilder codeword = new StringBuilder();
         int counter = 0;
@@ -29,7 +38,7 @@ public class Huffman {
         return result.toString();
     }
 
-    public String codeString(){
+    public String compress(){
         table = makeTable();
         StringBuilder result = new StringBuilder();
         for (int  i = 0; i < string.length(); i++){

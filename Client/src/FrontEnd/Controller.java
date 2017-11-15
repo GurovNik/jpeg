@@ -1,5 +1,7 @@
 package FrontEnd;
 
+import Algorithm.CompressionAlgorithm;
+import Algorithm.EncodeAlgorithm;
 import Network.ChatClient;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -19,8 +21,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.File;
-import java.io.IOException;
+import javax.print.attribute.standard.Compression;
+import java.io.*;
 import java.util.*;
 
 public class Controller {
@@ -48,6 +50,8 @@ public class Controller {
     private EventHandler<KeyEvent> sendHandler;
     private EventHandler<Event> tabCloseHandler;
 
+    private int temporaryIndex = 0;
+
     @FXML
     public void initialize() {
         keyHandler = new EventHandler<KeyEvent>() {
@@ -67,14 +71,16 @@ public class Controller {
             @Override
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ENTER) {
-                    sendData(textBar.getText());
+                    JSONObject json = new JSONObject();
+                    json.put("message", textBar.getText());
+                    
+                    sendData(saveObject(json), "text");
                     textBar.clear();
                 }
             }
         };
 
-        tabCloseHandler = new EventHandler<Event>()
-        {
+        tabCloseHandler = new EventHandler<Event>() {
             @Override
             public void handle(Event e)
             {
@@ -94,8 +100,9 @@ public class Controller {
                     public void handle(final ActionEvent e) {
                         final FileChooser fileChooser = new FileChooser();
                         final File selectedFile = fileChooser.showOpenDialog(null);
+                        String format = getFilenameExtension(selectedFile);
                         if (selectedFile != null) {
-                            sendData(selectedFile);
+                            sendData(selectedFile, format);
                         }
                     }
                 }
@@ -127,18 +134,63 @@ public class Controller {
         return -1;
     }
 
-    public void submitTextMessage() {
-        sendData(textBar.getText());
+    private String getFilenameExtension(File link) {
+        String name = link.getName();
+        try {
+            return name.substring(name.lastIndexOf(".") + 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
-    private void sendData(Object obj) {
-        String json = createJSON(obj);
+    public void submitTextMessage() {
+        try {
+            FileWriter fw = new FileWriter("temp_text.data");
+            fw.write(textBar.getText());
+            fw.close();
+
+            File link = new File("temp_text.data");
+            sendData(link, "text");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendData(File link, String format) {
+        int compression =  getHBOXindex(compressionHBOX);
+        int encoding =  getHBOXindex(encodingHBOX);
+
+//        CompressionAlgorithm cAlg = getCompressionAlgorithm(compression);
+//        File cFile = cAlg.compress(link);
+//        EncodeAlgorithm eAlg = getEncodingAlgorithm(encoding);
+//        File eFile = eAlg.encode(cFile);
+
+        EncodeAlgorithm eAlg = getEncodingAlgorithm(encoding);
+        File eFile = eAlg.encode(link);
+
+        String json = createJSON(eFile, format, link.length(), -1);
 
         try {
             socket.write(json);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private File saveObject(JSONObject json) {
+        String s = (String) json.get("message");
+        String fileName = "temporary" + Integer.toString(temporaryIndex);
+        try {
+            FileWriter fw = new FileWriter(fileName);
+            fw.write(s);
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        File link = new File(fileName);
+        return link;
     }
 
     public void receiveAlias(String alias) {
@@ -190,10 +242,8 @@ public class Controller {
             JSONObject obj = (JSONObject) parser.parse(text);
             String room = (String) obj.get("chat");
             Tab tab = selectDialogue(room);
-            if (tab != null) {
+            if (tab != null)
                 applyMessage(tab, obj);
-            }// TODO :: выебон сета!
-
         } catch (ParseException pe) {
             System.err.println("Invalid json");
             pe.printStackTrace();
@@ -202,37 +252,48 @@ public class Controller {
 
     private void applyMessage(Tab tab, JSONObject obj) {
 
+        //TODO :: decompress data for TASK
+        //TODO :: Перенести код выше в TASK
+        System.out.println("Я заебался :: " + obj.toJSONString());
+
         Task<Node> task = new Task<Node>() {
 
             @Override
             public Node call() throws Exception {
+                File link = saveObject(obj);
+                EncodeAlgorithm eAlg = getEncodingAlgorithm(Integer.parseInt((String)obj.get("encoding")));
+                File eFile = eAlg.decode(link);
+//                CompressionAlgorithm cAlg = getCompressionAlgorithm((int)obj.get("compression"));
+//                File cFile = cAlg.decompress(link);
+//                File cFile = cAlg.decompress(eFile);
+                File cFile = eFile;
+
                 String format = (String) obj.get("format");
+
                 Node n;
-        //        Cell<Node> cell = new Cell<>();
-        //        Node n;
-        //
-        //        System.out.println("Received msg :: " + obj.toJSONString());
-        //
         //        //TODO :: New data types
         //        //TODO :: NOT ONLY FOR STRING SAY NAME
                 switch (format)
-
                 {
                     case "text":
-                        String data = (String) obj.get("message");
+                        String data = readFile(cFile);
+                        // Добавить декомпрессию
+                        System.out.println("Data from file :: " + data);
                         n = new Label(obj.get("address") + " :: " + data);
                         break;
-                    case "jpeg":
-                        n = new ImageView("@../../image.jpeg");
-                        // Image has to be in Client/src folder
-                        break;
+//                    case "jpeg":
+//                        n = new ImageView("@../../image.jpeg");
+//                        // Image has to be in Client/src folder
+//                        break;
                     default:
-                        n = new Label("No data");
+                        String fileMessage = String.format("File [%s] :: stored in [%s]", cFile.getName(), cFile.getPath());
+                        n = new Label(fileMessage);
                         break;
                 }
 
 
 //        n = new ImageView("@../../image.jpeg");
+                System.out.println("Около окончания");
                 return n;
             }
         };
@@ -248,37 +309,11 @@ public class Controller {
     }
 
     private Tab selectDialogue(String alias) {
-        Tab tab;
         if (!tabMap.containsKey(alias)) {
-//            Task<Tab> taskTab = new Task<Tab>() {
-//                @Override
-//                protected Tab call() throws Exception {
-//                    Tab tab = new Tab(alias);
-//                    ListView lv = new ListView();
-//                    tab.setContent(lv);
-//                    tabMap.put(alias, tab);
-//
-//                    return tab;
-//                }
-//            };
-//
-//            taskTab.setOnSucceeded(event -> {
-//                requestHistory(alias);
-//            });
-            requestHistory(alias);
-
-
-//            tab = new Tab(alias);
-//            fillTab(alias, tab);
-//            tabs.getTabs().add(tab);
-//            tabMap.put(alias, tab);
-//            dialogue.add(alias);
+          requestHistory(alias);
         }
 
-        tab = tabMap.get(alias);
-
-
-
+        Tab tab = tabMap.get(alias);
 
         return tab;
     }
@@ -289,22 +324,79 @@ public class Controller {
         tabMap.put(alias, tab);
     }
 
-    private String createJSON(Object data) {
+    private String createJSON(File link, String format, long initial_size, long compressed_size) {
         String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", sendTo);
-        jsonObject.put("compression", getHBOXindex(compressionHBOX));
-        jsonObject.put("encoding", getHBOXindex(encodingHBOX));
-        jsonObject.put("initial_size", -1);
-        jsonObject.put("compressed_size", -1);
-        jsonObject.put("encoded_size", -1);
-        jsonObject.put("format", "text");
-        jsonObject.put("message", data);
+        jsonObject.put("compression", Long.toString(getHBOXindex(compressionHBOX)));
+        jsonObject.put("encoding", Long.toString(getHBOXindex(encodingHBOX)));
+        jsonObject.put("initial_size", Long.toString(initial_size));
+        jsonObject.put("compressed_size", "-1");
+        jsonObject.put("encoded_size", Long.toString(link.length()));
+        jsonObject.put("format", format);
+
+        String msg = readFile(link);
+
+        jsonObject.put("message", msg);
+        // TODO :: LINK INTO BASE64
 
         return jsonObject.toJSONString();
     }
 
+    private String readFile(File link) {
+        BufferedInputStream bin = null;
+        try {
+            bin = new BufferedInputStream(new FileInputStream(link));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        int data;
+        StringBuilder factory = new StringBuilder();
+        try {
+            while((data = bin.read())!=-1){
+                factory.append((char)data);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        return factory.toString();
+    }
+
+    private CompressionAlgorithm getCompressionAlgorithm(int compressionMethod) {
+        switch (compressionMethod) {
+            // First method
+            default:
+            case 0:
+                return new Algorithm.Huffman("asdf");
+            // Second method
+//            case 1:
+//                return new Algorithm.Compression.huffman(link);
+//                break;
+//            // Third method
+//            case 2:
+//                return new Algorithm.Compression.huffman(link);
+//                break;
+            }
+    }
+
+    private EncodeAlgorithm getEncodingAlgorithm(int encodingMethod) {
+        switch (encodingMethod){
+            // First method
+            default:
+            case 0:
+                return new Algorithm.Repetition(3);
+            // Second method
+//            case 1:
+//                return new Algorithm.Encoding.huffman(link);
+//                break;
+//            // Third method
+//            case 2:
+//                return new Algorithm.Encode.huffman(link);
+//                break;
+        }
+    }
 
     public void setSocket(ChatClient socket) {
         this.socket = socket;

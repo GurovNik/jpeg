@@ -58,6 +58,7 @@ public class Algorithm {
         } catch (IOException e) {
             System.out.println("Error: " + e);
         }
+
     }
     public void runCompressing() throws IOException {
         preProcessing();

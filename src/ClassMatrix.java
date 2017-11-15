@@ -10,8 +10,12 @@ public class ClassMatrix {
 
     public static void main(String[] args) throws IOException {
         Service JPEG= new Service();
-        JPEG.compress("/Users/Nikita/Desktop/2017-11-08 11.27.10.jpg");
+        JPEG.compress("/Users/Nikita/Desktop/artwork_mystery_symbols_symbol_2560x1440_artwallpaperhi.com-ConvertImage.tif");
         System.out.println("сжато");
         JPEG.decompress();
+
+
+
+
     }
 }

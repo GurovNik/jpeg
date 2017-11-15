@@ -1,5 +1,7 @@
 package Algorithm;
 
+import javafx.util.Pair;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -7,10 +9,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class LZW {
 
@@ -19,7 +18,6 @@ public class LZW {
     private final int initialBitsAmoint = 9;
     private final int initialDictionarySize = 255;
     private int[] getInput() {
-        //
         return null;
     }
 
@@ -36,7 +34,7 @@ public class LZW {
         return false;
     }
 
-    public int[][] compress(ArrayList<String> items) {
+    public List<Pair<Integer, Integer>> compress(ArrayList<String> items) {
         int[] input = getInput();
         int[] result = new int[1000];
         Map<String, Integer> dictionary = new HashMap<>();
@@ -44,6 +42,7 @@ public class LZW {
         String y = "";
 
         int codeX, codeY;
+
         for (int i = 0; i < input.length; i++) {
             codeX = getElement(input, i);
 
@@ -110,7 +109,7 @@ public class LZW {
         BitSet bitSet = createBitSet(bytes);
         fillList(values, bitSet);
 
-        int phrases[][] = compress(values);
+        List<Pair<Integer, Integer>> phrases = compress(values);
         File out = writeData(phrases);
 
         return out;
@@ -143,6 +142,10 @@ public class LZW {
             }
         }
         return bitSet;
+    }
+
+    private void fillList(List<String> values, BitSet bitSet) {
+        
     }
 
     private void fillList(ArrayList<Integer> values, BitSet bitSet) {

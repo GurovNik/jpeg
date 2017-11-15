@@ -49,10 +49,10 @@ public class DB {
 
             while (rs.next()) {
                 Hashtable<String, String> temp = new Hashtable<>(10);
-                temp.put("user", rs.getString(2));
-                temp.put("recepient", rs.getString(3));
-                temp.put("format", rs.getString(5));
-                temp.put("content", rs.getString(10));
+                temp.put("user", rs.getString("user"));
+                temp.put("recepient", rs.getString("recepient"));
+                temp.put("format", rs.getString("format"));
+                temp.put("content", rs.getString("content"));
                 result.add(temp);
             }
             results = result;
@@ -109,9 +109,9 @@ public class DB {
             selectID();
         }
         System.out.println("Inserting");
-        String sql =
+        String sql =                   //1  //2         //3         //4         //5       6     7           8           9       10              11       12       13
                 "INSERT INTO messages (id, intial_size, compressed, encoded, coding_time, user, recepient, compression, coding, compres_time, format, content, noises) " +
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                        "VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?, ?)";
 
         Double dTime = new Double((int) encodedTime);
         Double cTime = new Double((int) compressedTime);

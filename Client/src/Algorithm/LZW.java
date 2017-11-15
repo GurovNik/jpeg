@@ -12,19 +12,7 @@ public class LZW {
     private int size;
     private static final int initialDictionarySize = 256;
     private static final int initialSetAmoint = (int)Math.round(Math.log(initialDictionarySize)/Math.log(2)); //8
-    private static int bits = initialSetAmoint;
-
-    private int[] getInput() {
-        return null;
-    }
-
-    private int getElement(int[] input, int index) {
-        return input[index];
-    }
-
-    private boolean isInTable(String s) {
-        return false;
-    }
+    private static int bits = initialSetAmoint; //for decoding part
 
     public static List<Pair<Integer, Integer>> compress(String input) {
         List<Pair<Integer, Integer>> result = new ArrayList<Pair<Integer, Integer>>();
@@ -47,39 +35,29 @@ public class LZW {
                     System.out.print(x);
                     System.out.print(" ");
                 }
-                else { //if end of input, then code of current string to the output
+                else { //if end of input, then code of current string to the output and end LZW coding
                     Pair<Integer, Integer> temp = new Pair<>(dictionary.get(x), bits);
                     result.add(temp);
                     flag = false;
                     break;
                 }
-            if (flag) {
+            if (flag) { //flag for catching end of the lzw
                 System.out.println(i);
                 i--;
                 dictionary.put(x, dictionary.size() - 1);
-                if (dictionary.size() % 2 == 0) bits++;
+                if (dictionary.size() % 2 == 0) bits++; //bits for decoding part of the LZW
                 Pair<Integer, Integer> temp = new Pair<>(dictionary.get(x.substring(0, x.length() - 1)), bits);
                 result.add(temp);
             }
         }
+        //testing:
+        System.out.print("Dictionary size: ");
         System.out.println(dictionary.size());
         return result;
     }
 
-    public int[] decompress() {
-        Map<Integer, String> dictionary = new HashMap<>();
-        return null;
-    }
-
     public static void main(String[] args) {
-        char aa = 0;
-        char bb = 1;
-        char cc = 2;
-        String a = "" + aa;
-        String b = "" + bb;
-        String c = "" + cc;
-        String input = "";
-        List<Pair<Integer, Integer>> lzw = compress(a + b + b + c + a + c + a + b + b + a + b + b);
+        List<Pair<Integer, Integer>> lzw = compress("String for test should be there");
         for (int i = 0; i < lzw.size(); i++) {
             System.out.print(lzw.get(i).getKey());
             System.out.print(" ");

@@ -19,7 +19,6 @@ public class LZW {
     private final int initialBitsAmoint = 9;
     private final int initialDictionarySize = 255;
     private int[] getInput() {
-        //
         return null;
     }
 
@@ -44,6 +43,7 @@ public class LZW {
         String y = "";
 
         int codeX, codeY;
+
         for (int i = 0; i < input.length; i++) {
             codeX = getElement(input, i);
 

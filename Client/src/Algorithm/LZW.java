@@ -2,53 +2,56 @@ package Algorithm;
 
 import javafx.util.Pair;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class LZW {
+    private int size;
+    private final int initialDictionarySize = 256;
+    private final int initialBitsAmount = (int)Math.round(Math.log(initialDictionarySize)/Math.log(2)) + 1; //9
+    private int bits = initialBitsAmount;
 
-    private int bits;
-    private int size = 256;
-    private final int initialBitsAmoint = 9;
-    private final int initialDictionarySize = 255;
-    private int[] getInput() {
-        return null;
-    }
-
-    LZW() {
-        bits = initialBitsAmoint;
-        size = initialDictionarySize;
-    }
-
-    private int getElement(int[] input, int index) {
-        return input[index];
-    }
-
-    private boolean isInTable(String s) {
-        return false;
-    }
-
-    public List<Pair<Integer, Integer>> compress(ArrayList<String> items) {
-        int[] input = getInput();
-        int[] result = new int[1000];
+    public List<Pair<Integer, Integer>> compress(String input) {
+        List<Pair<Integer, Integer>> result = new ArrayList<>();
         Map<String, Integer> dictionary = new HashMap<>();
-        String x = "";
-        String y = "";
+        boolean flag = true;
 
-        int codeX, codeY;
-
-        for (int i = 0; i < input.length; i++) {
-            codeX = getElement(input, i);
-
+        //initializing dictionary and few variables for algorithm;
+        for (char i = 0; i <= initialDictionarySize; i++) {
+            String temp = "" + i;
+            dictionary.put(temp, (int)i);
         }
 
-        return null;
+        for (int i = 0; (i < input.length()) && flag; i++) {
+            String x = "" + input.charAt(i);
+            //go as far as possible with familiar String
+            while (dictionary.containsKey(x))
+                if (i < input.length() - 1) {
+                    i++;
+                    x += input.charAt(i);
+                    System.out.print(x);
+                    System.out.print(" ");
+                }
+                else { //if end of input, then code of current string to the output
+                    Pair<Integer, Integer> temp = new Pair<>(dictionary.get(x), bits);
+                    result.add(temp);
+                    flag = false;
+                    break;
+                }
+            if (flag) {
+                System.out.println(i);
+                i--;
+                dictionary.put(x, dictionary.size() - 1);
+                if (dictionary.size() % 2 == 0) bits++;
+                Pair<Integer, Integer> temp = new Pair<>(dictionary.get(x.substring(0, x.length() - 1)), bits);
+                result.add(temp);
+            }
+        }
+
+        return result;
     }
 
     public String decompress(ArrayList<Integer> vals) {
@@ -61,7 +64,6 @@ public class LZW {
         String wordCW;
         String P;
         String C;
-
 
         cW = vals.get(index);
         wordCW = dictionary.get(cW);
@@ -98,7 +100,6 @@ public class LZW {
     }
 
     public File compress(File link) {
-        ArrayList<String> values = new ArrayList<>();
         byte bytes[] = null;
         try {
             bytes = Files.readAllBytes(link.toPath());
@@ -106,17 +107,16 @@ public class LZW {
             e.printStackTrace();
         }
 
-        BitSet bitSet = createBitSet(bytes);
-        fillList(values, bitSet);
+//        BitSet bitSet = createBitSet(bytes);
+//        ArrayList<String> values = fillList(values, bitSet);
 
-        List<Pair<Integer, Integer>> phrases = compress(values);
+        List<Pair<Integer, Integer>> phrases = compress(bytes);
         File out = writeData(phrases);
 
         return out;
     }
 
     public File decompress(File link) {
-        ArrayList<Integer> values = new ArrayList<>();
         byte bytes[] = null;
         try {
             bytes = Files.readAllBytes(link.toPath());
@@ -125,12 +125,11 @@ public class LZW {
         }
 
         BitSet bitSet = createBitSet(bytes);
-        fillList(values, bitSet);
+        List<Integer> values = getValues(bitSet);
 
-        String data = decompress(values);
+        byte data[] = decompress(values);
 
-        File decompressedData = writeData(data);
-        return decompressedData;
+        return writeBytes("decompressedLZW.data", data);
     }
 
     private BitSet createBitSet(byte[] bytes) {
@@ -144,11 +143,21 @@ public class LZW {
         return bitSet;
     }
 
-    private void fillList(List<String> values, BitSet bitSet) {
+    private Map<Integer, String> loadDictionary() {
+        Map<Integer, String> dict = new HashMap<>();
+        for (int i = 0; i < size; i++) {
+            char c = (char) i;
+            dict.put(i, ""+c);
+        }
+        return dict;
+    }
+
+    private void bitsToInts(List<String> values, BitSet bitSet) {
         
     }
 
-    private void fillList(ArrayList<Integer> values, BitSet bitSet) {
+    private List<Integer> getValues(BitSet bitSet) {
+        ArrayList<Integer> values = new ArrayList<>();
         int index1 = 0;
         int index2 = bits;
         int bitsUsed = 0;
@@ -164,24 +173,24 @@ public class LZW {
             int value = convertBits(temp);
             values.add(value);
         }
+
+        return values;
     }
 
-    private File writeData(int data[][]) {
-        int values[] = data[0];
-        int bits[] = data[1];
-
-        BitSet bitSet = new BitSet();
-//        bitSet.
-
-        for (int i = 0; i < values.length; i++) {
-            BitSet bs = new BitSet(bits[i]);
+    private File writeData(List<Pair<Integer, Integer>> data) {
+        BitSet bitSet = new BitSet(); // specify size
+        for (Pair p: data) {
+            int value = (int)p.getKey();
+            int bits = (int)p.getValue();
+            BitSet bs = new BitSet(bits);
+            fillSet(bs, value);
         }
+
+        return writeBytes("compressedLZW.data", bitSet.toByteArray());
     }
 
-    private File writeData(String data) {
-        byte bytes[] = data.getBytes();
-        File link = new File("lzwDecompressed.data");
-
+    private File writeBytes(String filename, byte bytes[]) {
+        File link = new File(filename);
         try {
             FileOutputStream fos = new FileOutputStream(link);
             fos.write(bytes);
@@ -202,33 +211,18 @@ public class LZW {
         return value;
     }
 
-    private Map<Integer, String> loadDictionary() {
-        Map<Integer, String> dict = new HashMap<>();
-        for (int i = 0; i < size; i++) {
-            char c = (char) i;
-            dict.put(i, ""+c);
-        }
-        return dict;
-    }
-
     public static void main(String[] args) {
-//        int values[] = new int[]{(int)'a', (int)'a', (int)'b', (int)'b', 257, 257, (int)'b', (int)'c', (int)'a', 263, (int)'c', (int)'c'};
-//        ArrayList<Integer> vals = new ArrayList<>();
-//        for (int a: values)
-//            vals.add(a);
-//
-        LZW lzw = new LZW();
-//        String s = lzw.decompress(vals);
-//        System.out.println(s);
-
-        BitSet bs = new BitSet(4);
-        bs.set(0, true);
-        bs.set(1, true);
-        bs.set(2, false);
-        bs.set(3, true);
-
-        int val = lzw.convertBits(bs);
-        System.out.println(val);
+        char aa = 0;
+        char bb = 1;
+        char cc = 2;
+        String a = "" + aa;
+        String b = "" + bb;
+        String c = "" + cc;
+        String input = "";
+        List<Pair<Integer, Integer>> lzw = compress(a + b + b + c + a + c + a + b + b + a + b + b);
+        for (int i = 0; i < lzw.size(); i++) {
+            System.out.print(lzw.get(i).getKey());
+            System.out.print(" ");
+        }
     }
-
 }

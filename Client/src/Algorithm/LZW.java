@@ -1,7 +1,7 @@
 package Algorithm;
 
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import javafx.util.Pair;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,16 +54,17 @@ public class LZW {
         return result;
     }
 
-    public String decompress(ArrayList<Integer> vals) {
-        Map<Integer, String> dictionary = loadDictionary();
-        ArrayList<String> content = new ArrayList<>();
+    public byte[] decompress(List<Integer> vals) {
+        ByteOutputStream bos = new ByteOutputStream();
+        Map<Integer, List<Byte>> dictionary = loadByteDictionary();
+        ArrayList<Byte> content = new ArrayList<>();
         int index = 0;
         int pW;
         int cW;
-        String wordPW;
-        String wordCW;
-        String P;
-        String C;
+        List<Byte> wordPW;
+        List<Byte> wordCW;
+        List<Byte> P;
+        List<Byte> C;
 
         cW = vals.get(index);
         wordCW = dictionary.get(cW);
@@ -92,11 +93,12 @@ public class LZW {
             }
         }
 
-        StringBuilder sb = new StringBuilder();
-        for (String s: content)
-            sb.append(s);
+//        StringBuilder sb = new StringBuilder();
+//        for (String s: content)
+//            sb.append(s);
 
-        return sb.toString();
+//        return sb.toString();
+        return bos.getBytes();
     }
 
     public File compress(File link) {
@@ -132,6 +134,15 @@ public class LZW {
         return writeBytes("decompressedLZW.data", data);
     }
 
+    private BitSet createBitSet(int value, int bits) {
+        BitSet bitSet = new BitSet(bits);
+        for (int i = 0; i < bits; i++) {
+            bitSet.set(i, (value & (1 << i)) > 0);
+        }
+
+        return bitSet;
+    }
+
     private BitSet createBitSet(byte[] bytes) {
         BitSet bitSet = new BitSet(bytes.length * 8);
         for (int i = 0; i < bytes.length; i++) {
@@ -143,17 +154,13 @@ public class LZW {
         return bitSet;
     }
 
-    private Map<Integer, String> loadDictionary() {
-        Map<Integer, String> dict = new HashMap<>();
+    private Map<Integer, List<Byte>> loadByteDictionary() {
+        Map<Integer, List<Byte>> dict = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            char c = (char) i;
-            dict.put(i, ""+c);
+            byte b = (byte) i;
+            dict.put(i, b);
         }
         return dict;
-    }
-
-    private void bitsToInts(List<String> values, BitSet bitSet) {
-        
     }
 
     private List<Integer> getValues(BitSet bitSet) {
@@ -178,13 +185,21 @@ public class LZW {
     }
 
     private File writeData(List<Pair<Integer, Integer>> data) {
-        BitSet bitSet = new BitSet(); // specify size
+        BitSet bitSets[] = new BitSet[data.size()];
+        int index = 0;
+        int bits_amount = 0;
+
         for (Pair p: data) {
             int value = (int)p.getKey();
             int bits = (int)p.getValue();
-            BitSet bs = new BitSet(bits);
-            fillSet(bs, value);
+            bitSets[index++] = createBitSet(value, bits);
+            bits_amount += bits;
         }
+
+        BitSet bitSet = new BitSet(bits_amount);
+        for (BitSet bs: bitSets)
+            for (int j = 0; j < bs.length(); j++)
+                bitSet.set(--bits_amount, bs.get(j));
 
         return writeBytes("compressedLZW.data", bitSet.toByteArray());
     }

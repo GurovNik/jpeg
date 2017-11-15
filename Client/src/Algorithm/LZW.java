@@ -10,7 +10,6 @@ public class LZW {
     private final int initialSetAmoint = 8;
     private final int initialDictionarySize = 255;
     private int[] getInput() {
-        //
         return null;
     }
 
@@ -18,7 +17,7 @@ public class LZW {
         return input[index];
     }
 
-    private boolean isInTable(String ) {
+    private boolean isInTable(String s) {
         return false;
     }
 
@@ -30,6 +29,7 @@ public class LZW {
         String y = "";
 
         int codeX, codeY;
+
         for (int i = 0; i < input.length; i++) {
             codeX = getElement(input, i);
 

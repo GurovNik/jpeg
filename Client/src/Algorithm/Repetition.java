@@ -45,7 +45,11 @@ public class Repetition implements EncodeAlgorithm {
     }
 
     public static void main(String[] args) {
+        System.out.println();
+        System.out.println((char) 40);
         Repetition r = new Repetition(5);
+        File fin = new File("fin");
+        fin = r.encode(fin);
         File f = new File("outerf");
         f = r.decode(f);
         System.out.println(f.getAbsoluteFile());
@@ -68,6 +72,7 @@ public class Repetition implements EncodeAlgorithm {
         }
         int counter = 0;
         int[] data = new int[n];
+
         try {
             while ((data[0] = read.read()) != -1) {
                 int zero = 0;
@@ -86,9 +91,9 @@ public class Repetition implements EncodeAlgorithm {
                     }
                 }
                 if (zero > one) {
-                    write.write(0);
+                    write.write((byte) '0');
                 } else {
-                    write.write(1);
+                    write.write((byte) '1');
                 }
                 write.flush();
             }

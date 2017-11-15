@@ -49,10 +49,10 @@ public class DB {
 
             while (rs.next()) {
                 Hashtable<String, String> temp = new Hashtable<>(10);
-                temp.put("user", rs.getString("user"));
-                temp.put("recepient", rs.getString("recepient"));
-                temp.put("format", rs.getString("format"));
-                temp.put("content", rs.getString("content"));
+                temp.put("user", rs.getString(2));
+                temp.put("recepient", rs.getString(3));
+                temp.put("format", rs.getString(4));
+                temp.put("content", rs.getString(12));
                 result.add(temp);
             }
             results = result;

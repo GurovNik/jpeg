@@ -55,7 +55,6 @@ public class LZW {
     }
 
     public byte[] decompress(List<Integer> vals) {
-        ByteOutputStream bos = new ByteOutputStream();
         Map<Integer, List<Byte>> dictionary = loadByteDictionary();
         ArrayList<Byte> content = new ArrayList<>();
         int index = 0;
@@ -68,28 +67,34 @@ public class LZW {
 
         cW = vals.get(index);
         wordCW = dictionary.get(cW);
-        content.add(wordCW);
-
+        for (Byte b: wordCW)
+            content.add(b);
 
         for (int i = 1; i < vals.size(); i++) {
             pW = cW;
             cW = vals.get(++index);
             if (dictionary.containsKey(cW)) {
                 wordCW = dictionary.get(cW);
-                content.add(wordCW);
-
+                for (Byte b: wordCW)
+                    content.add(b);
                 wordPW = dictionary.get(pW);
 
-                P = wordPW;
-                C = wordCW.substring(0, 1);
-                dictionary.put(++size, P + C);
+                ArrayList<Byte> temp = new ArrayList<>();
+                for (Byte b: wordPW)
+                    temp.add(b);
+                temp.add(wordCW.get(0));
+                dictionary.put(++size, temp);
             } else {
                 wordPW = dictionary.get(pW);
 
-                P = wordPW;
-                C = wordPW.substring(0, 1);
-                dictionary.put(++size, P + C);
-                content.add(P + C);
+                ArrayList<Byte> temp = new ArrayList<>();
+                for (Byte b: wordPW)
+                    temp.add(b);
+                temp.add(wordPW.get(0));
+
+                dictionary.put(++size, temp);
+                for (Byte b: temp)
+                    content.add(b);
             }
         }
 
@@ -98,7 +103,7 @@ public class LZW {
 //            sb.append(s);
 
 //        return sb.toString();
-        return bos.getBytes();
+        return (byte[]) content.toArray();
     }
 
     public File compress(File link) {

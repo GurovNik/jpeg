@@ -36,7 +36,7 @@ public class LZW {
         return false;
     }
 
-    public int[] compress() {
+    public int[][] compress(ArrayList<String> items) {
         int[] input = getInput();
         int[] result = new int[1000];
         Map<String, Integer> dictionary = new HashMap<>();
@@ -98,6 +98,24 @@ public class LZW {
         return sb.toString();
     }
 
+    public File compress(File link) {
+        ArrayList<String> values = new ArrayList<>();
+        byte bytes[] = null;
+        try {
+            bytes = Files.readAllBytes(link.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        BitSet bitSet = createBitSet(bytes);
+        fillList(values, bitSet);
+
+        int phrases[][] = compress(values);
+        File out = writeData(phrases);
+
+        return out;
+    }
+
     public File decompress(File link) {
         ArrayList<Integer> values = new ArrayList<>();
         byte bytes[] = null;
@@ -118,7 +136,6 @@ public class LZW {
 
     private BitSet createBitSet(byte[] bytes) {
         BitSet bitSet = new BitSet(bytes.length * 8);
-        createBitSet(bytes);
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < 8; j++) {
                 bitSet.set(i * 8 + j, (bytes[i] & 1) > 0);
@@ -143,6 +160,18 @@ public class LZW {
 
             int value = convertBits(temp);
             values.add(value);
+        }
+    }
+
+    private File writeData(int data[][]) {
+        int values[] = data[0];
+        int bits[] = data[1];
+
+        BitSet bitSet = new BitSet();
+//        bitSet.
+
+        for (int i = 0; i < values.length; i++) {
+            BitSet bs = new BitSet(bits[i]);
         }
     }
 

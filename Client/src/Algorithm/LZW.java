@@ -30,31 +30,54 @@ public class LZW implements CompressionAlgorithm {
         Map<Byte, List<Byte>> backDictionary = maps.getValue();
         boolean flag = true;
 
-        ArrayList<Byte> x = new ArrayList<>();
-        for (int i = 0; (i < input.length) && flag; i++) {
-            x.add(input[i]);
+
+        ArrayList<Byte> C = new ArrayList<>();
+        ArrayList<Byte> pc = new ArrayList<>();
+
+//        C.add(input[0]);
+        ArrayList<Byte> P = new ArrayList<>(C);
+//        C = new ArrayList<>();
+
+        for (int i = 0; i < input.length & flag; i++) {
+            C.add(input[i]);
             //go as far as possible with familiar String
-            while (dictionary.containsKey(x))
-                if (i < input.length - 1) {
-                    i++;
-                    x.add(input[i]);
-                }
-                else { //if end of input, then code of current string to the output and end LZW coding
-                    Pair<Integer, Integer> temp = new Pair<>(dictionary.get(x), bits);
-                    result.add(temp);
-                    flag = false;
-                    break;
-                }
-            if (flag) { //flag for catching end of the lzw
-                i--;
-                dictionary.put(x, dictionary.size());
+            for (Byte b: P)
+                pc.add(b);
+            for (Byte b: C)
+                pc.add(b);
+            if (dictionary.containsKey(pc)) {
+                P = new ArrayList<>(pc);
+//                if (i < input.length - 1) {
+//                    i++;
+//                    C.add(input[i]);
+//                } else { //if end of input, then code of current string to the output and end LZW coding
+//                    Pair<Integer, Integer> temp = new Pair<>(dictionary.get(x), bits);
+//                    result.add(temp);
+//                    flag = false;
+//                    break;
+//                }
+            } else {
+                Pair<Integer, Integer> temp = new Pair<>(dictionary.get(P), bits);
+                result.add(temp);
+                dictionary.put(new ArrayList(pc), dictionary.size());
                 if (dictionary.size() % Math.pow(2, bits) == 0)
                     bits++; //bits for decoding part of the LZW
-                Pair<Integer, Integer> temp = new Pair<>(dictionary.get(backDictionary.get(x.get(0))), bits);
-                result.add(temp);
+                P = new ArrayList<>(C);
             }
-            x.clear();
+//            if (flag) { //flag for catching end of the lzw
+//                i--;
+//                dictionary.put(C, dictionary.size());
+//                if (dictionary.size() % Math.pow(2, bits) == 0)
+//                    bits++; //bits for decoding part of the LZW
+//                Pair<Integer, Integer> temp = new Pair<>(dictionary.get(backDictionary.get(x.get(0))), bits);
+//                result.add(temp);
+//            }
+            pc.clear();
+            C.clear();
         }
+
+        Pair<Integer, Integer> temp = new Pair<>(dictionary.get(P), bits);
+        result.add(temp);
 
         return result;
     }
@@ -84,10 +107,11 @@ public class LZW implements CompressionAlgorithm {
 
                 ArrayList<Byte> temp = new ArrayList<>();
                 for (int k = 0; k < wordPW.size(); k++) {
-                    temp.add(wordPW.get(k));
+                    byte val = wordPW.get(k) == null ? 0x00: wordPW.get(k);
+                    temp.add(val);
                 }
                 temp.add(wordCW.get(0));
-                dictionary.put(++size, temp);
+                dictionary.put(size++, new ArrayList(temp));
             } else {
                 wordPW = dictionary.get(pW);
 
@@ -96,7 +120,7 @@ public class LZW implements CompressionAlgorithm {
                     temp.add(b);
                 temp.add(wordPW.get(0));
 
-                dictionary.put(++size, temp);
+                dictionary.put(size++, new ArrayList(temp));
                 for (Byte b: temp)
                     content.add(b);
             }
@@ -114,7 +138,6 @@ public class LZW implements CompressionAlgorithm {
 
         byte bytes[] = null;
         try {
-            System.out.println(link.getAbsolutePath());
             bytes = Files.readAllBytes(link.toPath());
         } catch (IOException e) {
             e.printStackTrace();
@@ -140,7 +163,7 @@ public class LZW implements CompressionAlgorithm {
         }
 
         BitSet bitSet = createBitSet(bytes);
-        List<Integer> values = getValues(bitSet);
+        List<Integer> values = getValues(bitSet, bytes.length*8);
 
         byte data[] = decompress(values);
 
@@ -159,7 +182,7 @@ public class LZW implements CompressionAlgorithm {
     private BitSet createBitSet(byte[] bytes) {
         for (int i = 0; i < bytes.length; i++)
             System.out.print(bytes[i] + " ");
-        System.out.println();
+        System.out.println(" :: bytes decompressed");
 
         BitSet bitSet = new BitSet(bytes.length * 8);
         for (int i = 0; i < bytes.length; i++) {
@@ -168,7 +191,6 @@ public class LZW implements CompressionAlgorithm {
             }
         }
 
-        System.out.println(bitSet.cardinality());
         return bitSet;
     }
 
@@ -199,16 +221,16 @@ public class LZW implements CompressionAlgorithm {
         return maps;
     }
 
-    private List<Integer> getValues(BitSet bitSet) {
+    private List<Integer> getValues(BitSet bitSet, int length) {
         ArrayList<Integer> values = new ArrayList<>();
         int index1 = 0;
         int index2 = bits;
         int bitsUsed = 0;
         int temp_size = size;
 
-        while (bitsUsed < bitSet.length()) {
+        while (bitsUsed < length) {
             bitsUsed += index2 - index1;
-            BitSet temp = bitSet.get(index1, index2 - 1);
+            BitSet temp = bitSet.get(index1, index2);
             if (++temp_size % Math.pow(2, bits) == 0)
                 bits++;
             index1 = index2;
@@ -218,6 +240,10 @@ public class LZW implements CompressionAlgorithm {
             values.add(value);
         }
 
+        for (int i = 0; i < values.size(); i++)
+            System.out.printf("%d ", values.get(i));
+        System.out.println(" values decompressed");
+
         return values;
     }
 
@@ -225,6 +251,10 @@ public class LZW implements CompressionAlgorithm {
         BitSet bitSets[] = new BitSet[data.size()];
         int index = 0;
         int bits_amount = 0;
+
+        for (int i = 0; i < data.size(); i++)
+            System.out.printf("%d ", data.get(i).getKey());
+        System.out.println(" :: values written");
 
         for (Pair p: data) {
             int value = p.getKey() != null ? (int)p.getKey(): 0;
@@ -242,7 +272,12 @@ public class LZW implements CompressionAlgorithm {
             }
         }
 
-        return writeBytes("compressedLZW.data", bitSet.toByteArray());
+        byte bytes[] = bitSet.toByteArray();
+        for (int i = 0; i < bytes.length; i++)
+            System.out.printf("%d ", bytes[i]);
+        System.out.println(" bytes written");
+
+        return writeBytes("compressedLZW.data", bytes);
     }
 
     private File writeBytes(String filename, byte bytes[]) {

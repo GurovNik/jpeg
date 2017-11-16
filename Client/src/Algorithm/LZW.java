@@ -35,17 +35,17 @@ public class LZW implements CompressionAlgorithm {
                     System.out.print(x);
                     System.out.print(" ");
                 }
-                else { //if end of input, then code of current string to the output
+                else { //if end of input, then code of current string to the output and end LZW coding
                     Pair<Integer, Integer> temp = new Pair<>(dictionary.get(x), bits);
                     result.add(temp);
                     flag = false;
                     break;
                 }
-            if (flag) {
+            if (flag) { //flag for catching end of the lzw
                 System.out.println(i);
                 i--;
                 dictionary.put(x, dictionary.size() - 1);
-                if (dictionary.size() % 2 == 0) bits++;
+                if (dictionary.size() % 2 == 0) bits++; //bits for decoding part of the LZW
                 Pair<Integer, Integer> temp = new Pair<>(dictionary.get(x.substring(0, x.length() - 1)), bits);
                 result.add(temp);
             }

@@ -25,7 +25,9 @@ public class LZW implements CompressionAlgorithm {
     public List<Pair<Integer, Integer>> compress(byte input[]) {
         //initializing dictionary and few variables for algorithm;
         List<Pair<Integer, Integer>> result = new ArrayList<>();
-        Map<List<Byte>, Integer> dictionary = loadByteIntegerDictionary();
+        Pair<Map<List<Byte>, Integer>, Map<Byte, List<Byte>>> maps = loadByteIntegerDictionary();
+        Map<List<Byte>, Integer> dictionary = maps.getKey();
+        Map<Byte, List<Byte>> backDictionary = maps.getValue();
         boolean flag = true;
 
         ArrayList<Byte> x = new ArrayList<>();
@@ -46,9 +48,9 @@ public class LZW implements CompressionAlgorithm {
             if (flag) { //flag for catching end of the lzw
                 i--;
                 dictionary.put(x, dictionary.size());
-                if (dictionary.size() % 2 == 0) bits++; //bits for decoding part of the LZW
-                Pair<Integer, Integer> temp = new Pair<>(dictionary.get(LIST OF x.get(0)), bits);
-                // TODO :: брать лишь первый байт и отсылать в какой-то лист
+                if (dictionary.size() % Math.pow(2, bits) == 0)
+                    bits++; //bits for decoding part of the LZW
+                Pair<Integer, Integer> temp = new Pair<>(dictionary.get(backDictionary.get(x.get(0))), bits);
                 result.add(temp);
             }
             x.clear();
@@ -155,13 +157,18 @@ public class LZW implements CompressionAlgorithm {
     }
 
     private BitSet createBitSet(byte[] bytes) {
+        for (int i = 0; i < bytes.length; i++)
+            System.out.print(bytes[i] + " ");
+        System.out.println();
+
         BitSet bitSet = new BitSet(bytes.length * 8);
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < 8; j++) {
-                bitSet.set(i * 8 + j, (bytes[i] & 1) > 0);
-                bytes[i] <<= 1;
+                bitSet.set(i * 8 + j, (bytes[i] & (1 << j)) > 0);
             }
         }
+
+        System.out.println(bitSet.cardinality());
         return bitSet;
     }
 
@@ -176,15 +183,20 @@ public class LZW implements CompressionAlgorithm {
         return dict;
     }
 
-    private Map<List<Byte>, Integer> loadByteIntegerDictionary() {
+    private Pair<Map<List<Byte>, Integer>, Map<Byte, List<Byte>>> loadByteIntegerDictionary() {
         Map<List<Byte>, Integer> dict = new HashMap<>();
+        Map<Byte, List<Byte>> reverseDict = new HashMap<>();
         for (int i = 0; i < size; i++) {
             ArrayList<Byte> list = new ArrayList<>();
-            list.add((byte) i);
+            Byte b = (byte) i;
+
+            list.add(b);
             dict.put(list, i);
+            reverseDict.put(b, list);
         }
 
-        return dict;
+        Pair<Map<List<Byte>, Integer>, Map<Byte, List<Byte>>> maps = new Pair<>(dict, reverseDict);
+        return maps;
     }
 
     private List<Integer> getValues(BitSet bitSet) {
@@ -196,10 +208,10 @@ public class LZW implements CompressionAlgorithm {
 
         while (bitsUsed < bitSet.length()) {
             bitsUsed += index2 - index1;
-            BitSet temp = bitSet.get(index1, index2);
-            if (++temp_size % 2 == 0)
+            BitSet temp = bitSet.get(index1, index2 - 1);
+            if (++temp_size % Math.pow(2, bits) == 0)
                 bits++;
-            index1 = index2 + 1;
+            index1 = index2;
             index2 = index1 + bits;
 
             int value = convertBits(temp);
@@ -221,10 +233,14 @@ public class LZW implements CompressionAlgorithm {
             bits_amount += bits;
         }
 
+        int counter = 0;
+
         BitSet bitSet = new BitSet(bits_amount);
-        for (BitSet bs: bitSets)
-            for (int j = 0; j < bs.length(); j++)
-                bitSet.set(--bits_amount, bs.get(j));
+        for (int i = 0; i < data.size(); i++) {
+            for (int j = 0; j < data.get(i).getValue(); j++) {
+                bitSet.set(counter++, bitSets[i].get(j));
+            }
+        }
 
         return writeBytes("compressedLZW.data", bitSet.toByteArray());
     }

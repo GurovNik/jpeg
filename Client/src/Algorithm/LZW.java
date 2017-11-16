@@ -62,8 +62,8 @@ public class LZW {
         int cW;
         List<Byte> wordPW;
         List<Byte> wordCW;
-        List<Byte> P;
-        List<Byte> C;
+//        List<Byte> P;
+//        List<Byte> C;
 
         cW = vals.get(index);
         wordCW = dictionary.get(cW);
@@ -103,7 +103,11 @@ public class LZW {
 //            sb.append(s);
 
 //        return sb.toString();
-        return (byte[]) content.toArray();
+        byte bytes[] = new byte[content.size()];
+        for (int i = 0; i < bytes.length; i++)
+            bytes[i] = content.get(i);
+
+        return bytes;
     }
 
     public File compress(File link) {
@@ -162,9 +166,11 @@ public class LZW {
     private Map<Integer, List<Byte>> loadByteDictionary() {
         Map<Integer, List<Byte>> dict = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            byte b = (byte) i;
-            dict.put(i, b);
+            ArrayList<Byte> list = new ArrayList<>();
+            list.add((byte) i);
+            dict.put(i, list);
         }
+
         return dict;
     }
 

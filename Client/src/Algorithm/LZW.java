@@ -8,13 +8,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
-public class LZW {
+public class LZW implements CompressionAlgorithm {
     private int size;
     private final int initialDictionarySize = 256;
     private final int initialBitsAmount = (int)Math.round(Math.log(initialDictionarySize)/Math.log(2)) + 1; //9
     private int bits = initialBitsAmount;
 
-    public List<Pair<Integer, Integer>> compress(String input) {
+    public List<Pair<Integer, Integer>> compress(byte input[]) {
         List<Pair<Integer, Integer>> result = new ArrayList<>();
         Map<String, Integer> dictionary = new HashMap<>();
         boolean flag = true;
@@ -26,10 +26,10 @@ public class LZW {
         }
 
         for (int i = 0; (i < input.length()) && flag; i++) {
-            String x = "" + input.charAt(i);
+            String x = "" + input.get(i);
             //go as far as possible with familiar String
             while (dictionary.containsKey(x))
-                if (i < input.length() - 1) {
+                if (i < input.size() - 1) {
                     i++;
                     x += input.charAt(i);
                     System.out.print(x);
@@ -62,8 +62,6 @@ public class LZW {
         int cW;
         List<Byte> wordPW;
         List<Byte> wordCW;
-//        List<Byte> P;
-//        List<Byte> C;
 
         cW = vals.get(index);
         wordCW = dictionary.get(cW);
@@ -98,11 +96,6 @@ public class LZW {
             }
         }
 
-//        StringBuilder sb = new StringBuilder();
-//        for (String s: content)
-//            sb.append(s);
-
-//        return sb.toString();
         byte bytes[] = new byte[content.size()];
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = content.get(i);
@@ -238,17 +231,6 @@ public class LZW {
     }
 
     public static void main(String[] args) {
-        char aa = 0;
-        char bb = 1;
-        char cc = 2;
-        String a = "" + aa;
-        String b = "" + bb;
-        String c = "" + cc;
-        String input = "";
-        List<Pair<Integer, Integer>> lzw = compress(a + b + b + c + a + c + a + b + b + a + b + b);
-        for (int i = 0; i < lzw.size(); i++) {
-            System.out.print(lzw.get(i).getKey());
-            System.out.print(" ");
-        }
+
     }
 }

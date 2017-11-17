@@ -2,10 +2,9 @@ package Algorithm;
 
 import javafx.util.Pair;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
+
+import static Algorithm.FileProcessor.writeBytes;
 
 public class LZW implements CompressionAlgorithm {
     private int size;
@@ -114,13 +113,7 @@ public class LZW implements CompressionAlgorithm {
     public File compress(File link) {
         setUp();
 
-        byte bytes[] = null;
-        try {
-            bytes = Files.readAllBytes(link.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        byte bytes[] = Algorithm.FileProcessor.readBytes(link);
         List<Pair<Integer, Integer>> phrases = compress(bytes);
         File out = writeData(phrases);
 
@@ -130,13 +123,7 @@ public class LZW implements CompressionAlgorithm {
     public File decompress(File link) {
         setUp();
 
-        byte bytes[] = null;
-        try {
-            bytes = Files.readAllBytes(link.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        byte bytes[] = Algorithm.FileProcessor.readBytes(link);
         BitSet bitSet = createBitSet(bytes);
         List<Integer> values = getValues(bitSet, bytes.length*8);
 
@@ -249,19 +236,6 @@ public class LZW implements CompressionAlgorithm {
 //        System.out.println(" bytes written");
 
         return writeBytes("compressedLZW.data", bytes);
-    }
-
-    private File writeBytes(String filename, byte bytes[]) {
-        File link = new File(filename);
-        try {
-            FileOutputStream fos = new FileOutputStream(link);
-            fos.write(bytes);
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return link;
     }
 
     private int convertBits(BitSet bitSet) {

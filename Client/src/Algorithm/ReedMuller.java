@@ -28,7 +28,7 @@ public class ReedMuller implements EncodeAlgorithm {
         }
     }
 
-    ReedMuller() {
+    public ReedMuller() {
         hadamardMatrix(4);
         encodeMx = new int[][]
                 {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},

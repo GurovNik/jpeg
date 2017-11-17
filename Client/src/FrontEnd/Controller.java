@@ -1,9 +1,6 @@
 package FrontEnd;
 
-import Algorithm.CompressionAlgorithm;
-import Algorithm.EncodeAlgorithm;
-import Algorithm.LZW;
-import Algorithm.Repetition;
+import Algorithm.*;
 import Network.ChatClient;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -58,6 +55,7 @@ public class Controller {
     private CompressionAlgorithm huffman;
     private EncodeAlgorithm repetition3;
     private EncodeAlgorithm repetition5;
+    private EncodeAlgorithm reedMuller;
 
 
     @FXML
@@ -66,7 +64,7 @@ public class Controller {
 //        huffman = new huffman("");
         repetition3 = new Repetition(3);
         repetition5 = new Repetition(5);
-
+        reedMuller = new ReedMuller();
 
         keyHandler = new EventHandler<KeyEvent>() {
             @Override
@@ -403,8 +401,8 @@ public class Controller {
             case 1:
                 return repetition5;
             // Second method
-//            case 1:
-//                return new Algorithm.Encoding.huffman(link);
+            case 2:
+                return reedMuller;
 //                break;
 //            // Third method
 //            case 2:

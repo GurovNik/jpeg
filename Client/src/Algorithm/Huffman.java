@@ -114,7 +114,6 @@ public class Huffman {
         queue.addAll(symbols);
         return queue;
     }
-
     private static void writeString(String s) {
         try {
             try (Writer writer = new BufferedWriter(

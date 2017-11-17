@@ -44,6 +44,24 @@ public class ReedMuller implements EncodeAlgorithm {
 
     }
 
+    public File decode(File link) {
+        byte[] bytes = Algorithm.FileProcessor.readBytes(link);
+        byte[] transofrmed = bytesToBits(bytes);
+        byte[] decoded = decode(transofrmed);
+        byte result[] = decodedToResult(decoded);
+
+        return writeBytes("decodedReedmuller.data", result);
+    }
+
+    public File encode(File link) {
+        byte[] data = FileProcessor.readBytes(link);
+        byte[] transofrmed = bytesToBits(data);
+        byte decoded[] = this.encode(transofrmed);
+        byte result[] = decodedToResult(decoded);
+
+        return writeBytes("encodedMuller.data", result);
+    }
+
     private byte[] bytesToBits(byte[] data) {
         byte transofrmed[] = new byte[data.length * 8];
         for (int i = 0; i < data.length; i++) {
@@ -57,15 +75,6 @@ public class ReedMuller implements EncodeAlgorithm {
         }
 
         return transofrmed;
-    }
-
-    public File encode(File link) {
-        byte[] data = FileProcessor.readBytes(link);
-        byte[] transofrmed = bytesToBits(data);
-        byte decoded[] = this.encode(transofrmed);
-        byte result[] = decodedToResult(decoded);
-
-        return writeBytes("encodedMuller.data", result);
     }
 
     private byte[] encode(byte bytes[]) {
@@ -90,14 +99,7 @@ public class ReedMuller implements EncodeAlgorithm {
         return out;
     }
 
-    public File decode(File link) {
-        byte[] bytes = Algorithm.FileProcessor.readBytes(link);
-        byte[] transofrmed = bytesToBits(bytes);
-        byte[] decoded = decode(transofrmed);
-        byte result[] = decodedToResult(decoded);
 
-        return writeBytes("decodedReedmuller.data", result);
-    }
 
     private byte[] decodedToResult(byte[] decoded) {
         byte result[] = new byte[(int) Math.floor(decoded.length / 1.0 / 8)];
@@ -155,5 +157,13 @@ public class ReedMuller implements EncodeAlgorithm {
 
         }
         return out;
+    }
+
+    public static void main(String[] args) {
+        ReedMuller rm = new ReedMuller();
+        File f = new File("in.data");
+        f = rm.encode(f);
+        ReedMuller mr = new ReedMuller();
+        mr.decode(f);
     }
 }

@@ -2,6 +2,8 @@ package FrontEnd;
 
 import Algorithm.CompressionAlgorithm;
 import Algorithm.EncodeAlgorithm;
+import Algorithm.LZW;
+import Algorithm.Repetition;
 import Network.ChatClient;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -52,8 +54,20 @@ public class Controller {
 
     private int temporaryIndex = 0;
 
+    private CompressionAlgorithm lzw;
+    private CompressionAlgorithm huffman;
+    private EncodeAlgorithm repetition3;
+    private EncodeAlgorithm repetition5;
+
+
     @FXML
     public void initialize() {
+        lzw = new LZW();
+//        huffman = new huffman("");
+        repetition3 = new Repetition(3);
+        repetition5 = new Repetition(5);
+
+
         keyHandler = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
@@ -251,10 +265,7 @@ public class Controller {
     }
 
     private void applyMessage(Tab tab, JSONObject obj) {
-
-        //TODO :: decompress data for TASK
-        //TODO :: Перенести код выше в TASK
-        System.out.println("Я заебался :: " + obj.toJSONString());
+        System.out.println(obj.toJSONString());
 
         Task<Node> task = new Task<Node>() {
 
@@ -369,7 +380,9 @@ public class Controller {
             // First method
             default:
             case 0:
-                return new Algorithm.Huffman("asdf");
+                return huffman;
+            case 1:
+                return lzw;
             // Second method
 //            case 1:
 //                return new Algorithm.Compression.huffman(link);
@@ -386,7 +399,9 @@ public class Controller {
             // First method
             default:
             case 0:
-                return new Algorithm.Repetition(3);
+                return repetition3;
+            case 1:
+                return repetition5;
             // Second method
 //            case 1:
 //                return new Algorithm.Encoding.huffman(link);

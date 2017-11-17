@@ -1,27 +1,22 @@
 package Algorithm;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
-public class Huffman implements CompressionAlgorithm {
+public class Huffman {
 
     private String string;
     private HuffmanNode root;
     private String[][] table;
 
-    public Huffman(String s){
-        string = s;
+    public Huffman() throws FileNotFoundException {
+        Scanner scanner = new Scanner(new File("input.txt"));
+        StringBuilder s = new StringBuilder();
+        while (scanner.hasNext()) s.append(scanner.next());
+        string = s.toString();
     }
 
-    public File decompress(File link) {
-        return null;
-    }
-
-    public File compress(File link) {
-        return null;
-    }
-
-    public String decompress(String code){
+    void decodeString(String code) {
         StringBuilder result = new StringBuilder();
         StringBuilder codeword = new StringBuilder();
         int counter = 0;
@@ -35,10 +30,10 @@ public class Huffman implements CompressionAlgorithm {
             }
             counter++;
         }
-        return result.toString();
+        writeString(result.toString());
     }
 
-    public String compress(){
+    void codeString() {
         table = makeTable();
         StringBuilder result = new StringBuilder();
         for (int  i = 0; i < string.length(); i++){
@@ -52,10 +47,10 @@ public class Huffman implements CompressionAlgorithm {
             }
             result.append(code);
         }
-        return result.toString();
+        writeString(result.toString());
     }
 
-    private String[][] makeTable(){
+    String[][] makeTable() {
         PriorityQueue<HuffmanNode> queue = countFrequency();
         String[][] table = new String[queue.size()][2];
         root = makeTree(queue);
@@ -63,7 +58,7 @@ public class Huffman implements CompressionAlgorithm {
         return table;
     }
 
-    private void makeCode(String[][] table, HuffmanNode node, String currentCode){
+    void makeCode(String[][] table, HuffmanNode node, String currentCode) {
         if (node.getValue() != '\u0000'){
             int i = 0;
             for (int j = 0; j < table.length; j++){
@@ -81,7 +76,7 @@ public class Huffman implements CompressionAlgorithm {
         if (node.getRightchild() != null) makeCode(table, node.getRightchild(), currentCode + "1");
     }
 
-    private HuffmanNode makeTree(PriorityQueue<HuffmanNode> queue){
+    HuffmanNode makeTree(PriorityQueue<HuffmanNode> queue) {
         while (queue.size() > 1){
             HuffmanNode node1 = queue.poll();
             HuffmanNode node2 = queue.poll();
@@ -96,7 +91,7 @@ public class Huffman implements CompressionAlgorithm {
         return queue.peek();
     }
 
-    public PriorityQueue<HuffmanNode> countFrequency(){
+    PriorityQueue<HuffmanNode> countFrequency() {
         PriorityQueue<HuffmanNode> queue = new PriorityQueue<>(frequencyComparator);
         LinkedList<HuffmanNode> symbols = new LinkedList<>();
         for (int i = 0; i < string.length(); i++){
@@ -118,6 +113,17 @@ public class Huffman implements CompressionAlgorithm {
         }
         queue.addAll(symbols);
         return queue;
+    }
+
+    private static void writeString(String s) {
+        try {
+            try (Writer writer = new BufferedWriter(
+                    new OutputStreamWriter(
+                            new FileOutputStream("output.txt"), "ascii"))) {
+                writer.write(s);
+            }
+        } catch (IOException ex) {
+        }
     }
 
     public static Comparator<HuffmanNode> frequencyComparator = new Comparator<HuffmanNode>() {

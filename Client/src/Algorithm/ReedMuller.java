@@ -1,11 +1,6 @@
 package Algorithm;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static Algorithm.FileProcessor.writeBytes;
 
@@ -56,16 +51,33 @@ public class ReedMuller implements EncodeAlgorithm {
     public File encode(File link) {
         byte[] data = FileProcessor.readBytes(link);
         byte[] transofrmed = bytesToBits(data);
-        byte decoded[] = this.encode(transofrmed);
-        byte result[] = decodedToResult(decoded);
+        byte decoded[] = encode(transofrmed);
+        byte result[] = encodedToResult(decoded);
+
 
         return writeBytes("encodedMuller.data", result);
     }
 
+    private byte[] encodedToResult(byte[] bytes) {
+        byte result[] = new byte[(int) Math.ceil(bytes.length / 1.0 / 8)];
+
+        for (int i = 0; i < bytes.length; i += 8) {
+            for (int j = 1; j < 8; j++) {
+                result[i / 8] += bytes[i + j] * Math.pow(2, 7 - j);
+            }
+            if (bytes[i] == 1) {
+                result[i / 8] *= -1;
+            }
+        }
+
+        return result;
+    }
+
     private byte[] bytesToBits(byte[] data) {
+        int b;
         byte transofrmed[] = new byte[data.length * 8];
         for (int i = 0; i < data.length; i++) {
-            int b = data[i];
+            b = data[i];
             for (int j = 0; j < 7; j++) {
                 transofrmed[8 * i + 7 - j] = (byte) (((Math.abs(b)) >> j) % 2);
             }
@@ -98,7 +110,6 @@ public class ReedMuller implements EncodeAlgorithm {
 
         return out;
     }
-
 
 
     private byte[] decodedToResult(byte[] decoded) {

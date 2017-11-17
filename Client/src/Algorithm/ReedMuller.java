@@ -16,7 +16,7 @@ public class ReedMuller implements EncodeAlgorithm {
     private int MX[][];
     private int encodeMx[][];
 
-    private void HadamardMatrix(int in) {
+    private void hadamardMatrix(int in) {
         MX = new int[(int) Math.pow(2, in)][(int) Math.pow(2, in)];
         MX[0][0] = 1;
         MX[0][1] = 1;
@@ -31,17 +31,10 @@ public class ReedMuller implements EncodeAlgorithm {
                 }
             }
         }
-        for (int i = 0; i < MX.length; i++) {
-            for (int j = 0; j < MX.length; j++) {
-
-            }
-
-        }
-
     }
 
     ReedMuller() {
-        HadamardMatrix(4);
+        hadamardMatrix(4);
         encodeMx = new int[][]
                 {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                         {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -51,35 +44,28 @@ public class ReedMuller implements EncodeAlgorithm {
 
     }
 
-    public void encode(String pathFrom, String pathTo) {
-        try {
-            byte[] data = Files.readAllBytes(Paths.get(pathFrom));
-            byte transofrmed[] = new byte[data.length * 8];
-            for (int i = 0; i < data.length; i++) {
-                int b = data[i];
-                for (int j = 0; j < 7; j++) {
-                    transofrmed[8 * i + 7 - j] = (byte) (((Math.abs(b)) >> j) % 2);
-                }
-                if (b < 0) {
-                    transofrmed[8 * i] = 1;
-                }
+    private byte[] bytesToBits(byte[] data) {
+        byte transofrmed[] = new byte[data.length * 8];
+        for (int i = 0; i < data.length; i++) {
+            int b = data[i];
+            for (int j = 0; j < 7; j++) {
+                transofrmed[8 * i + 7 - j] = (byte) (((Math.abs(b)) >> j) % 2);
             }
-            byte ar2[] = this.encode(transofrmed);
-            byte ar3[] = new byte[(int) Math.ceil(ar2.length / 1.0 / 8)];
-            for (int i = 0; i < ar2.length; i += 8) {
-                for (int j = 1; j < 8; j++) {
-                    ar3[i / 8] += ar2[i + j] * Math.pow(2, 7 - j);
-                }
-                if (ar2[i] == 1) {
-                    ar3[i / 8] *= -1;
-                }
+            if (b < 0) {
+                transofrmed[8 * i] = 1;
             }
-            FileOutputStream fos = new FileOutputStream(pathTo);
-            fos.write(ar3);
-            fos.close();
-        } catch (Exception e) {
-            System.out.print("Failure of encoding\n" + e.getMessage() + "\n");
         }
+
+        return transofrmed;
+    }
+
+    public File encode(File link) {
+        byte[] data = FileProcessor.readBytes(link);
+        byte[] transofrmed = bytesToBits(data);
+        byte decoded[] = this.encode(transofrmed);
+        byte result[] = decodedToResult(decoded);
+
+        return writeBytes("encodedMuller.data", result);
     }
 
     private byte[] encode(byte bytes[]) {
@@ -106,18 +92,14 @@ public class ReedMuller implements EncodeAlgorithm {
 
     public File decode(File link) {
         byte[] bytes = Algorithm.FileProcessor.readBytes(link);
-        byte[] transofrmation = new byte[bytes.length * 8];
-        for (int i = 0; i < bytes.length; i++) {
-            int b = bytes[i];
-            for (int j = 0; j < 7; j++) {
-                bytes[8 * i + 7 - j] = (byte) (((Math.abs(b)) >> j) % 2);
-            }
-            if (b < 0) {
-                bytes[8 * i] = 1;
-            }
-        }
+        byte[] transofrmed = bytesToBits(bytes);
+        byte[] decoded = decode(transofrmed);
+        byte result[] = decodedToResult(decoded);
 
-        byte[] decoded = decode(transofrmation);
+        return writeBytes("decodedReedmuller.data", result);
+    }
+
+    private byte[] decodedToResult(byte[] decoded) {
         byte result[] = new byte[(int) Math.floor(decoded.length / 1.0 / 8)];
         for (int i = 0; i < Math.floor(result.length / 1.0 / 8) * 8; i += 8) {
             for (int j = 1; j < 8; j++) {
@@ -127,8 +109,7 @@ public class ReedMuller implements EncodeAlgorithm {
                 result[i / 8] *= -1;
             }
         }
-
-        return writeBytes("decodedReedmuller.data", result);
+        return result;
     }
 
     private byte[] decode(byte bytes[]) {

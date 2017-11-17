@@ -51,9 +51,8 @@ public class ReedMuller implements EncodeAlgorithm {
     public File encode(File link) {
         byte[] data = FileProcessor.readBytes(link);
         byte[] transofrmed = bytesToBits(data);
-        byte decoded[] = encode(transofrmed);
-        byte result[] = encodedToResult(decoded);
-
+        byte encoded[] = encode(transofrmed);
+        byte result[] = encodedToResult(encoded);
 
         return writeBytes("encodedMuller.data", result);
     }
@@ -114,7 +113,7 @@ public class ReedMuller implements EncodeAlgorithm {
 
     private byte[] decodedToResult(byte[] decoded) {
         byte result[] = new byte[(int) Math.floor(decoded.length / 1.0 / 8)];
-        for (int i = 0; i < Math.floor(result.length / 1.0 / 8) * 8; i += 8) {
+        for (int i = 0; i < Math.floor(decoded.length / 1.0 / 8) * 8; i += 8) {
             for (int j = 1; j < 8; j++) {
                 result[i / 8] += decoded[i + j] * Math.pow(2, 7 - j);
             }
@@ -122,6 +121,7 @@ public class ReedMuller implements EncodeAlgorithm {
                 result[i / 8] *= -1;
             }
         }
+
         return result;
     }
 
@@ -171,10 +171,19 @@ public class ReedMuller implements EncodeAlgorithm {
     }
 
     public static void main(String[] args) {
+//        ReedMuller rm = new ReedMuller();
+//        File f = new File("in.data");
+//        f = rm.encode(f);
+//        ReedMuller mr = new ReedMuller();
+//        mr.decode(f);
+        LZW lzw = new LZW();
         ReedMuller rm = new ReedMuller();
-        File f = new File("in.data");
-        f = rm.encode(f);
+        File f = lzw.compress(new File("img.jpg"));
+        File g = rm.encode(f);
+
+        LZW lzw1 = new LZW();
         ReedMuller mr = new ReedMuller();
-        mr.decode(f);
+        File k = mr.decode(g);
+        lzw1.decompress(f);
     }
 }

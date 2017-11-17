@@ -12,8 +12,28 @@ public class LZW implements CompressionAlgorithm {
     private final int initialDictionarySize = 256;
     private final int initialBitsAmount = (int)Math.round(Math.log(initialDictionarySize)/Math.log(2)) + 1; //9
 
-    public LZW() {
+    public LZW() {}
+
+    public File compress(File link) {
         setUp();
+
+        byte bytes[] = Algorithm.FileProcessor.readBytes(link);
+        List<Pair<Integer, Integer>> phrases = compress(bytes);
+        File out = writeData(phrases);
+
+        return out;
+    }
+
+    public File decompress(File link) {
+        setUp();
+
+        byte bytes[] = Algorithm.FileProcessor.readBytes(link);
+        BitSet bitSet = createBitSet(bytes);
+        List<Integer> values = getValues(bitSet, bytes.length*8);
+
+        byte data[] = decompress(values);
+
+        return writeBytes("decompressedLZW.data", data);
     }
 
     private void setUp() {
@@ -110,28 +130,6 @@ public class LZW implements CompressionAlgorithm {
         return bytes;
     }
 
-    public File compress(File link) {
-        setUp();
-
-        byte bytes[] = Algorithm.FileProcessor.readBytes(link);
-        List<Pair<Integer, Integer>> phrases = compress(bytes);
-        File out = writeData(phrases);
-
-        return out;
-    }
-
-    public File decompress(File link) {
-        setUp();
-
-        byte bytes[] = Algorithm.FileProcessor.readBytes(link);
-        BitSet bitSet = createBitSet(bytes);
-        List<Integer> values = getValues(bitSet, bytes.length*8);
-
-        byte data[] = decompress(values);
-
-        return writeBytes("decompressedLZW.data", data);
-    }
-
     private BitSet createBitSet(int value, int bits) {
         BitSet bitSet = new BitSet(bits);
         for (int i = 0; i < bits; i++) {
@@ -142,10 +140,6 @@ public class LZW implements CompressionAlgorithm {
     }
 
     private BitSet createBitSet(byte[] bytes) {
-//        for (int i = 0; i < bytes.length; i++)
-//            System.out.print(bytes[i] + " ");
-//        System.out.println(" :: bytes decompressed");
-
         BitSet bitSet = new BitSet(bytes.length * 8);
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < 8; j++) {
@@ -198,10 +192,6 @@ public class LZW implements CompressionAlgorithm {
             values.add(value);
         }
 
-//        for (int i = 0; i < values.size(); i++)
-//            System.out.printf("%d ", values.get(i));
-//        System.out.println(" values decompressed");
-
         return values;
     }
 
@@ -209,10 +199,6 @@ public class LZW implements CompressionAlgorithm {
         BitSet bitSets[] = new BitSet[data.size()];
         int index = 0;
         int bits_amount = 0;
-
-//        for (int i = 0; i < data.size(); i++)
-//            System.out.printf("%d ", data.get(i).getKey());
-//        System.out.println(" :: values written");
 
         for (Pair p: data) {
             int value = p.getKey() != null ? (int)p.getKey(): 0;
@@ -231,10 +217,6 @@ public class LZW implements CompressionAlgorithm {
         }
 
         byte bytes[] = bitSet.toByteArray();
-//        for (int i = 0; i < bytes.length; i++)
-//            System.out.printf("%d ", bytes[i]);
-//        System.out.println(" bytes written");
-
         return writeBytes("compressedLZW.data", bytes);
     }
 
@@ -249,11 +231,10 @@ public class LZW implements CompressionAlgorithm {
 
     public static void main(String[] args) {
         LZW lzw = new LZW();
-        File in = new File("large.jpg");
+        File in = new File("input.txt");
         File compressed = lzw.compress(in);
 
         LZW lzw1 = new LZW();
         File out = lzw1.decompress(compressed);
-
     }
 }

@@ -5,10 +5,11 @@ import java.util.*;
 
 public class Huffman implements CompressionAlgorithm {
 
-    private String string;
-    private HuffmanNode root;
-    private String[][] table;
+    private String string;                                 // The string we are working with
+    private HuffmanNode root;                              // The root of the huffman tree
+    private String[][] table;                              // A table with symbols and their codewords
 
+    // The constructor reads file and makes a string to work with
     public Huffman() throws FileNotFoundException {
         byte mas[] = FileProcessor.readBytes(new File("input"));
         char arr[] = new char[mas.length];
@@ -18,16 +19,13 @@ public class Huffman implements CompressionAlgorithm {
         string = new String(arr);
     }
 
-    public File decode(File input) {
-
-        //This is how to read chars from File.
-        //==============================================//
+    // Decompresses a file and returns a result file
+    public File decompress(File input) {
         byte inp[] = FileProcessor.readBytes(input);
         char arr[] = new char[inp.length];
         for (int i = 0; i < inp.length; i++) {
             arr[i] = (char) inp[i];
         }
-        //=============================================//
         String code = new String(arr);
         StringBuilder result = new StringBuilder();
         StringBuilder codeword = new StringBuilder();
@@ -43,13 +41,24 @@ public class Huffman implements CompressionAlgorithm {
             ++counter;
         }
         System.out.println("DECODING DONE!");
-
-        byte outs[] = new byte[ ??];
-
-        return FileProcessor.writeBytes("huffmanCompressed.data", out);
+        String s = result.toString();
+        s = s.replace(Character.toString(s.charAt(0)), "");
+        s = s.replace(Character.toString(s.charAt(s.length() - 1)), "");
+        byte outs[] = new byte[s.length()];
+        for (int i = 0; i < s.length(); i++) {
+            outs[i] = (byte) s.charAt(i);
+        }
+        return FileProcessor.writeBytes("huffmanCompressed.data", outs);
     }
 
-    public File enocode(File input) {
+    // Compresses an input file and returns a result file
+    public File compress(File input) {
+        byte inp[] = FileProcessor.readBytes(input);
+        char arr[] = new char[inp.length];
+        for (int i = 0; i < inp.length; i++) {
+            arr[i] = (char) inp[i];
+        }
+        string = arr.toString();
         table = makeTable();
         StringBuilder result = new StringBuilder();
         for (int  i = 0; i < string.length(); i++){
@@ -63,12 +72,17 @@ public class Huffman implements CompressionAlgorithm {
             }
             result.append(code);
         }
-
-
-        /*Return file which was written*/
-        return null;
+        String s = result.toString();
+        s = s.replace(Character.toString(s.charAt(0)), "");
+        s = s.replace(Character.toString(s.charAt(s.length() - 1)), "");
+        byte outs[] = new byte[s.length()];
+        for (int i = 0; i < s.length(); i++) {
+            outs[i] = (byte) s.charAt(i);
+        }
+        return FileProcessor.writeBytes("huffmanCompressed.data", outs);
     }
 
+    // Makes a table with symbols and their codewords
     String[][] makeTable() {
         PriorityQueue<HuffmanNode> queue = countFrequency();
         String[][] table = new String[queue.size()][2];
@@ -77,6 +91,7 @@ public class Huffman implements CompressionAlgorithm {
         return table;
     }
 
+    // Creates codewords for each symbol in the huffman tree
     void makeCode(String[][] table, HuffmanNode node, String currentCode) {
         if (node.getValue() != '\u0000'){
             int i = 0;
@@ -95,6 +110,7 @@ public class Huffman implements CompressionAlgorithm {
         if (node.getRightchild() != null) makeCode(table, node.getRightchild(), currentCode + "1");
     }
 
+    // Makes a tree of symbols with the most frequent in the root
     HuffmanNode makeTree(PriorityQueue<HuffmanNode> queue) {
         while (queue.size() > 1){
             HuffmanNode node1 = queue.poll();
@@ -110,6 +126,8 @@ public class Huffman implements CompressionAlgorithm {
         return queue.peek();
     }
 
+    // Counts the frequency of each symbol in the string and puts each symbol into the
+    // priority queue, with the least frequent in the beginning
     PriorityQueue<HuffmanNode> countFrequency() {
         PriorityQueue<HuffmanNode> queue = new PriorityQueue<>(frequencyComparator);
         LinkedList<HuffmanNode> symbols = new LinkedList<>();
@@ -134,21 +152,13 @@ public class Huffman implements CompressionAlgorithm {
         return queue;
     }
 
-    private static void writeString(String s) {
-        byte mas[] = new byte[s.length()];
-        for (int i = 0; i < s.length(); i++) {
-            mas[i] = (byte) s.charAt(i);
-        }
-        FileProcessor.writeBytes("output", mas);
-    }
-
     public static void main(String[] args) {
         try {
             Huffman huf = new Huffman();
             System.out.println("CODING!");
-            huf.codeString();
+            File f = huf.compress(new File("input"));
             System.out.println("DECODING!");
-            huf.decodeString(huf.getString());
+            huf.decompress(f);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -159,6 +169,7 @@ public class Huffman implements CompressionAlgorithm {
         return string;
     }
 
+    // A comparator for the priority queue based on frequency, the least frequent is the most prior
     public static Comparator<HuffmanNode> frequencyComparator = new Comparator<HuffmanNode>() {
         @Override
         public int compare(HuffmanNode o1, HuffmanNode o2) {

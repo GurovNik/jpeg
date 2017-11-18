@@ -1,12 +1,14 @@
 /**
  * Created by Nikita on 28/10/17.
  */
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -17,9 +19,10 @@ public class Algorithm {
     private BufferedImage image = null;
     private int height;
     private int width;
-    private int LIMIT=3500000;
-    private int LOWLIMIT=500000;
+    private int LIMIT = 3500000;
+    private int LOWLIMIT = 500000;
     private int SIZE;
+    private File outputFile;
     /**
      * CREATE
      */
@@ -60,17 +63,20 @@ public class Algorithm {
         }
 
     }
+
     public void runCompressing() throws IOException {
         preProcessing();
     }
-    public void runDecompressing() throws IOException {
+
+    public File runDecompressing() throws IOException {
         decomposition();
+        return outputFile;
     }
 
     private void preProcessing() throws IOException {
         height = image.getHeight();
         width = image.getWidth();
-        SIZE=height*width;
+        SIZE = height * width;
         // make matrix of pixels
         Color[][] matrixData = new Color[height][width];
         for (int i = 0; i < height; i++) {
@@ -101,7 +107,7 @@ public class Algorithm {
         for (int i = 0; i < thisHeight; i++) {
             for (int j = 0; j < thisWidth; j++) {
                 double[][] bufferY = new double[8][8];
-                double[][] bufferCb = new double[8][8];
+                double[][] bufferCb = new double[8][8];                         //todo вынести иниц
                 double[][] bufferCr = new double[8][8];
                 for (int k = 0; k < 8; k++) {
                     for (int l = 0; l < 8; l++) {
@@ -121,6 +127,13 @@ public class Algorithm {
 
     private void compress(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) throws IOException {
         // сделал преобразование DCT
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
         for (int k = 0; k < height / 8; k++) {
             for (int l = 0; l < width / 8; l++) {
                 RealMatrix Ybuf = U.multiply(Y[k][l]);
@@ -129,6 +142,14 @@ public class Algorithm {
                 RealMatrix Yresult = Ybuf.multiply(Utransposed);
                 RealMatrix Cbresult = Cbbuf.multiply(Utransposed);
                 RealMatrix Crresult = Crbuf.multiply(Utransposed);
+                if (k == 0 && l == 0) {
+                    for (int i = 0; i < 8; i++) {
+                        for (int j = 0; j < 8; j++) {
+                            System.out.print((int) Yresult.getEntry(i, j) + " ");
+                        }
+                        System.out.println();
+                    }
+                }
                 for (int i = 0; i < 8; i++) {
                     for (int j = 0; j < 8; j++) {
                         int valueY = (int) (Math.round(Yresult.getEntry(j, i) * 1000.0) / 1000.0 / Z.getEntry(j, i));
@@ -144,12 +165,26 @@ public class Algorithm {
                 Cr[k][l] = Crresult;        // result of compression
             }
         }
-        universalRestructureToFile(Y,Cb,Cr);
+        System.out.println();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+            }
+            System.out.println();
+        }
+
+        universalRestructureToFile(Y, Cb, Cr);
     }
 
     //округлил до 3 после0
     public void decompress(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) throws IOException {
-
+        System.out.println();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+            }
+            System.out.println();
+        }
         for (int k = 0; k < height / 8; k++) {
             for (int l = 0; l < width / 8; l++) {
 
@@ -160,12 +195,37 @@ public class Algorithm {
                         Cr[k][l].setEntry(i, j, Cr[k][l].getEntry(i, j) * Z.getEntry(i, j));
                     }
                 }
+                if (k == 0 && l == 0) {
+                    System.out.println();
+                    for (int i = 0; i < 8; i++) {
+                        for (int j = 0; j < 8; j++) {
+                            System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+                        }
+                        System.out.println();
+                    }
+                }
                 RealMatrix bufferY = Utransposed.multiply(Y[k][l]);
                 RealMatrix bufferCb = Utransposed.multiply(Cb[k][l]);
                 RealMatrix bufferCr = Utransposed.multiply(Cr[k][l]);
                 Y[k][l] = bufferY.multiply(U);
                 Cb[k][l] = bufferCb.multiply(U);
                 Cr[k][l] = bufferCr.multiply(U);
+                if (k == 0 && l == 0) {
+                    System.out.println();
+                    for (int i = 0; i < 8; i++) {
+                        for (int j = 0; j < 8; j++) {
+                            System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+                        }
+                        System.out.println();
+                    }
+                }
+            }
+            System.out.println();
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+                }
+                System.out.println();
             }
         }
         int[][] Ysourse = new int[height][width];
@@ -209,9 +269,12 @@ public class Algorithm {
         }
         File file = new File("/Users/Nikita/IdeaProjects/JPEG/outFiles");
         File[] files = file.listFiles();
-        int n=10000+files.length;
-        FileOutputStream name = new FileOutputStream(new File("/Users/Nikita/IdeaProjects/JPEG/outFiles/" + "IMG_"+String.valueOf(n) +".jpeg"));
+        int n = 10000 + files.length;
+        File returnFile=new File("/Users/Nikita/IdeaProjects/JPEG/outFiles/" + "IMG_" + String.valueOf(n) + ".jpeg");
+        FileOutputStream name = new FileOutputStream(returnFile);
         ImageIO.write(bufferedImage, "jpeg", name);
+
+       outputFile=returnFile;
     }
 
     private RealMatrix toYCbCr(Color pixel) {
@@ -236,15 +299,16 @@ public class Algorithm {
         RealMatrix resmatrix = matrixToRGB.multiply(YCrCb);
         return resmatrix;
     }
-    public void universalRestructureToFile(RealMatrix[][] Y,RealMatrix[][] Cb, RealMatrix[][] Cr){
+
+    public void universalRestructureToFile(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) {
         try {
-            try (FileWriter writer = new FileWriter("data.txt",false )) {
+            try (FileWriter writer = new FileWriter("data.txt", false)) {
                 writer.write(String.valueOf(height));
-                writer.write("\n"+String.valueOf(width)+"\n");
+                writer.write("\n" + String.valueOf(width) + "\n");
 
 
-                for (int i = 0; i < height/8; i++) {
-                    for (int j = 0; j < width/8; j++) {
+                for (int i = 0; i < height / 8; i++) {
+                    for (int j = 0; j < width / 8; j++) {
                         ArrayList<Integer> hParam = new ArrayList<>();
                         ArrayList<Integer> wParam = new ArrayList<>();
                         int rowRes = 0;
@@ -285,30 +349,29 @@ public class Algorithm {
                         int q = 0;
                         if (SIZE > LIMIT) {
                             //if (wParam.size() == hParam.size()) q = hParam.size();
-                            q = Math.min(rowRes, colRes)+1;
-                        }
-                        else {
+                            q = Math.min(rowRes, colRes) + 1;
+                        } else {
                             if (wParam.size() == hParam.size()) q = hParam.size();
                             else
                                 q = Math.max(hParam.size(), wParam.size());
                             //if(size<LIMIT2) q=Math.max(rowRes,colRes)+1;
                         }
-                        if(q>7) q=7;
-                            //      if(wParam.size()==2 && hParam.size()==1) q=2;
-                           // q=5;
+                        if (q > 7) q = 7;
+                        //      if(wParam.size()==2 && hParam.size()==1) q=2;
+                        // q=5;
 //                            if (i==3 && j==55)
 //                                System.out.println();
-                            writer.write(String.valueOf(q) + " ");
-                            for (int k = 0; k < q; k++) {
-                                for (int l = 0; l < q; l++) {
+                        writer.write(String.valueOf(q) + " ");
+                        for (int k = 0; k < q; k++) {
+                            for (int l = 0; l < q; l++) {
 
-                                    writer.write(String.valueOf((int) Y[i][j].getEntry(k, l)) + " ");
-                                }
+                                writer.write(String.valueOf((int) Y[i][j].getEntry(k, l)) + " ");
                             }
+                        }
 
                     }
                 }
-                if (SIZE>LOWLIMIT) {
+                if (SIZE > LOWLIMIT) {
                     writer.write("\n");
                     for (int i = 0; i < height / 8; i++) {
                         for (int j = 0; j < width / 8; j++) {
@@ -316,10 +379,9 @@ public class Algorithm {
                             writer.write(String.valueOf((int) Cr[i][j].getEntry(0, 0)) + " ");
                         }
                     }
-                }
-                else {
-                    for (int i = 0; i < height/8; i++) {
-                        for (int j = 0; j < width/8; j++) {
+                } else {
+                    for (int i = 0; i < height / 8; i++) {
+                        for (int j = 0; j < width / 8; j++) {
                             for (int k = 0; k < 2; k++) {
                                 for (int l = 0; l < 2; l++) {
                                     writer.write(String.valueOf((int) Cb[i][j].getEntry(k, l)) + " ");
@@ -327,8 +389,8 @@ public class Algorithm {
                             }
                         }
                     }
-                    for (int i = 0; i < height/8; i++) {
-                        for (int j = 0; j < width/8; j++) {
+                    for (int i = 0; i < height / 8; i++) {
+                        for (int j = 0; j < width / 8; j++) {
                             for (int k = 0; k < 2; k++) {
                                 for (int l = 0; l < 2; l++) {
                                     writer.write(String.valueOf((int) Cr[i][j].getEntry(k, l)) + " ");
@@ -343,18 +405,19 @@ public class Algorithm {
             e.printStackTrace();
         }
     }
-    public void restructureToFile(RealMatrix[][] Y,RealMatrix[][] Cb, RealMatrix[][] Cr) {
+
+    public void restructureToFile(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) {
         try {
-            try (FileWriter writer = new FileWriter("data.txt",false )) {
+            try (FileWriter writer = new FileWriter("data.txt", false)) {
                 writer.write(String.valueOf(height));
-                writer.write("\n"+String.valueOf(width)+"\n");
-                for (int i = 0; i < height/8; i++) {
-                    for (int j = 0; j < width/8; j++) {
-                        for (int k = 0; k <5 ; k++) {
+                writer.write("\n" + String.valueOf(width) + "\n");
+                for (int i = 0; i < height / 8; i++) {
+                    for (int j = 0; j < width / 8; j++) {
+                        for (int k = 0; k < 5; k++) {
                             for (int l = 0; l < 5; l++) {
-                                writer.write(String.valueOf((int)Y[i][j].getEntry(k,l))+" ");
-                                writer.write(String.valueOf((int)Cb[i][j].getEntry(k,l))+" ");
-                                writer.write(String.valueOf((int)Cr[i][j].getEntry(k,l))+" ");
+                                writer.write(String.valueOf((int) Y[i][j].getEntry(k, l)) + " ");
+                                writer.write(String.valueOf((int) Cb[i][j].getEntry(k, l)) + " ");
+                                writer.write(String.valueOf((int) Cr[i][j].getEntry(k, l)) + " ");
                             }
                         }
                     }
@@ -365,6 +428,7 @@ public class Algorithm {
             e.printStackTrace();
         }
     }
+
     public void decomposition() throws IOException {
         Scanner scan = null;
         try {
@@ -372,14 +436,15 @@ public class Algorithm {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        int y=Integer.parseInt(scan.nextLine());
-        int x=Integer.parseInt(scan.nextLine());
-        int size=x*y;
-        height=y;
-        width=x;
-         universalDecompositionFromFile();
+        int y = Integer.parseInt(scan.nextLine());
+        int x = Integer.parseInt(scan.nextLine());
+        int size = x * y;
+        height = y;
+        width = x;
+        universalDecompositionFromFile();
     }
-    public void  universalDecompositionFromFile() throws IOException {
+
+    public void universalDecompositionFromFile() throws IOException {
 
         Scanner scan = null;
         try {
@@ -387,37 +452,37 @@ public class Algorithm {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        int y=Integer.parseInt(scan.nextLine());
-        int x=Integer.parseInt(scan.nextLine());
-        int size=x*y;
-        RealMatrix[][] decodedMatrixY=new RealMatrix[y/8][x/8];
-        RealMatrix[][] decodedMatrixCb=new RealMatrix[y/8][x/8];
-        RealMatrix[][] decodedMatrixCr=new RealMatrix[y/8][x/8];
-        double[][] zeroArray= new double[8][8];
+        int y = Integer.parseInt(scan.nextLine());
+        int x = Integer.parseInt(scan.nextLine());
+        int size = x * y;
+        RealMatrix[][] decodedMatrixY = new RealMatrix[y / 8][x / 8];
+        RealMatrix[][] decodedMatrixCb = new RealMatrix[y / 8][x / 8];
+        RealMatrix[][] decodedMatrixCr = new RealMatrix[y / 8][x / 8];
+        double[][] zeroArray = new double[8][8];
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                zeroArray[i][j]=0;
+                zeroArray[i][j] = 0;
             }
         }
-        for (int i = 0; i < y/8; i++) {
-            for (int j = 0; j < x/8; j++) {
-                decodedMatrixY[i][j]= MatrixUtils.createRealMatrix(zeroArray);
-                decodedMatrixCb[i][j]= MatrixUtils.createRealMatrix(zeroArray);
-                decodedMatrixCr[i][j]= MatrixUtils.createRealMatrix(zeroArray);
+        for (int i = 0; i < y / 8; i++) {
+            for (int j = 0; j < x / 8; j++) {
+                decodedMatrixY[i][j] = MatrixUtils.createRealMatrix(zeroArray);
+                decodedMatrixCb[i][j] = MatrixUtils.createRealMatrix(zeroArray);
+                decodedMatrixCr[i][j] = MatrixUtils.createRealMatrix(zeroArray);
             }
         }
 //---------------------------------------
-        for (int i = 0; i < y/8; i++) {
-            for (int j = 0; j < x/8; j++) {
-                int space=scan.nextInt();
-                for (int k = 0; k <space ; k++) {
+        for (int i = 0; i < y / 8; i++) {
+            for (int j = 0; j < x / 8; j++) {
+                int space = scan.nextInt();
+                for (int k = 0; k < space; k++) {
                     for (int l = 0; l < space; l++) {
-                        decodedMatrixY[i][j].setEntry(k,l,scan.nextDouble());
+                        decodedMatrixY[i][j].setEntry(k, l, scan.nextDouble());
                     }
                 }
             }
         }
-        if (size>LOWLIMIT) {
+        if (size > LOWLIMIT) {
             for (int i = 0; i < y / 8; i++) {
                 for (int j = 0; j < x / 8; j++) {
                     decodedMatrixCb[i][j].setEntry(0, 0, scan.nextDouble());
@@ -426,22 +491,21 @@ public class Algorithm {
 
                 }
             }
-        }
-        else{
-            for (int i = 0; i < y/8; i++) {
-                for (int j = 0; j < x/8; j++) {
+        } else {
+            for (int i = 0; i < y / 8; i++) {
+                for (int j = 0; j < x / 8; j++) {
                     for (int k = 0; k < 2; k++) {
                         for (int l = 0; l < 2; l++) {
-                           decodedMatrixCb[i][j].setEntry(k,l,scan.nextDouble());
+                            decodedMatrixCb[i][j].setEntry(k, l, scan.nextDouble());
                         }
                     }
                 }
             }
-            for (int i = 0; i < height/8; i++) {
-                for (int j = 0; j < width/8; j++) {
+            for (int i = 0; i < height / 8; i++) {
+                for (int j = 0; j < width / 8; j++) {
                     for (int k = 0; k < 2; k++) {
                         for (int l = 0; l < 2; l++) {
-                            decodedMatrixCr[i][j].setEntry(k,l,scan.nextDouble());
+                            decodedMatrixCr[i][j].setEntry(k, l, scan.nextDouble());
                         }
                     }
                 }
@@ -449,7 +513,7 @@ public class Algorithm {
 
 
         }
-        decompress(decodedMatrixY,decodedMatrixCb,decodedMatrixCr);
+        decompress(decodedMatrixY, decodedMatrixCb, decodedMatrixCr);
     }
 
     public void decompositionFromFile() throws IOException {
@@ -459,34 +523,34 @@ public class Algorithm {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        int y=Integer.parseInt(scan.nextLine());
-        int x=Integer.parseInt(scan.nextLine());
-        RealMatrix[][] decodedMatrixY=new RealMatrix[y/8][x/8];
-        RealMatrix[][] decodedMatrixCb=new RealMatrix[y/8][x/8];
-        RealMatrix[][] decodedMatrixCr=new RealMatrix[y/8][x/8];
-        for (int i = 0; i < y/8; i++) {
-            for (int j = 0; j < x/8; j++) {
+        int y = Integer.parseInt(scan.nextLine());
+        int x = Integer.parseInt(scan.nextLine());
+        RealMatrix[][] decodedMatrixY = new RealMatrix[y / 8][x / 8];
+        RealMatrix[][] decodedMatrixCb = new RealMatrix[y / 8][x / 8];
+        RealMatrix[][] decodedMatrixCr = new RealMatrix[y / 8][x / 8];
+        for (int i = 0; i < y / 8; i++) {
+            for (int j = 0; j < x / 8; j++) {
                 RealMatrix blockY;
                 RealMatrix blockCb;
                 RealMatrix blockCr;
-                double[][] bufferY=new double[8][8];
-                double[][] bufferCb=new double[8][8];
-                double[][] bufferCr=new double[8][8];
-                for (int k = 0; k <5 ; k++) {
+                double[][] bufferY = new double[8][8];
+                double[][] bufferCb = new double[8][8];
+                double[][] bufferCr = new double[8][8];
+                for (int k = 0; k < 5; k++) {
                     for (int l = 0; l < 5; l++) {
-                        bufferY[k][l]=scan.nextDouble();
-                        bufferCb[k][l]=scan.nextDouble();
-                        bufferCr[k][l]=scan.nextDouble();
+                        bufferY[k][l] = scan.nextDouble();
+                        bufferCb[k][l] = scan.nextDouble();
+                        bufferCr[k][l] = scan.nextDouble();
                     }
                 }
-                blockY=MatrixUtils.createRealMatrix(bufferY);
-                blockCb=MatrixUtils.createRealMatrix(bufferCb);
-                blockCr=MatrixUtils.createRealMatrix(bufferCr);
-                decodedMatrixY[i][j]=blockY;
-                decodedMatrixCb[i][j]=blockCb;
-                decodedMatrixCr[i][j]=blockCr;
+                blockY = MatrixUtils.createRealMatrix(bufferY);
+                blockCb = MatrixUtils.createRealMatrix(bufferCb);
+                blockCr = MatrixUtils.createRealMatrix(bufferCr);
+                decodedMatrixY[i][j] = blockY;
+                decodedMatrixCb[i][j] = blockCb;
+                decodedMatrixCr[i][j] = blockCr;
             }
         }
-        decompress(decodedMatrixY,decodedMatrixCb,decodedMatrixCr);
+        decompress(decodedMatrixY, decodedMatrixCb, decodedMatrixCr);
     }
 }

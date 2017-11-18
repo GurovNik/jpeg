@@ -53,19 +53,53 @@ public class Controller {
 
     private CompressionAlgorithm lzw;
     private CompressionAlgorithm huffman;
+    private CompressionAlgorithm jpeg;
     private EncodeAlgorithm repetition3;
     private EncodeAlgorithm repetition5;
     private EncodeAlgorithm reedMuller;
+    private EncodeAlgorithm hamming;
 
 
     @FXML
     public void initialize() {
         lzw = new LZW();
-//        huffman = new huffman("");
+        huffman = new Huffman();
         repetition3 = new Repetition(3);
         repetition5 = new Repetition(5);
         reedMuller = new ReedMuller();
+        hamming = new Hamming();
+//        jpeg = new JPEG();
 
+        tabMap = new HashMap<>();
+
+
+
+
+
+
+
+        setUpGUIItems();
+    }
+
+    /**
+     * Set up specific items in GUI and customize event handlers
+     */
+    private void setUpGUIItems() {
+        /* It is possible to close any tab */
+        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
+
+        /* Creation of ToggleGroups */
+        compression = new ToggleGroup();
+        encoding = new ToggleGroup();
+
+        /* Set up ToggleGroup for encoding/compression radio buttons */
+        ObservableList<Node> compressionButtons = compressionHBOX.getChildren();
+        ObservableList<Node> encodingnButtons = encodingHBOX.getChildren();
+
+        for (Node n: compressionButtons) ((RadioButton)(n)).setToggleGroup(compression);
+        for (Node n: encodingnButtons) ((RadioButton)(n)).setToggleGroup(encoding);
+
+        /* `Enter` handler on `send message to` text bar */
         keyHandler = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
@@ -79,33 +113,7 @@ public class Controller {
             }
         };
 
-        sendHandler = new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                if (event.getCode() == KeyCode.ENTER) {
-                    JSONObject json = new JSONObject();
-                    json.put("message", textBar.getText());
-
-                    sendData(saveObject(json), "text");
-                    textBar.clear();
-                }
-            }
-        };
-
-        tabCloseHandler = new EventHandler<Event>() {
-            @Override
-            public void handle(Event e)
-            {
-                Tab t = (Tab)(e.getSource());
-                String name = t.getText();
-                tabMap.remove(name);
-            }
-        };
-
-        tabMap = new HashMap<>();
-        sendTo.setOnKeyReleased(keyHandler);
-        textBar.setOnKeyReleased(sendHandler);
-
+        /* Attachment button handler - creates window for choosing files */
         attachment.setOnAction(
                 new EventHandler<ActionEvent>() {
                     @Override
@@ -119,23 +127,41 @@ public class Controller {
                     }
                 }
         );
+        /* Send message handler on enter :: Catches Enter key */
+        sendHandler = new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.ENTER) {
+                    JSONObject json = new JSONObject();
+                    json.put("message", textBar.getText());
 
-        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
+                    sendData(saveObject(json), "text");
+                    textBar.clear();
+                }
+            }
+        };
 
-        compression = new ToggleGroup();
-        encoding = new ToggleGroup();
-        ObservableList<Node> compressionButtons = compressionHBOX.getChildren();
-        for (Node n: compressionButtons) {
-            ((RadioButton)(n)).setToggleGroup(compression);
-        }
+        /* Closing tab handler :: removes from tabMap */
+        tabCloseHandler = new EventHandler<Event>() {
+            @Override
+            public void handle(Event e)
+            {
+                Tab t = (Tab)(e.getSource());
+                String name = t.getText();
+                tabMap.remove(name);
+            }
+        };
 
-        ObservableList<Node> encodingnButtons = encodingHBOX.getChildren();
-        for (Node n: encodingnButtons) {
-            ((RadioButton)(n)).setToggleGroup(encoding);
-        }
-
+        /* Binding handlers */
+        sendTo.setOnKeyReleased(keyHandler);
+        textBar.setOnKeyReleased(sendHandler);
     }
 
+    /**
+     * Get index of used algorithm in HBOX
+     * @param hBox - hbox to work with
+     * @return index of item
+     */
     public int getHBOXindex(HBox hBox) {
         ObservableList<Node> ol = hBox.getChildren();
         for (int i = 0; i < ol.size(); i++) {
@@ -146,6 +172,11 @@ public class Controller {
         return -1;
     }
 
+    /**
+     * Method for getting extension of the file
+     * @param link - link to file
+     * @return extension
+     */
     private String getFilenameExtension(File link) {
         String name = link.getName();
         try {
@@ -156,7 +187,12 @@ public class Controller {
         }
     }
 
+    /**
+     * Method for sending text message from textBar
+     */
     public void submitTextMessage() {
+
+        //TODO :: refactor
         try {
             FileWriter fw = new FileWriter("temp_text.data");
             fw.write(textBar.getText());
@@ -169,20 +205,32 @@ public class Controller {
         }
     }
 
+    /**
+     * Sends File(link) to the user
+     * @param link - file to be send
+     * @param format - format of the file
+     */
     private void sendData(File link, String format) {
+        /* Get info about compression/encoding algorithms to use */
         int compression =  getHBOXindex(compressionHBOX);
         int encoding =  getHBOXindex(encodingHBOX);
 
-//        CompressionAlgorithm cAlg = getCompressionAlgorithm(compression);
-//        File cFile = cAlg.compress(link);
-//        EncodeAlgorithm eAlg = getEncodingAlgorithm(encoding);
-//        File eFile = eAlg.encode(cFile);
-
+        /* Get compression/encoding algorithms objects */
+        CompressionAlgorithm cAlg = getCompressionAlgorithm(compression);
         EncodeAlgorithm eAlg = getEncodingAlgorithm(encoding);
-        File eFile = eAlg.encode(link);
+
+        /* Compress & encode file */
+        File cFile = cAlg.compress(link);
+        File eFile = eAlg.encode(cFile);
+        //TODO :: compressed_size
+        /*
+            Create JSON string
+            ALso transofrms file into some data for JSON
+         */
 
         String json = createJSON(eFile, format, link.length(), -1);
 
+        /* Send by socket JSON string */
         try {
             socket.write(json);
         } catch (IOException e) {
@@ -190,6 +238,11 @@ public class Controller {
         }
     }
 
+    /**
+     * Stores JSONObject on a disk
+     * @param json - object to be stored
+     * @return link to the stored file
+     */
     private File saveObject(JSONObject json) {
         String s = (String) json.get("message");
         String fileName = "temporary" + Integer.toString(temporaryIndex);
@@ -205,6 +258,10 @@ public class Controller {
         return link;
     }
 
+    /**
+     * Method for external usage - called by Dialogue window on its' close
+      * @param alias - name of the user of this application
+     */
     public void receiveAlias(String alias) {
         this.alias.setText(alias);
     }
@@ -241,6 +298,11 @@ public class Controller {
         th.start();
     }
 
+    /**
+     * Method for requesting history of conversation from server by `alias`
+     * @param alias - unique identifier of user(chat) on a server
+     * @return JSONObject that contains flag `database`
+     */
     private JSONObject createHistoryRequest(String alias) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("address", alias);
@@ -248,13 +310,19 @@ public class Controller {
         return jsonObject;
     }
 
+    /**
+     * Method for external service (socket) - called when message came, applies message somewhere in GUI.
+     * @param text - jsonObject in a form of String
+     */
     public synchronized void receiveMessage(String text) {
         JSONParser parser = new JSONParser();
         try {
             JSONObject obj = (JSONObject) parser.parse(text);
             String room = (String) obj.get("chat");
+            /* Select tab to apply to */
             Tab tab = selectDialogue(room);
             if (tab != null)
+                /* If tab is found - apply */
                 applyMessage(tab, obj);
         } catch (ParseException pe) {
             System.err.println("Invalid json");
@@ -272,10 +340,8 @@ public class Controller {
                 File link = saveObject(obj);
                 EncodeAlgorithm eAlg = getEncodingAlgorithm(Integer.parseInt((String)obj.get("encoding")));
                 File eFile = eAlg.decode(link);
-//                CompressionAlgorithm cAlg = getCompressionAlgorithm((int)obj.get("compression"));
-//                File cFile = cAlg.decompress(link);
-//                File cFile = cAlg.decompress(eFile);
-                File cFile = eFile;
+                CompressionAlgorithm cAlg = getCompressionAlgorithm((int)obj.get("compression"));
+                File cFile = cAlg.decompress(eFile);
 
                 String format = (String) obj.get("format");
 
@@ -317,16 +383,24 @@ public class Controller {
         t.start();
     }
 
+    /**
+     * Select dialogue to apply message
+     * @param alias - name of sender
+     * @return Tab object to apply to
+     */
     private Tab selectDialogue(String alias) {
-        if (!tabMap.containsKey(alias)) {
+        if (!tabMap.containsKey(alias))
             requestHistory(alias);
-        }
-
         Tab tab = tabMap.get(alias);
 
         return tab;
     }
 
+    /**
+     * Creates fullfilment of the Tab object and stores it into the dictionary
+     * @param alias - name of the tab
+     * @param tab - object to fill
+     */
     private void fillTab(String alias, Tab tab) {
         ListView lv = new ListView();
         tab.setContent(lv);
@@ -341,6 +415,7 @@ public class Controller {
         jsonObject.put("compression", Long.toString(getHBOXindex(compressionHBOX)));
         jsonObject.put("encoding", Long.toString(getHBOXindex(encodingHBOX)));
         jsonObject.put("initial_size", Long.toString(initial_size));
+        //TODO :: compressed_size, time
         jsonObject.put("compressed_size", "-1");
         jsonObject.put("encoded_size", Long.toString(link.length()));
         jsonObject.put("format", format);
@@ -353,6 +428,11 @@ public class Controller {
         return jsonObject.toJSONString();
     }
 
+    /**
+     * Reads txt file and returns String
+     * @param link
+     * @return String
+     */
     private String readFile(File link) {
         BufferedInputStream bin = null;
         try {
@@ -373,44 +453,46 @@ public class Controller {
         return factory.toString();
     }
 
+    /**
+     * Method returns compression algorithm based on `index`
+     * @param compressionMethod - index of algorithm :: value is got from frontend
+     * @return CompressionAlgorithm object
+     */
     private CompressionAlgorithm getCompressionAlgorithm(int compressionMethod) {
         switch (compressionMethod) {
-            // First method
             default:
             case 0:
-                return huffman;
-            case 1:
                 return lzw;
-            // Second method
-//            case 1:
-//                return new Algorithm.Compression.huffman(link);
-//                break;
-//            // Third method
-//            case 2:
-//                return new Algorithm.Compression.huffman(link);
-//                break;
+            case 1:
+                return huffman;
+            case 2:
+                return jpeg;
         }
     }
 
+    /**
+     * Method returns encoding algorithm based on `index`
+     * @param encodingMethod - index of algorithm :: value is got from frontend
+     * @return EncodeAlgorithm object
+     */
     private EncodeAlgorithm getEncodingAlgorithm(int encodingMethod) {
         switch (encodingMethod){
-            // First method
             default:
             case 0:
                 return repetition3;
             case 1:
                 return repetition5;
-            // Second method
             case 2:
                 return reedMuller;
-//                break;
-//            // Third method
-//            case 2:
-//                return new Algorithm.Encode.huffman(link);
-//                break;
+            case 3:
+                return hamming;
         }
     }
 
+    /**
+     * Sets socket to negotiate with - send messages & receive from
+     * @param socket - ChatClient object
+     */
     public void setSocket(ChatClient socket) {
         this.socket = socket;
     }

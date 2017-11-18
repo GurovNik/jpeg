@@ -10,14 +10,7 @@ public class Huffman implements CompressionAlgorithm {
     private String[][] table;                              // A table with symbols and their codewords
 
     // The constructor reads file and makes a string to work with
-    public Huffman() throws FileNotFoundException {
-        byte mas[] = FileProcessor.readBytes(new File("input"));
-        char arr[] = new char[mas.length];
-        for (int i = 0; i < mas.length; i++) {
-            arr[i] = (char) mas[i];
-        }
-        string = new String(arr);
-    }
+    public Huffman() {}
 
     // Decompresses a file and returns a result file
     public File decompress(File input) {

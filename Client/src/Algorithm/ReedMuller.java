@@ -233,7 +233,7 @@ public class ReedMuller implements EncodeAlgorithm {
                 }
             }
             //decoding according to the Reed-Muller algorithm
-            //if value of component is negative then x0=0 else dx0=1
+            //if value of component is negative then x0=0 else x0=1
             //X1 = Y8^Y0
             //X2 =Y4^Y0
             //x3 = Y2^Y0

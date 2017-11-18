@@ -45,11 +45,11 @@ public class Hamming implements EncodeAlgorithm {
     public File encode(File link) {
         byte[] data = FileProcessor.readBytes(link);
         byte[] transformed = bytesToBits(data);
-        byte[] encoded = new byte[transformed.length * 3 / 2];
-        for (int i = 0; i < transformed.length / 8; i++) {
+        byte[] encoded = new byte[transformed.length*3/2];
+        for (int i = 0; i < transformed.length/8; i++) {
             byte[] temp = new byte[8];
             for (int j = 0; j < 8; j++)
-                temp[j] = transformed[j + i * 8];
+                temp[j] = transformed[j + i*8];
             byte[] answer = code(temp);
             for (int j = 0; j < answer.length; j++)
                 encoded[i * 12 + j] = answer[j];
@@ -97,11 +97,11 @@ public class Hamming implements EncodeAlgorithm {
         byte[] bytes = Algorithm.FileProcessor.readBytes(link);
         byte[] transformed = bytesToBits(bytes);
         //byte[] transformed = {0,0,0,0,1,1,0,1,0,0,1,0};
-        byte[] decoded = new byte[transformed.length * 2 / 3];
-        for (int i = 0; i < transformed.length / 12; i++) {
+        byte[] decoded = new byte[transformed.length*2/3];
+        for (int i = 0; i < transformed.length/12; i++) {
             byte[] temp = new byte[12];
             for (int j = 0; j < 12; j++)
-                temp[j] = transformed[j + i * 12];
+                temp[j] = transformed[j + i*12];
             byte[] answer = new byte[8];
             for (int z = 0; z < answer.length; z++)
                 answer[z] = decoding(temp)[z];
@@ -159,7 +159,7 @@ public class Hamming implements EncodeAlgorithm {
 
     public static void main(String[] args) {
         Hamming coding = new Hamming();
-        File f = new File("in.data");
+        File f = new File("large.jpg");
         Hamming decoding = new Hamming();
         File fprev = decoding.decode(coding.encode(f));
     }

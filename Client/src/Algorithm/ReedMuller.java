@@ -262,11 +262,6 @@ public class ReedMuller implements EncodeAlgorithm {
     }
 
     public static void main(String[] args) {
-//        ReedMuller rm = new ReedMuller();
-//        File f = new File("in.data");
-//        f = rm.encode(f);
-//        ReedMuller mr = new ReedMuller();
-//        mr.decode(f);
         LZW lzw = new LZW();
         ReedMuller rm = new ReedMuller();
         File f = lzw.compress(new File("img.jpg"));

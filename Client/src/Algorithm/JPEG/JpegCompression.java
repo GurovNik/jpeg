@@ -20,7 +20,7 @@ public class JpegCompression implements CompressionAlgorithm {
         }
 
         //TODO :: return link
-        return link;
+        return file;
     }
     public File decompress(File file) {
         //TODO :: USE FILE

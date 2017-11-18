@@ -3,20 +3,32 @@ package Algorithm;
 import java.io.*;
 import java.util.*;
 
-public class Huffman {
+public class Huffman implements CompressionAlgorithm {
 
     private String string;
     private HuffmanNode root;
     private String[][] table;
 
     public Huffman() throws FileNotFoundException {
-        Scanner scanner = new Scanner(new File("input.txt"));
-        StringBuilder s = new StringBuilder();
-        while (scanner.hasNext()) s.append(scanner.next());
-        string = s.toString();
+        byte mas[] = FileProcessor.readBytes(new File("input"));
+        char arr[] = new char[mas.length];
+        for (int i = 0; i < mas.length; i++) {
+            arr[i] = (char) mas[i];
+        }
+        string = new String(arr);
     }
 
-    void decodeString(String code) {
+    public File decode(File input) {
+
+        //This is how to read chars from File.
+        //==============================================//
+        byte inp[] = FileProcessor.readBytes(input);
+        char arr[] = new char[inp.length];
+        for (int i = 0; i < inp.length; i++) {
+            arr[i] = (char) inp[i];
+        }
+        //=============================================//
+        String code = new String(arr);
         StringBuilder result = new StringBuilder();
         StringBuilder codeword = new StringBuilder();
         int counter = 0;
@@ -28,12 +40,16 @@ public class Huffman {
                     codeword = new StringBuilder();
                 }
             }
-            counter++;
+            ++counter;
         }
-        writeString(result.toString());
+        System.out.println("DECODING DONE!");
+
+        byte outs[] = new byte[ ??];
+
+        return FileProcessor.writeBytes("huffmanCompressed.data", out);
     }
 
-    void codeString() {
+    public File enocode(File input) {
         table = makeTable();
         StringBuilder result = new StringBuilder();
         for (int  i = 0; i < string.length(); i++){
@@ -47,7 +63,10 @@ public class Huffman {
             }
             result.append(code);
         }
-        writeString(result.toString());
+
+
+        /*Return file which was written*/
+        return null;
     }
 
     String[][] makeTable() {
@@ -114,15 +133,30 @@ public class Huffman {
         queue.addAll(symbols);
         return queue;
     }
+
     private static void writeString(String s) {
-        try {
-            try (Writer writer = new BufferedWriter(
-                    new OutputStreamWriter(
-                            new FileOutputStream("output.txt"), "ascii"))) {
-                writer.write(s);
-            }
-        } catch (IOException ex) {
+        byte mas[] = new byte[s.length()];
+        for (int i = 0; i < s.length(); i++) {
+            mas[i] = (byte) s.charAt(i);
         }
+        FileProcessor.writeBytes("output", mas);
+    }
+
+    public static void main(String[] args) {
+        try {
+            Huffman huf = new Huffman();
+            System.out.println("CODING!");
+            huf.codeString();
+            System.out.println("DECODING!");
+            huf.decodeString(huf.getString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public String getString() {
+        return string;
     }
 
     public static Comparator<HuffmanNode> frequencyComparator = new Comparator<HuffmanNode>() {

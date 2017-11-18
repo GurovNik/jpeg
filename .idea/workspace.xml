@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="15067551-8bfc-480a-8bb5-5d7b4d9d77f3" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Client/src/image.jpeg" afterPath="$PROJECT_DIR$/Client/src/image.jpeg" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json-simple-1.1.1.jar" afterPath="$PROJECT_DIR$/json-simple-1.1.1.jar" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
@@ -44,39 +43,38 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ReedMuller.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Client/src/Algorithm/ReedMuller.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="18" column="29" lean-forward="false" selection-start-line="18" selection-start-column="29" selection-end-line="18" selection-end-column="29" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <marker date="1511043605119" expanded="true" signature="9154:9446" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Controller.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Controller.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Client/src/FrontEnd/Controller.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="339">
-              <caret line="426" column="29" lean-forward="true" selection-start-line="426" selection-start-column="29" selection-end-line="426" selection-end-column="29" />
+            <state relative-caret-position="170">
+              <caret line="72" column="59" lean-forward="false" selection-start-line="72" selection-start-column="59" selection-end-line="72" selection-end-column="59" />
               <folding>
-                <element signature="imports" expanded="true" />
                 <element signature="method#setUpGUIItems#0;class#Controller#0" expanded="false" />
                 <element signature="method#getHBOXindex#0;class#Controller#0" expanded="false" />
                 <element signature="method#getFilenameExtension#0;class#Controller#0" expanded="false" />
                 <element signature="method#saveObject#0;class#Controller#0" expanded="false" />
                 <element signature="method#requestHistory#0;class#Controller#0" expanded="false" />
-                <element signature="e#8771#9052#0" expanded="true" />
-                <element signature="e#9051#9052#0" expanded="true" />
+                <element signature="e#9081#9362#0" expanded="true" />
+                <element signature="e#9361#9362#0" expanded="true" />
                 <element signature="method#createHistoryRequest#0;class#Controller#0" expanded="false" />
-                <element signature="e#10936#12339#0" expanded="true" />
-                <element signature="e#12338#12339#0" expanded="true" />
-                <element signature="e#16419#16420#0" expanded="true" />
-                <element signature="e#16455#16456#0" expanded="true" />
+                <element signature="e#11524#12924#0" expanded="true" />
+                <element signature="e#12923#12924#0" expanded="true" />
+                <element signature="e#17130#17131#0" expanded="true" />
+                <element signature="e#17166#17167#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sample.fxml" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Client/src/FrontEnd/sample.fxml">
+          <provider editor-type-id="JavaFX-Scene-Builder">
+            <state />
+          </provider>
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="396">
+              <caret line="68" column="89" lean-forward="true" selection-start-line="68" selection-start-column="89" selection-end-line="68" selection-end-column="89" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -970,12 +968,12 @@
       <workItem from="1510771702079" duration="21717000" />
       <workItem from="1510847833486" duration="6673000" />
       <workItem from="1510927213672" duration="10736000" />
-      <workItem from="1511017518231" duration="6574000" />
+      <workItem from="1511017518231" duration="7027000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="107052000" />
+    <option name="totallyTimeSpent" value="107505000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1" y="1" width="1918" height="1048" extended-state="0" />
@@ -1092,16 +1090,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
           <caret line="7" column="17" lean-forward="false" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Client/src/FrontEnd/sample.fxml">
-      <provider editor-type-id="JavaFX-Scene-Builder">
-        <state />
-      </provider>
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1360">
-          <caret line="80" column="25" lean-forward="false" selection-start-line="80" selection-start-column="25" selection-end-line="80" selection-end-column="25" />
         </state>
       </provider>
     </entry>
@@ -1458,23 +1446,33 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Client/src/FrontEnd/Controller.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="339">
-          <caret line="426" column="29" lean-forward="true" selection-start-line="426" selection-start-column="29" selection-end-line="426" selection-end-column="29" />
+        <state relative-caret-position="170">
+          <caret line="72" column="59" lean-forward="false" selection-start-line="72" selection-start-column="59" selection-end-line="72" selection-end-column="59" />
           <folding>
-            <element signature="imports" expanded="true" />
             <element signature="method#setUpGUIItems#0;class#Controller#0" expanded="false" />
             <element signature="method#getHBOXindex#0;class#Controller#0" expanded="false" />
             <element signature="method#getFilenameExtension#0;class#Controller#0" expanded="false" />
             <element signature="method#saveObject#0;class#Controller#0" expanded="false" />
             <element signature="method#requestHistory#0;class#Controller#0" expanded="false" />
-            <element signature="e#8771#9052#0" expanded="true" />
-            <element signature="e#9051#9052#0" expanded="true" />
+            <element signature="e#9081#9362#0" expanded="true" />
+            <element signature="e#9361#9362#0" expanded="true" />
             <element signature="method#createHistoryRequest#0;class#Controller#0" expanded="false" />
-            <element signature="e#10936#12339#0" expanded="true" />
-            <element signature="e#12338#12339#0" expanded="true" />
-            <element signature="e#16419#16420#0" expanded="true" />
-            <element signature="e#16455#16456#0" expanded="true" />
+            <element signature="e#11524#12924#0" expanded="true" />
+            <element signature="e#12923#12924#0" expanded="true" />
+            <element signature="e#17130#17131#0" expanded="true" />
+            <element signature="e#17166#17167#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Client/src/FrontEnd/sample.fxml">
+      <provider editor-type-id="JavaFX-Scene-Builder">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="68" column="89" lean-forward="true" selection-start-line="68" selection-start-column="89" selection-end-line="68" selection-end-column="89" />
+          <folding />
         </state>
       </provider>
     </entry>

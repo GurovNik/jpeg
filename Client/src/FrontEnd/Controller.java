@@ -20,8 +20,6 @@ import javafx.stage.FileChooser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import javax.print.attribute.standard.Compression;
 import java.io.*;
 import java.util.*;
 
@@ -41,17 +39,27 @@ public class Controller {
     @FXML
     private Button attachment;
 
+    /*
+        Necessary items
+        :: socket - server/client interaction
+        :: tabMap - maps aliases to tabs
+    */
     private ChatClient socket;
     private Map<String, Tab> tabMap;
+
+    /* GUI items */
     private ToggleGroup compression;
     private ToggleGroup encoding;
 
+    /* Event handlers for GUI */
     private EventHandler<KeyEvent> keyHandler;
     private EventHandler<KeyEvent> sendHandler;
     private EventHandler<Event> tabCloseHandler;
 
+    /* Some temp value I do not remember for */
     private int temporaryIndex = 0;
 
+    /* Algorithms */
     private CompressionAlgorithm lzw;
     private CompressionAlgorithm huffman;
     private CompressionAlgorithm jpeg;
@@ -60,7 +68,10 @@ public class Controller {
     private EncodeAlgorithm reedMuller;
     private EncodeAlgorithm hamming;
 
-
+    /**
+     * Like constructor for Controller
+     * Used to initialize GUI variables, set handlers, etc.
+     */
     @FXML
     public void initialize() {
         lzw = new LZW();
@@ -339,11 +350,17 @@ public class Controller {
         }
     }
 
+    /**
+     * Performs applying of a message
+     * Client recieves message and this method applies it to some tab
+     * @param tab - tab to apply to
+     * @param obj - message to apply
+     */
     private void applyMessage(Tab tab, JSONObject obj) {
         System.out.println(obj.toJSONString());
 
+        /* Task object is used to perform GUI changes :: necessary for JavaFX */
         Task<Node> task = new Task<Node>() {
-
             @Override
             public Node call() throws Exception {
                 File link = saveObject(obj);
@@ -370,19 +387,19 @@ public class Controller {
                         n = new Label(fileMessage);
                         break;
                 }
-
-
 //        n = new ImageView("@../../image.jpeg");
                 System.out.println("Около окончания");
                 return n;
             }
         };
 
+        /* If successful task - change the GUI */
         task.setOnSucceeded(event -> {
             ListView lv = (ListView) tab.getContent();
             lv.getItems().add(task.getValue());
         });
 
+        /* Additional thread for running `Runnable task` in a background */
         Thread t = new Thread(task);
         t.setDaemon(true);
         t.start();

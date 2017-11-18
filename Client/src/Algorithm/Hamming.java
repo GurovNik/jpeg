@@ -21,7 +21,6 @@ public class Hamming implements EncodeAlgorithm {
     }
 
     private static byte[] code(byte[] input_byte) {
-        //int ncb = log2(input_bytes.length) + 1; 4 = ncb everywhere
         int numberOfAddiditionalBits = 4;
         //for the message of length 8 we need additional 4 bits (trunc(log2(N)) + 1 in general, since we ooded 1 byte, this number is 4)
         byte result[] = new byte[8 + numberOfAddiditionalBits];
@@ -41,6 +40,22 @@ public class Hamming implements EncodeAlgorithm {
             result[x] = (byte) (summ % 2);
         }
         return result;
+    }
+
+    public File encode(File link) {
+        byte[] data = FileProcessor.readBytes(link);
+        byte[] transformed = bytesToBits(data);
+        byte[] encoded = new byte[transformed.length*3/2];
+        for (int i = 0; i < transformed.length/8; i++) {
+            byte[] temp = new byte[8];
+            for (int j = 0; j < 8; j++)
+                temp[j] = transformed[j + i*8];
+            byte[] answer = code(temp);
+            for (int j = 0; j < answer.length; j++)
+                encoded[i * 12 + j] = answer[j];
+        }
+        byte result[] = encodedToResult(encoded);
+        return writeBytes("encodedHamming.data", result);
     }
 
     private static byte[] decoding(byte[] input) {
@@ -64,9 +79,10 @@ public class Hamming implements EncodeAlgorithm {
                 sum += x + 1;
         }
         //checking for an error and fixing it (sum store summ of indexes of wrong additional bits)
-        if (sum != 0)
+        if (sum != 0 && sum < 13) {
             if (copy_of_input[sum - 1] == 0) copy_of_input[sum - 1] = 1;
             else copy_of_input[sum - 1] = 0;
+        }
         byte[] result = new byte[input.length - ((log2(input.length)) + 1)];
         int j = 0;
         for (int i = 0; i < copy_of_input.length; i++)
@@ -79,28 +95,32 @@ public class Hamming implements EncodeAlgorithm {
 
     public File decode(File link) {
         byte[] bytes = Algorithm.FileProcessor.readBytes(link);
-        byte[] transofrmed = bytesToBits(bytes);
-        byte[] decoded = decoding(transofrmed);
+        byte[] transformed = bytesToBits(bytes);
+        //byte[] transformed = {0,0,0,0,1,1,0,1,0,0,1,0};
+        byte[] decoded = new byte[transformed.length*2/3];
+        for (int i = 0; i < transformed.length/12; i++) {
+            byte[] temp = new byte[12];
+            for (int j = 0; j < 12; j++)
+                temp[j] = transformed[j + i*12];
+            byte[] answer = new byte[8];
+            for (int z = 0; z < answer.length; z++)
+                answer[z] = decoding(temp)[z];
+            for (int j = 0; j < answer.length; j++)
+                decoded[i * 8 + j] = answer[j];
+        }
         byte result[] = decodedToResult(decoded);
         return writeBytes("decodedHamming.data", result);
     }
 
-    public File encode(File link) {
-        byte[] data = FileProcessor.readBytes(link);
-        byte[] transofrmed = bytesToBits(data);
-        byte encoded[] = code(transofrmed);
-        byte result[] = encodedToResult(encoded);
-
-        return writeBytes("encodedHamming.data", result);
-    }
-
     private byte[] encodedToResult(byte[] bytes) {
         byte result[] = new byte[(int) Math.ceil(bytes.length / 1.0 / 8)];
+        byte bytesExtended[] = new byte[bytes.length + 300];
 
+        for (int i = 0; i < bytes.length; i++)
+            bytesExtended[i] = bytes[i];
         for (int i = 0; i < bytes.length; i += 8) {
-            for (int j = 1; j < 8; j++) {
-                result[i / 8] += bytes[i + j] * Math.pow(2, 7 - j);
-            }
+            for (int j = 1; j < 8; j++)
+                result[i / 8] += bytesExtended[i + j] * Math.pow(2, 7 - j);
             if (bytes[i] == 1) {
                 result[i / 8] *= -1;
             }
@@ -113,12 +133,12 @@ public class Hamming implements EncodeAlgorithm {
         byte transofrmed[] = new byte[data.length * 8];
         for (int i = 0; i < data.length; i++) {
             b = data[i];
-            for (int j = 0; j < 7; j++) {
+            for (int j = 0; j < 7; j++)
                 transofrmed[8 * i + 7 - j] = (byte) (((Math.abs(b)) >> j) % 2);
-            }
-            if (b < 0) {
+            if (b < 0)
                 transofrmed[8 * i] = 1;
-            }
+            else
+                transofrmed[8 * i] = 0;
         }
         return transofrmed;
     }
@@ -140,8 +160,7 @@ public class Hamming implements EncodeAlgorithm {
     public static void main(String[] args) {
         Hamming coding = new Hamming();
         File f = new File("in.data");
-        f = coding.encode(f);
         Hamming decoding = new Hamming();
-        File fprev = decoding.decode(f);
+        File fprev = decoding.decode(coding.encode(f));
     }
 }

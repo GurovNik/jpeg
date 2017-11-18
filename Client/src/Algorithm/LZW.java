@@ -311,7 +311,7 @@ public class LZW implements CompressionAlgorithm {
         return value;
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         System.out.println("Hell");
         LZW lzw = new LZW();
         File in = new File("in.data");
@@ -320,5 +320,12 @@ public class LZW implements CompressionAlgorithm {
         LZW lzw1 = new LZW();
         File out = lzw1.decompress(compressed);
 
+    }*/
+    public static void main(String[] args) {
+        Hamming coding = new Hamming();
+        File f = new File("in.data");
+        f = coding.encode(f);
+        Hamming decoding = new Hamming();
+        File fprev = decoding.decode(f);
     }
 }

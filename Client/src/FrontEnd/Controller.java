@@ -1,6 +1,7 @@
 package FrontEnd;
 
 import Algorithm.*;
+import Algorithm.JPEG.JpegCompression;
 import Network.ChatClient;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -68,15 +69,9 @@ public class Controller {
         repetition5 = new Repetition(5);
         reedMuller = new ReedMuller();
         hamming = new Hamming();
-//        jpeg = new JPEG();
+        jpeg = new JpegCompression();
 
         tabMap = new HashMap<>();
-
-
-
-
-
-
 
         setUpGUIItems();
     }
@@ -220,15 +215,25 @@ public class Controller {
         EncodeAlgorithm eAlg = getEncodingAlgorithm(encoding);
 
         /* Compress & encode file */
+        long compress_time = System.currentTimeMillis();
         File cFile = cAlg.compress(link);
+        compress_time = System.currentTimeMillis() - compress_time;
+        long encoding_time = System.currentTimeMillis();
         File eFile = eAlg.encode(cFile);
+        encoding_time = System.currentTimeMillis() - encoding_time;
         //TODO :: compressed_size
         /*
             Create JSON string
             ALso transofrms file into some data for JSON
          */
 
-        String json = createJSON(eFile, format, link.length(), -1);
+        long initial = link.length();
+        long compressed = cFile.length();
+        long encoded = eFile.length();
+        long stats_size[] = new long[]{initial, compressed, encoded};
+        long stats_time[] = new long[]{compress_time, encoding_time};
+
+        String json = createJSON(eFile, format, stats_size, stats_time);
 
         /* Send by socket JSON string */
         try {
@@ -266,6 +271,10 @@ public class Controller {
         this.alias.setText(alias);
     }
 
+    /**
+     * Method for requesting history about u_name
+     * @param u_name - unique identifier of the user
+     */
     private void requestHistory(String u_name) {
 
         Task<Tab> tabTask = new Task<Tab>() {
@@ -299,7 +308,7 @@ public class Controller {
     }
 
     /**
-     * Method for requesting history of conversation from server by `alias`
+     * Method for creating json for requesting history of conversation from server by `alias`
      * @param alias - unique identifier of user(chat) on a server
      * @return JSONObject that contains flag `database`
      */
@@ -346,8 +355,8 @@ public class Controller {
                 String format = (String) obj.get("format");
 
                 Node n;
-                //        //TODO :: New data types
-                //        //TODO :: NOT ONLY FOR STRING SAY NAME
+                //TODO :: New data types
+                //TODO :: NOT ONLY FOR STRING SAY NAME
                 switch (format)
                 {
                     case "text":
@@ -356,10 +365,6 @@ public class Controller {
                         System.out.println("Data from file :: " + data);
                         n = new Label(obj.get("address") + " :: " + data);
                         break;
-//                    case "jpeg":
-//                        n = new ImageView("@../../image.jpeg");
-//                        // Image has to be in Client/src folder
-//                        break;
                     default:
                         String fileMessage = String.format("File [%s] :: stored in [%s]", cFile.getName(), cFile.getPath());
                         n = new Label(fileMessage);
@@ -407,23 +412,33 @@ public class Controller {
         tabMap.put(alias, tab);
     }
 
-    private String createJSON(File link, String format, long initial_size, long compressed_size) {
+    /**
+     * Creates json for sending it to server
+     * @param link - File bytes of to send
+     * @param format - format of the file
+     * @param sizes - array of sizes
+     * @param time - array of time results
+     * @return json in form of a string
+     */
+    private String createJSON(File link, String format, long sizes[], long time[]) {
         String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
 
         JSONObject jsonObject = new JSONObject();
+        /* Meta information*/
         jsonObject.put("address", sendTo);
         jsonObject.put("compression", Long.toString(getHBOXindex(compressionHBOX)));
         jsonObject.put("encoding", Long.toString(getHBOXindex(encodingHBOX)));
-        jsonObject.put("initial_size", Long.toString(initial_size));
-        //TODO :: compressed_size, time
-        jsonObject.put("compressed_size", "-1");
-        jsonObject.put("encoded_size", Long.toString(link.length()));
+        jsonObject.put("message", readFile(link));
+        /* Size stats for server */
+        jsonObject.put("initial_size", Long.toString(sizes[0]));
+        jsonObject.put("compressed_size", Long.toString(sizes[1]));
+        jsonObject.put("encoded_size", Long.toString(sizes[2]));
+        /* Time stats for server */
+        jsonObject.put("compression_time", Long.toString(time[0]));
+        jsonObject.put("encoding_time", Long.toString(time[1]));
         jsonObject.put("format", format);
 
-        String msg = readFile(link);
-
-        jsonObject.put("message", msg);
-        // TODO :: LINK INTO BASE64
+        // TODO :: LINK INTO BASE64 ?
 
         return jsonObject.toJSONString();
     }

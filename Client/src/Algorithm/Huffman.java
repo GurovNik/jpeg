@@ -146,16 +146,11 @@ public class Huffman implements CompressionAlgorithm {
     }
 
     public static void main(String[] args) {
-        try {
-            Huffman huf = new Huffman();
-            System.out.println("CODING!");
-            File f = huf.compress(new File("input"));
-            System.out.println("DECODING!");
-            huf.decompress(f);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
+        Huffman huf = new Huffman();
+        System.out.println("CODING!");
+        File f = huf.compress(new File("input"));
+        System.out.println("DECODING!");
+        huf.decompress(f);
     }
 
     public String getString() {

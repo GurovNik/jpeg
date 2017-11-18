@@ -62,16 +62,16 @@ public class JPEG {
 
     }
 
-    public void runCompressing() throws IOException {   // start procedure of compressing
-        preProcessing();
+    public File runCompressing() throws IOException {   // start procedure of compressing
+        return preProcessing();
     }
 
-    public File runDecompressing() throws IOException {   // start procedure of decompressing
-        decomposition();
+    public File runDecompressing(File file) throws IOException {   // start procedure of decompressing
+        decomposition(file);
         return outputFile;
     }
 
-    private void preProcessing() throws IOException {       // preparing file for transformation. Splits whole matrix of pixels on several matrices of 8x8 pixels
+    private File preProcessing() throws IOException {       // preparing file for transformation. Splits whole matrix of pixels on several matrices of 8x8 pixels
         height = image.getHeight();
         width = image.getWidth();
         SIZE = height * width;
@@ -120,10 +120,10 @@ public class JPEG {
             }
         }
         //  make two demensional matrix of 8x8 matrices for Y, Cr and Cb matrices
-        compress(matrix8x8ofY, matrix8x8ofCb, matrix8x8ofCr);
+        return compress(matrix8x8ofY, matrix8x8ofCb, matrix8x8ofCr);
     }
 
-    private void compress(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) throws IOException { // DCT transformation function
+    private File compress(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) throws IOException { // DCT transformation function
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -174,7 +174,7 @@ public class JPEG {
             System.out.println();
         }
 
-        universalRestructureToFile(Y, Cb, Cr);
+        return universalRestructureToFile(Y, Cb, Cr);
     }
 
 
@@ -300,9 +300,11 @@ public class JPEG {
         return resmatrix;
     }
 
-    public void universalRestructureToFile(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) {        // method that transform data and writes it into file in most comfortable way
+    public File universalRestructureToFile(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) {
+        // method that transform data and writes it into file in most comfortable way
+        File link = new File("compressedFile.data");
         try {
-            try (FileWriter writer = new FileWriter("compressedFile.data", false)) {
+            try (FileWriter writer = new FileWriter(link, false)) {
                 writer.write(String.valueOf(height));
                 writer.write("\n" + String.valueOf(width) + "\n");
                 for (int i = 0; i < height / 8; i++) {
@@ -388,10 +390,14 @@ public class JPEG {
                     }
                 }
                 writer.flush();
+                writer.close();
+                return link;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
+
     }
 
     public void restructureToFile(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) {     // old function, use for debugging
@@ -417,10 +423,10 @@ public class JPEG {
         }
     }
 
-    public void decomposition() throws IOException {        // prepare for reading and interpretation of data from file
+    public void decomposition(File file) throws IOException {        // prepare for reading and interpretation of data from file
         Scanner scan = null;
         try {
-            scan = new Scanner(new File("compressedFile.data"));
+            scan = new Scanner(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

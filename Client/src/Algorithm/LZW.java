@@ -54,14 +54,18 @@ public class LZW implements CompressionAlgorithm {
 
         for (int i = 0; i < input.length & flag; i++) {
             C.add(input[i]);
-            //go as far as possible with familiar String
             for (Byte b: P)
                 pc.add(b);
             for (Byte b: C)
                 pc.add(b);
+            //go as far as possible with familiar String that already exists in the dictionary
             if (dictionary.containsKey(pc)) {
                 P = new ArrayList<>(pc);
             } else {
+                //if end of input, then code of current string to the output and end LZW coding
+                //if we got new String that is not in the dictionary, then add it
+                //to the dictionary, write down the code of already existed part in the output
+                //and continue with new simbol, that stopped the familiar sequence
                 Pair<Integer, Integer> temp = new Pair<>(dictionary.get(P), bits);
                 result.add(temp);
                 dictionary.put(new ArrayList(pc), dictionary.size());
@@ -80,6 +84,7 @@ public class LZW implements CompressionAlgorithm {
     }
 
     public byte[] decompress(List<Integer> vals) {
+        //initializing values and dictionary (with all sequences with length 1)
         Map<Integer, List<Byte>> dictionary = loadIntegerByteDictionary();
         ArrayList<Byte> content = new ArrayList<>();
         int index = 0;
@@ -94,6 +99,10 @@ public class LZW implements CompressionAlgorithm {
             content.add(b);
 
         for (int i = 1; i < vals.size(); i++) {
+            //algorithm in general is the following:
+            //while we have new string in the dictionary, increase it
+            //if new string is not in the dictionary, then add it to the dictionary and write code of
+            //the last string that was in it before last adding action
             pW = cW;
             cW = vals.get(++index);
             if (dictionary.containsKey(cW)) {
@@ -229,12 +238,22 @@ public class LZW implements CompressionAlgorithm {
         return value;
     }
 
-    public static void main(String[] args) {
+
+    /*public static void main(String[] args) {
+        System.out.println("Hell");
         LZW lzw = new LZW();
         File in = new File("input.txt");
         File compressed = lzw.compress(in);
 
         LZW lzw1 = new LZW();
         File out = lzw1.decompress(compressed);
+
+    }*/
+    public static void main(String[] args) {
+        Hamming coding = new Hamming();
+        File f = new File("in.data");
+        f = coding.encode(f);
+        Hamming decoding = new Hamming();
+        File fprev = decoding.decode(f);
     }
 }

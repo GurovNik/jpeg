@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8a656174-bd76-4aff-9e20-4556ac5fb88f" name="Default" comment="last commit with comments">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/commons_math3_3_6_1_javadoc.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/jai_linux_i586.xml" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+    <list default="true" id="8a656174-bd76-4aff-9e20-4556ac5fb88f" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Client/Client.iml" afterPath="$PROJECT_DIR$/Client/Client.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Client/src/Algorithm/JPEG/JpegCompression.java" afterPath="$PROJECT_DIR$/Client/src/Algorithm/JPEG/JpegCompression.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Server/Server.iml" afterPath="$PROJECT_DIR$/Server/Server.iml" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -48,8 +43,8 @@
       <file leaf-file-name="JPEG.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Client/src/Algorithm/JPEG/JPEG.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="44" column="53" lean-forward="false" selection-start-line="44" selection-start-column="53" selection-end-line="44" selection-end-column="53" />
+            <state relative-caret-position="240">
+              <caret line="18" column="31" lean-forward="false" selection-start-line="18" selection-start-column="31" selection-end-line="18" selection-end-column="31" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -726,11 +721,18 @@
       <option name="project" value="LOCAL" />
       <updated>1511021486289</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Add  JPEG and Lib">
+      <created>1511047480311</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1511047480311</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="114495000" />
+    <option name="totallyTimeSpent" value="114693000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -819,7 +821,8 @@
     <MESSAGE value="commit with TIFF file support" />
     <MESSAGE value="commit with implementing compressionAlgorithm" />
     <MESSAGE value="last commit with comments" />
-    <option name="LAST_COMMIT_MESSAGE" value="last commit with comments" />
+    <MESSAGE value="Add  JPEG and Lib" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add  JPEG and Lib" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -990,8 +993,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Client/src/Algorithm/JPEG/JPEG.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="630">
-          <caret line="44" column="53" lean-forward="false" selection-start-line="44" selection-start-column="53" selection-end-line="44" selection-end-column="53" />
+        <state relative-caret-position="240">
+          <caret line="18" column="31" lean-forward="false" selection-start-line="18" selection-start-column="31" selection-end-line="18" selection-end-column="31" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

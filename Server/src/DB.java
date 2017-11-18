@@ -53,6 +53,8 @@ public class DB {
                 temp.put("recepient", rs.getString(3));
                 temp.put("format", rs.getString(4));
                 temp.put("content", rs.getString(12));
+                temp.put("compression", Integer.toString(rs.getInt(9)));
+                temp.put("coding", Integer.toString(rs.getInt(6)));
                 result.add(temp);
             }
             results = result;

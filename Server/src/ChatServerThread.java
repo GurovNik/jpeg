@@ -92,8 +92,9 @@ public class ChatServerThread extends Thread {
                     send.put("compression", obj.get("compression"));
                     send.put("encoding", obj.get("encoding"));
 
-                    db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1], -1, -1, -1,
-                            getName(), (String) obj.get("address"), (String) obj.get("compression"), (String) obj.get("encoding"),
+                    db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1],
+                            -1, -1, -1, getName(), (String) obj.get("address"),
+                            (String) obj.get("compression"), (String) obj.get("encoding"),
                             (String) obj.get("format"), (String) obj.get("message"));
 
 
@@ -117,15 +118,21 @@ public class ChatServerThread extends Thread {
         Random rand = new Random();
         int n = 0;
         char[] seq = message.toCharArray();
+        byte store[] = new byte[seq.length];
         for (int i = 0; i < seq.length; i++) {
-            if (rand.nextDouble() < thr) {
-                if (seq[i] == '0') {
-                    seq[i] = '1';
-                } else {
-                    seq[i] = '0';
+            store[i] = (byte) seq[i];
+        }
+        for (int i = 0; i < store.length; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                if(rand.nextDouble() < thr){
+                    store[i] ^= (byte)~(store[i] & (1 << j));
+                    ++n;
                 }
-                ++n;
+
             }
+        }
+        for (int i = 0; i < seq.length; i++) {
+            seq[i] = (char) store[i];
         }
         Object[] res = {new String(seq), n};
         return res;

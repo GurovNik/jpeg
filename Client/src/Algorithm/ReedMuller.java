@@ -4,6 +4,8 @@ package Algorithm;
 import java.io.File;
 
 import static Algorithm.FileProcessor.writeBytes;
+
+
 import java.io.File;
 
 
@@ -85,7 +87,7 @@ public class ReedMuller {
         //compose these bits to bytes
         byte result[] = decodedToResult(decoded);
         //create file from bytes and return it
-        return FileProcessor.writeBytes("decoded.data", result);
+        return FileProcessor.writeBytes("decodedReed.data", result);
     }
 
     /**
@@ -122,6 +124,9 @@ public class ReedMuller {
             //sign of byte
             if (bytes[i] == 1) {
                 result[i / 8] *= -1;
+                if (result[i/8]==0)
+                    result[i/8]=-128;
+
             }
         }
 
@@ -139,6 +144,13 @@ public class ReedMuller {
         byte transformed[] = new byte[data.length * 8];
         for (int i = 0; i < data.length; i++) {
             b = data[i];
+            if (b==-128){
+                byte m128[] ={1,0,0,0,0,0,0,0};
+                for (int j=0;j<8;j++) {
+                    transformed[8 * i + j]=m128[j];
+                }
+                continue;
+            }
             for (int j = 0; j < 7; j++) {
                 //extract bits from bytes
                 transformed[8 * i + 7 - j] = (byte) (((Math.abs(b)) >> j) % 2);
@@ -165,6 +177,9 @@ public class ReedMuller {
             }
             if (bytes[i] == 1) {
                 result[i / 8] *= -1;
+                if (result[i/8]==0){
+                    result[i/8]=-128;
+                }
             }
         }
         return result;
@@ -267,9 +282,13 @@ public class ReedMuller {
 
     public static void main(String[] args) {
         ReedMuller rm = new ReedMuller();
-        File f = new File("in.data");
+        File f = new File("Modern Operating Systems - 4th Edition.pdf");
         f = rm.encode(f);
         ReedMuller mr = new ReedMuller();
         mr.decode(f);
+
+
+
     }
 }
+

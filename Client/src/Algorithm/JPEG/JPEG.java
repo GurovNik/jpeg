@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -19,8 +20,8 @@ public class JPEG {
     private BufferedImage image = null;     //initial picture
     private int height;                     //picture size
     private int width;                     //picture size
-    private int LIMIT = 3500000;           // limit of size for big pictures
-    private int LOWLIMIT = 500000;           // limit of size for small pictures
+    private final int LIMIT = 3500000;           // limit of size for big pictures
+    private final int LOWLIMIT = 500000;           // limit of size for small pictures
     private int SIZE;
     private File outputFile;            // decompressed file for reciever
 
@@ -125,13 +126,13 @@ public class JPEG {
 
     private File compress(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) throws IOException { // DCT transformation function
 
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                System.out.print((int) Y[0][0].getEntry(i, j) + " ");
-            }
-            System.out.println();
-        }
-        System.out.println();
+//        for (int i = 0; i < 8; i++) {
+//            for (int j = 0; j < 8; j++) {
+//                System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+//            }
+//            System.out.println();
+//        }
+//        System.out.println();
         for (int k = 0; k < height / 8; k++) {
             for (int l = 0; l < width / 8; l++) {
                 RealMatrix Ybuf = U.multiply(Y[k][l]);
@@ -140,14 +141,14 @@ public class JPEG {
                 RealMatrix Yresult = Ybuf.multiply(Utransposed);
                 RealMatrix Cbresult = Cbbuf.multiply(Utransposed);
                 RealMatrix Crresult = Crbuf.multiply(Utransposed);
-                if (k == 0 && l == 0) {
-                    for (int i = 0; i < 8; i++) {
-                        for (int j = 0; j < 8; j++) {
-                            System.out.print((int) Yresult.getEntry(i, j) + " ");
-                        }
-                        System.out.println();
-                    }
-                }
+//                if (k == 0 && l == 0) {
+//                    for (int i = 0; i < 8; i++) {
+//                        for (int j = 0; j < 8; j++) {
+//                            System.out.print((int) Yresult.getEntry(i, j) + " ");
+//                        }
+//                        System.out.println();
+//                    }
+//                }
                 int valueY;
                 int valueCb;
                 int valueCr;
@@ -166,26 +167,26 @@ public class JPEG {
                 Cr[k][l] = Crresult;        // result of compression
             }
         }
-        System.out.println();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                System.out.print((int) Y[0][0].getEntry(i, j) + " ");
-            }
-            System.out.println();
-        }
+//        System.out.println();
+//        for (int i = 0; i < 8; i++) {
+//            for (int j = 0; j < 8; j++) {
+//                System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+//            }
+//            System.out.println();
+//        }
 
         return universalRestructureToFile(Y, Cb, Cr);
     }
 
 
     public void decompress(RealMatrix[][] Y, RealMatrix[][] Cb, RealMatrix[][] Cr) throws IOException {     // make DCT transformation in reverse order for getting initial data
-        System.out.println();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                System.out.print((int) Y[0][0].getEntry(i, j) + " ");
-            }
-            System.out.println();
-        }
+//        System.out.println();
+//        for (int i = 0; i < 8; i++) {
+//            for (int j = 0; j < 8; j++) {
+//                System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+//            }
+//            System.out.println();
+//        }
         for (int k = 0; k < height / 8; k++) {
             for (int l = 0; l < width / 8; l++) {
                 for (int i = 0; i < 8; i++) {
@@ -195,38 +196,38 @@ public class JPEG {
                         Cr[k][l].setEntry(i, j, Cr[k][l].getEntry(i, j) * Z.getEntry(i, j));
                     }
                 }
-                if (k == 0 && l == 0) {
-                    System.out.println();
-                    for (int i = 0; i < 8; i++) {
-                        for (int j = 0; j < 8; j++) {
-                            System.out.print((int) Y[0][0].getEntry(i, j) + " ");
-                        }
-                        System.out.println();
-                    }
-                }
+//                if (k == 0 && l == 0) {
+//                    System.out.println();
+//                    for (int i = 0; i < 8; i++) {
+//                        for (int j = 0; j < 8; j++) {
+//                            System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+//                        }
+//                        System.out.println();
+//                    }
+//                }
                 RealMatrix bufferY = Utransposed.multiply(Y[k][l]);
                 RealMatrix bufferCb = Utransposed.multiply(Cb[k][l]);
                 RealMatrix bufferCr = Utransposed.multiply(Cr[k][l]);
                 Y[k][l] = bufferY.multiply(U);
                 Cb[k][l] = bufferCb.multiply(U);
                 Cr[k][l] = bufferCr.multiply(U);
-                if (k == 0 && l == 0) {
-                    System.out.println();
-                    for (int i = 0; i < 8; i++) {
-                        for (int j = 0; j < 8; j++) {
-                            System.out.print((int) Y[0][0].getEntry(i, j) + " ");
-                        }
-                        System.out.println();
-                    }
-                }
+//                if (k == 0 && l == 0) {
+//                    System.out.println();
+//                    for (int i = 0; i < 8; i++) {
+//                        for (int j = 0; j < 8; j++) {
+//                            System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+//                        }
+//                        System.out.println();
+//                    }
+//                }
             }
-            System.out.println();
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
-                    System.out.print((int) Y[0][0].getEntry(i, j) + " ");
-                }
-                System.out.println();
-            }
+//            System.out.println();
+//            for (int i = 0; i < 8; i++) {
+//                for (int j = 0; j < 8; j++) {
+//                    System.out.print((int) Y[0][0].getEntry(i, j) + " ");
+//                }
+//                System.out.println();
+//            }
         }
         int[][] Ysourse = new int[height][width];
         int[][] CbSourse = new int[height][width];
@@ -267,10 +268,10 @@ public class JPEG {
                 bufferedImage.setRGB(j, i, col.getRGB());
             }
         }
-        File file = new File("/Users/Nikita/IdeaProjects/JPEG/outFiles");
+        File file = new File("outFiles/");
         File[] files = file.listFiles();
         int n = 10000 + files.length;
-        File returnFile = new File("/Users/Nikita/IdeaProjects/JPEG/outFiles/" + "IMG_" + String.valueOf(n) + ".jpeg");
+        File returnFile = new File("outFiles/" + "IMG_" + String.valueOf(n) + ".jpeg");
         FileOutputStream name = new FileOutputStream(returnFile);
         ImageIO.write(bufferedImage, "jpeg", name);
 

@@ -1,8 +1,6 @@
 package Algorithm.JPEG;
 
 import Algorithm.CompressionAlgorithm;
-import Algorithm.FileProcessor;
-
 import java.io.File;
 import java.io.IOException;
 

@@ -15,7 +15,7 @@ import javafx.stage.WindowEvent;
 
 import java.util.Optional;
 
-public class Main extends Application {
+public class ClientApplication extends javafx.application.Application {
     static Controller myController;
     static ChatClient chatClient;
     static ChatClientThread chatClientThread;

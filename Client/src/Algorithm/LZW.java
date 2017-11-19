@@ -251,10 +251,10 @@ public class LZW implements CompressionAlgorithm {
 
     }*/
     public static void main(String[] args) {
-        Hamming coding = new Hamming();
+        /*Hamming coding = new Hamming();
         File f = new File("in.data");
         f = coding.encode(f);
         Hamming decoding = new Hamming();
-        File fprev = decoding.decode(f);
+        File fprev = decoding.decode(f);*/
     }
 }

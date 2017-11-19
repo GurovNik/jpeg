@@ -2,9 +2,7 @@ package FrontEnd;
 
 import Network.ChatClient;
 import Network.ChatClientThread;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,7 +13,7 @@ import javafx.stage.WindowEvent;
 
 import java.util.Optional;
 
-public class Main extends Application {
+public class ClientApplication extends javafx.application.Application {
     static Controller myController;
     static ChatClient chatClient;
     static ChatClientThread chatClientThread;

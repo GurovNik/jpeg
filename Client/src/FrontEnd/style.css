@@ -13,3 +13,10 @@
 .borderPane {
 	-fx-padding: 40px;
 }
+
+.VBOX {
+	-fx-padding: 15px;
+}
+.VBOX .radio {
+	-fx-margin: 10px;
+}

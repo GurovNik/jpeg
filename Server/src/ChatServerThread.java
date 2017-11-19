@@ -1,11 +1,9 @@
-import jdk.nashorn.internal.parser.JSONParser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.Socket;
-import java.sql.SQLException;
-import java.util.Scanner;
+import java.util.Random;
 
 public class ChatServerThread extends Thread {
     private ChatServer server = null;
@@ -13,6 +11,8 @@ public class ChatServerThread extends Thread {
     private int ID = -1;
     private DataInputStream streamIn = null;
     private DataOutputStream streamOut = null;
+    Random rand = new Random();
+
 
     protected ChatServerThread(ChatServer _server, Socket _socket) {
         super();
@@ -62,8 +62,10 @@ public class ChatServerThread extends Thread {
                         send.put("address", "null");
                         send.put("format", "null");
                         send.put("message", "null");
+
                         server.handle(send.toJSONString(), getName());
                     } else {
+                        System.out.println("DEBAJU ETO DERMO");
                         while (db.hasNext()) {
                             JSONObject send = new JSONObject();
                             String receiver = (String) obj.get("address");
@@ -71,27 +73,36 @@ public class ChatServerThread extends Thread {
                             send.put("address", db.get("user"));
                             send.put("format", db.get("format"));
                             send.put("message", db.get("content"));
+                            send.put("encoding", db.get("coding"));
+                            send.put("compression", db.get("compression"));
 
-                            System.out.println(send.toJSONString());
+                            System.out.println("SENDING THIS SHIT :: " + send.toJSONString());
                             server.handle(send.toJSONString(), getName());
                             db.next();
                         }
                     }
                     db.reset();
                 } else {
-                    //Or send message to user.
-                    db.insert(obj.get("encoded_size"), obj.get("compressed_size"),
-                            getName(), obj.get("address"), obj.get("compression"), obj.get("encoding"),
-                            obj.get("format"), obj.get("message"));
+//                    Or send message to user.
+//                    (size, compressed, encoded, encodedTime, compressedTime,
+//                     user, recipient, compression, coding,
+//                     format, content)
                     JSONObject send = new JSONObject();
                     String receiver = (String) obj.get("address");
 
                     send.put("chat", obj.get("address"));
                     send.put("address", getName());
                     send.put("format", obj.get("format"));
-                    send.put("message", obj.get("message"));
+                    Object[] noise = makeSomeNoise((String) obj.get("message"), 0.00);
+                    send.put("message", (String) noise[0]);
                     send.put("compression", obj.get("compression"));
                     send.put("encoding", obj.get("encoding"));
+
+                    db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1],
+                            -1, -1, -1, getName(), (String) obj.get("address"),
+                            (String) obj.get("compression"), (String) obj.get("encoding"),
+                            (String) obj.get("format"), (String) obj.get("message"));
+
 
                     server.handle(send.toJSONString(), getName());
 
@@ -99,8 +110,6 @@ public class ChatServerThread extends Thread {
                     send.put("address", getName());
 
                     server.handle(send.toJSONString(), receiver);
-
-
                 }
                 db.close();
             } catch (IOException ioe) {
@@ -109,6 +118,29 @@ public class ChatServerThread extends Thread {
                 stop();
             }
         }
+    }
+
+    public Object[] makeSomeNoise(String message, double thr) {
+        int n = 0;
+        char[] seq = message.toCharArray();
+        byte store[] = new byte[seq.length];
+        for (int i = 0; i < seq.length; i++) {
+            store[i] = (byte) seq[i];
+        }
+        for (int i = 0; i < store.length; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                if(rand.nextDouble() < thr){
+                    store[i] ^= (byte)~(store[i] & (1 << j));
+                    ++n;
+                }
+
+            }
+        }
+        for (int i = 0; i < seq.length; i++) {
+            seq[i] = (char) store[i];
+        }
+        Object[] res = {new String(seq), n};
+        return res;
     }
 
     public void open() throws IOException {

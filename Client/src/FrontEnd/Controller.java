@@ -29,6 +29,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 
+import static Algorithm.FileProcessor.getFilenameExtension;
 import static Algorithm.FileProcessor.writeBytes;
 
 public class Controller {
@@ -176,7 +177,7 @@ public class Controller {
      * @param vBox - hbox to work with
      * @return index of item
      */
-    public int getVBOXindex(VBox vBox) {
+    private int getVBOXindex(VBox vBox) {
         ObservableList<Node> ol = vBox.getChildren();
         for (int i = 0; i < ol.size(); i++) {
             RadioButton rb = (RadioButton) ol.get(i);
@@ -184,21 +185,6 @@ public class Controller {
                 return i;
         }
         return -1;
-    }
-
-    /**
-     * Method for getting extension of the file
-     * @param link - link to file
-     * @return extension
-     */
-    private String getFilenameExtension(File link) {
-        String name = link.getName();
-        try {
-            return name.substring(name.lastIndexOf(".") + 1);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
     }
 
     /**
@@ -549,18 +535,7 @@ public class Controller {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-//        int data;
-//        StringBuilder factory = new StringBuilder();
-//        try {
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-
         String s = bin.nextLine();
-//        s = s.replace(Character.toString(s.charAt(0)), "");
-//        s = s.replace(Character.toString(s.charAt(s.length()-1)), "");
 
         return s;
     }

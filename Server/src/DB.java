@@ -1,4 +1,4 @@
-import java.io.*;
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -26,7 +26,7 @@ public class DB {
 
     public Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:messenger";
+        String url = "jdbc:sqlite:Server/messenger";
         conn = null;
         try {
             conn = DriverManager.getConnection(url);

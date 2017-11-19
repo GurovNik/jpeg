@@ -11,6 +11,8 @@ public class ChatServerThread extends Thread {
     private int ID = -1;
     private DataInputStream streamIn = null;
     private DataOutputStream streamOut = null;
+    Random rand = new Random();
+
 
     protected ChatServerThread(ChatServer _server, Socket _socket) {
         super();
@@ -60,8 +62,10 @@ public class ChatServerThread extends Thread {
                         send.put("address", "null");
                         send.put("format", "null");
                         send.put("message", "null");
+
                         server.handle(send.toJSONString(), getName());
                     } else {
+                        System.out.println("DEBAJU ETO DERMO");
                         while (db.hasNext()) {
                             JSONObject send = new JSONObject();
                             String receiver = (String) obj.get("address");
@@ -69,8 +73,10 @@ public class ChatServerThread extends Thread {
                             send.put("address", db.get("user"));
                             send.put("format", db.get("format"));
                             send.put("message", db.get("content"));
+                            send.put("encoding", db.get("coding"));
+                            send.put("compression", db.get("compression"));
 
-                            System.out.println(send.toJSONString());
+                            System.out.println("SENDING THIS SHIT :: " + send.toJSONString());
                             server.handle(send.toJSONString(), getName());
                             db.next();
                         }
@@ -87,7 +93,7 @@ public class ChatServerThread extends Thread {
                     send.put("chat", obj.get("address"));
                     send.put("address", getName());
                     send.put("format", obj.get("format"));
-                    Object[] noise = makeSomeNoise((String) obj.get("message"), 0.03);
+                    Object[] noise = makeSomeNoise((String) obj.get("message"), 0.00);
                     send.put("message", (String) noise[0]);
                     send.put("compression", obj.get("compression"));
                     send.put("encoding", obj.get("encoding"));
@@ -115,7 +121,6 @@ public class ChatServerThread extends Thread {
     }
 
     public Object[] makeSomeNoise(String message, double thr) {
-        Random rand = new Random();
         int n = 0;
         char[] seq = message.toCharArray();
         byte store[] = new byte[seq.length];

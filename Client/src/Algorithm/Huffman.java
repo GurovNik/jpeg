@@ -35,8 +35,10 @@ public class Huffman implements CompressionAlgorithm {
         }
         System.out.println("DECODING DONE!");
         String s = result.toString();
+        System.out.println(s);
         s = s.replace(Character.toString(s.charAt(0)), "");
         s = s.replace(Character.toString(s.charAt(s.length() - 1)), "");
+        System.out.println(s);
         byte outs[] = new byte[s.length()];
         for (int i = 0; i < s.length(); i++) {
             outs[i] = (byte) s.charAt(i);

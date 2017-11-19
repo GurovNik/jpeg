@@ -21,8 +21,13 @@ import javafx.stage.FileChooser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import sun.misc.BASE64Encoder;
+
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
+
+import static Algorithm.FileProcessor.writeBytes;
 
 public class Controller {
     @FXML
@@ -142,7 +147,7 @@ public class Controller {
                     JSONObject json = new JSONObject();
                     json.put("message", textBar.getText());
 
-                    sendData(saveObject(json), "text");
+                    sendData(saveObjectOnSend(json), "text");
                     textBar.clear();
                 }
             }
@@ -166,7 +171,7 @@ public class Controller {
 
     /**
      * Get index of used algorithm in HBOX
-     * @param hBox - hbox to work with
+     * @param vBox - hbox to work with
      * @return index of item
      */
     public int getVBOXindex(VBox vBox) {
@@ -234,7 +239,6 @@ public class Controller {
         long encoding_time = System.currentTimeMillis();
         File eFile = eAlg.encode(cFile);
         encoding_time = System.currentTimeMillis() - encoding_time;
-        //TODO :: compressed_size
         /*
             Create JSON string
             ALso transofrms file into some data for JSON
@@ -261,19 +265,33 @@ public class Controller {
      * @param json - object to be stored
      * @return link to the stored file
      */
-    private File saveObject(JSONObject json) {
+    private File saveObjectOnSend(JSONObject json) {
         String s = (String) json.get("message");
-        String fileName = "temporary" + Integer.toString(temporaryIndex);
+        String fileName = "temporary" + Integer.toString(temporaryIndex++);
+        File link = new File(fileName);
+
         try {
-            FileWriter fw = new FileWriter(fileName);
-            fw.write(s);
-            fw.close();
+            FileWriter write = new FileWriter(fileName, false);
+            write.write(s);
+            write.flush();
+            write.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        File link = new File(fileName);
         return link;
+    }
+
+
+    /**
+     * Stores JSONObject on a disk
+     * @param json - object to be stored
+     * @return link to the stored file
+     */
+    private File saveObjectOnReceive(JSONObject json) {
+        byte[] bytes = Base64.getDecoder().decode((String) json.get("message"));
+        String fileName = "temporary" + Integer.toString(temporaryIndex++);
+
+        return writeBytes(fileName, bytes);
     }
 
     /**
@@ -340,6 +358,7 @@ public class Controller {
         JSONParser parser = new JSONParser();
         try {
             JSONObject obj = (JSONObject) parser.parse(text);
+//            obj.put("message", Base64.getDecoder().decode((String)obj.get("message")));
             String room = (String) obj.get("chat");
             /* Select tab to apply to */
             Tab tab = selectDialogue(room);
@@ -365,13 +384,30 @@ public class Controller {
         Task<Node> task = new Task<Node>() {
             @Override
             public Node call() throws Exception {
-                File link = saveObject(obj);
-                EncodeAlgorithm eAlg = getEncodingAlgorithm(Integer.parseInt((String)obj.get("encoding")));
+                String encode_item = (String) obj.get("encoding");
+                String compress_item = (String) obj.get("compression");
+
+                System.out.printf("%s and %s\n",encode_item, compress_item);
+
+                int encode_index = Integer.parseInt(encode_item);
+                int compression_index = Integer.parseInt(compress_item);
+
+                System.out.printf("%d and %d\n",encode_index, compression_index);
+
+                EncodeAlgorithm eAlg = getEncodingAlgorithm(encode_index);
+                CompressionAlgorithm cAlg = getCompressionAlgorithm(compression_index);
+
+                System.out.println("Ya ne sdoh0");
+
+                File link = saveObjectOnReceive(obj);
+                System.out.println("Ya ne sdoh1");
                 File eFile = eAlg.decode(link);
-                CompressionAlgorithm cAlg = getCompressionAlgorithm((int)obj.get("compression"));
+                System.out.println("Ya ne sdoh2");
                 File cFile = cAlg.decompress(eFile);
+                System.out.println("Ya ne sdoh3");
 
                 String format = (String) obj.get("format");
+                System.out.println("Ya ne sdoh4");
 
                 Node n;
                 //TODO :: New data types
@@ -379,7 +415,8 @@ public class Controller {
                 switch (format)
                 {
                     case "text":
-                        String data = readFile(cFile);
+                        System.out.println("Am I alive?");
+                        String data = readFileOnText(cFile);
                         // Добавить декомпрессию
                         System.out.println("Data from file :: " + data);
                         n = new Label(obj.get("address") + " :: " + data);
@@ -399,6 +436,10 @@ public class Controller {
         task.setOnSucceeded(event -> {
             ListView lv = (ListView) tab.getContent();
             lv.getItems().add(task.getValue());
+        });
+
+        task.setOnFailed(event -> {
+            System.out.println("Ya ne smog");
         });
 
         /* Additional thread for running `Runnable task` in a background */
@@ -440,6 +481,7 @@ public class Controller {
      * @return json in form of a string
      */
     private String createJSON(File link, String format, long sizes[], long time[]) {
+
         String sendTo = tabs.getSelectionModel().getSelectedItem().getText();
 
         JSONObject jsonObject = new JSONObject();
@@ -462,29 +504,65 @@ public class Controller {
         return jsonObject.toJSONString();
     }
 
+    private String readFileOnText(File link) {
+        Scanner bin = null;
+        try {
+            bin = new Scanner(new FileInputStream(link));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+//        int data;
+//        StringBuilder factory = new StringBuilder();
+//        try {
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+
+        String s = bin.nextLine();
+//        s = s.replace(Character.toString(s.charAt(0)), "");
+//        s = s.replace(Character.toString(s.charAt(s.length()-1)), "");
+
+        return s;
+    }
+
+
     /**
      * Reads txt file and returns String
      * @param link
      * @return String
      */
     private String readFile(File link) {
-        BufferedInputStream bin = null;
+//        BufferedInputStream bin = null;
+//        try {
+//            bin = new BufferedInputStream(new FileInputStream(link));
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        int data;
+//        StringBuilder factory = new StringBuilder();
+//        try {
+//            while((data = bin.read())!=-1){
+//                factory.append((char)data);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        byte[] bytes= new byte[0];
         try {
-            bin = new BufferedInputStream(new FileInputStream(link));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        int data;
-        StringBuilder factory = new StringBuilder();
-        try {
-            while((data = bin.read())!=-1){
-                factory.append((char)data);
-            }
+            bytes = Files.readAllBytes(link.toPath());
         } catch (IOException e) {
             e.printStackTrace();
         }
+        String data = Base64.getEncoder().encodeToString(bytes);
 
-        return factory.toString();
+//        String s = factory.toString();
+//        s = s.replace(Character.toString(s.charAt(0)), "");
+//        s = s.replace(Character.toString(s.charAt(s.length()-1)), "");
+
+        return data;
     }
 
     /**
@@ -529,5 +607,10 @@ public class Controller {
      */
     public void setSocket(ChatClient socket) {
         this.socket = socket;
+    }
+
+    @FXML
+    public void puppet() {
+        System.out.println("I am alive, yes");
     }
 }

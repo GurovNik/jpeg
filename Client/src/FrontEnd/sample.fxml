@@ -80,6 +80,8 @@
                                     <RadioButton mnemonicParsing="false" text="Hamming" />
                                  </children>
                               </VBox>
+                              <Button mnemonicParsing="false" text="click" onAction="#puppet"  />
+
                            </children>
                         </HBox>
                      </children>

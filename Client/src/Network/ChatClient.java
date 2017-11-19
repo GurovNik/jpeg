@@ -1,10 +1,10 @@
 package Network;
 
 import FrontEnd.Controller;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -38,6 +38,39 @@ public class ChatClient extends Thread {
 
     }
 
+    public void sendFile(File file, String msg){
+        try {
+            streamOut.writeUTF(msg);
+            streamOut.flush();
+            System.out.println("CALL FOR FILE :: " + msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        int count;
+        byte bytes[] = new byte[8192];
+        BufferedInputStream inputStream = null;
+        try {
+            inputStream = new BufferedInputStream(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            while((count = inputStream.read(bytes))>0){
+                streamOut.write(bytes);
+                streamOut.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void write(String msg) throws IOException {
         streamOut.writeUTF(msg);
         streamOut.flush();
@@ -45,6 +78,11 @@ public class ChatClient extends Thread {
     }
 
     public void handle(String msg) throws IOException {
+        if(!msg.contains("text")){
+            File f = client.readFile();
+            //TODO: Call method for receiving a file
+            // frontEndController.receiveFile(File);
+        }
         frontEndController.receiveMessage(msg);
     }
 

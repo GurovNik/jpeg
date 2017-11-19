@@ -1,7 +1,6 @@
 package Network;
 
-import java.io.DataInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 public class ChatClientThread extends Thread {
@@ -24,6 +23,28 @@ public class ChatClientThread extends Thread {
             System.out.println("Error getting input stream: " + ioe);
             work = false;
         }
+    }
+
+    public File readFile(){
+        File output = new File("receivedFile");
+        BufferedOutputStream streamOut = null;
+        try {
+            streamOut = new BufferedOutputStream(new FileOutputStream(output));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        int count;
+        byte bytes[] = new byte[8192];
+        try {
+            while((count = streamIn.read(bytes))>0){
+                streamOut.write(bytes);
+                streamOut.flush();
+            }
+            streamOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return output;
     }
 
     public void close() {

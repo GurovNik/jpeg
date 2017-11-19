@@ -1,9 +1,9 @@
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import sun.misc.IOUtils;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Base64;
 import java.util.Random;
 
 public class ChatServerThread extends Thread {
@@ -25,17 +25,6 @@ public class ChatServerThread extends Thread {
     public void send(String msg) {
         try {
             streamOut.writeUTF(msg);
-            streamOut.flush();
-        } catch (IOException ioe) {
-            System.out.println(ID + " ERROR sending: " + ioe.getMessage());
-            server.remove(ID);
-            stop();
-        }
-    }
-
-    public void send(byte[] msg) {
-        try {
-            streamOut.write(msg);
             streamOut.flush();
         } catch (IOException ioe) {
             System.out.println(ID + " ERROR sending: " + ioe.getMessage());
@@ -98,21 +87,41 @@ public class ChatServerThread extends Thread {
                     }
                     db.reset();
                 } else {
+                    //If sended file:
                     if(!obj.get("format").equals("text")){
-                        byte bytes[] = new byte[0];
-                        streamIn.read(bytes);
-                        JSONObject send = new JSONObject();
-                        String receiver = (String) obj.get("address");
-                        send.put("chat", obj.get("address"));
-                        send.put("address", getName());
-                        send.put("format", obj.get("format"));
-                        Object[] noise = makeSomeNoise(bytes, 0.00);
-                        send.put("message", (String) noise[0]);
-                        send.put("compression", obj.get("compression"));
-                        send.put("encoding", obj.get("encoding"));
 
-                        server.handle(send.toJSONString(), receiver);
-                        server.handleFile(bytes, receiver);
+                        JSONObject notification = new JSONObject();
+
+                        String receiver = (String) obj.get("address");
+                        notification.put("chat", obj.get("address"));
+                        notification.put("address", getName());
+                        notification.put("format", obj.get("format"));
+                        notification.put("message", obj.get("message"));
+                        notification.put("compression", obj.get("compression"));
+                        notification.put("encoding", obj.get("encoding"));
+
+                        server.handle(notification.toJSONString(), receiver);
+
+
+                        int count;
+                        byte bytes[] = new byte[8192];
+                        Object[] noise = {null, 0};
+                        while((count = streamIn.read(bytes))>0){
+                            noise[1] = (int) noise[1] + (int)makeSomeNoise(bytes, 0.00)[1];
+                            streamOut.write(bytes);
+                            streamOut.flush();
+                        }
+
+                        db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1],
+                                -1, -1, -1, getName(), (String) obj.get("address"),
+                                (String) obj.get("compression"), (String) obj.get("encoding"),
+                                (String) obj.get("format"), (String) obj.get("message"));
+
+                        notification.put("chat", getName());
+                        notification.put("address", getName());
+
+                        server.handle(notification.toJSONString(), receiver);
+
                     }else {
 //                    Or send message to user.
 //                    (size, compressed, encoded, encodedTime, compressedTime,

@@ -16,6 +16,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -33,9 +34,9 @@ public class Controller {
     @FXML
     private Label alias;
     @FXML
-    private HBox encodingHBOX;
+    private VBox encodingHBOX;
     @FXML
-    private HBox compressionHBOX;
+    private VBox compressionHBOX;
     @FXML
     private Button attachment;
 
@@ -168,8 +169,8 @@ public class Controller {
      * @param hBox - hbox to work with
      * @return index of item
      */
-    public int getHBOXindex(HBox hBox) {
-        ObservableList<Node> ol = hBox.getChildren();
+    public int getVBOXindex(VBox vBox) {
+        ObservableList<Node> ol = vBox.getChildren();
         for (int i = 0; i < ol.size(); i++) {
             RadioButton rb = (RadioButton) ol.get(i);
             if (rb.isSelected())
@@ -205,6 +206,7 @@ public class Controller {
             fw.close();
 
             File link = new File("temp_text.data");
+            textBar.clear();
             sendData(link, "text");
         } catch (IOException e) {
             e.printStackTrace();
@@ -218,8 +220,8 @@ public class Controller {
      */
     private void sendData(File link, String format) {
         /* Get info about compression/encoding algorithms to use */
-        int compression =  getHBOXindex(compressionHBOX);
-        int encoding =  getHBOXindex(encodingHBOX);
+        int compression =  getVBOXindex(compressionHBOX);
+        int encoding =  getVBOXindex(encodingHBOX);
 
         /* Get compression/encoding algorithms objects */
         CompressionAlgorithm cAlg = getCompressionAlgorithm(compression);
@@ -443,8 +445,8 @@ public class Controller {
         JSONObject jsonObject = new JSONObject();
         /* Meta information*/
         jsonObject.put("address", sendTo);
-        jsonObject.put("compression", Long.toString(getHBOXindex(compressionHBOX)));
-        jsonObject.put("encoding", Long.toString(getHBOXindex(encodingHBOX)));
+        jsonObject.put("compression", Long.toString(getVBOXindex(compressionHBOX)));
+        jsonObject.put("encoding", Long.toString(getVBOXindex(encodingHBOX)));
         jsonObject.put("message", readFile(link));
         /* Size stats for server */
         jsonObject.put("initial_size", Long.toString(sizes[0]));

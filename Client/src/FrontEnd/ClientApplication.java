@@ -2,9 +2,7 @@ package FrontEnd;
 
 import Network.ChatClient;
 import Network.ChatClientThread;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

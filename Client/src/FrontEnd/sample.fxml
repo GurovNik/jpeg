@@ -63,18 +63,23 @@
                                  </font></Label>
                            </top>
                         </BorderPane>
-                        <HBox fx:id="compressionHBOX" prefHeight="28.0" prefWidth="270.0">
+                        <HBox prefHeight="28.0" prefWidth="270.0">
                            <children>
-                              <RadioButton mnemonicParsing="false" selected="true" text="Compression1" />
-                              <RadioButton mnemonicParsing="false" text="Compression2" />
-                              <RadioButton mnemonicParsing="false" text="Compression3" />
-                           </children>
-                        </HBox>
-                        <HBox fx:id="encodingHBOX" prefHeight="30.0" prefWidth="270.0">
-                           <children>
-                              <RadioButton mnemonicParsing="false" selected="true" text="Encoding1" />
-                              <RadioButton mnemonicParsing="false" text="Encoding3" />
-                              <RadioButton mnemonicParsing="false" text="Encoding2" />
+                              <VBox fx:id="compressionHBOX" prefHeight="200.0" prefWidth="100.0" styleClass="VBOX">
+                                 <children>
+                                    <RadioButton mnemonicParsing="false" selected="true" styleClass="radio" text="LZW" />
+                                    <RadioButton mnemonicParsing="false" styleClass="radio" text="Huffman" />
+                                    <RadioButton mnemonicParsing="false" text="JPEG" />
+                                 </children>
+                              </VBox>
+                              <VBox fx:id="encodingHBOX" prefHeight="200.0" prefWidth="100.0">
+                                 <children>
+                                    <RadioButton mnemonicParsing="false" selected="true" text="Repetition - 3" />
+                                    <RadioButton mnemonicParsing="false" text="Repetition - 5" />
+                                    <RadioButton mnemonicParsing="false" text="ReedMuller" />
+                                    <RadioButton mnemonicParsing="false" text="Hamming" />
+                                 </children>
+                              </VBox>
                            </children>
                         </HBox>
                      </children>

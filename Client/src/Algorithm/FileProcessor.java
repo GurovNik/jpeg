@@ -32,4 +32,19 @@ public class FileProcessor {
 
         return link;
     }
+
+    /**
+     * Method for getting extension of the file
+     * @param link - link to file
+     * @return extension
+     */
+    public static String getFilenameExtension(File link) {
+        String name = link.getName();
+        try {
+            return name.substring(name.lastIndexOf(".") + 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 }

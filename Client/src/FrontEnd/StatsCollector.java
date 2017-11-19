@@ -3,6 +3,8 @@ package FrontEnd;
 import Algorithm.*;
 import Algorithm.JPEG.JpegCompression;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -10,6 +12,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Scanner;
 
 import static Algorithm.FileProcessor.getFilenameExtension;
 
@@ -35,7 +38,7 @@ public class StatsCollector {
     public static String decoded = "decoded_";
     public static String format;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ParseException {
         for (int i = 0; i < comprNames.length; i++)
             algName.put(compressionAlgorithms[i], comprNames[i]);
         for (int i = 0; i < encodeNames.length; i++)
@@ -46,11 +49,10 @@ public class StatsCollector {
         int items_amount = 0;
 
 
-        int index = 2;
+        int index = 0;
         File stats_compression_json = new File(foldersPath + "/../stats/compression" + algName.get(comprNames[index]) + ".data");
         FileWriter fw = new FileWriter(stats_compression_json, true);
 
-//        for (int i = 0; i < compressionAlgorithms.length - 2; i++) {
             CompressionAlgorithm alg = compressionAlgorithms[index];
             for (File folder: folders.listFiles()) {
                 for (File subfolder: folder.listFiles()) {
@@ -68,11 +70,15 @@ public class StatsCollector {
                         long time = System.currentTimeMillis();
                         File compressed = alg.compress(item);
                         time = System.currentTimeMillis() - time;
+                        json.put("compression_time", Long.toString(time));
+                        time = System.currentTimeMillis();
+                        alg.decompress(compressed);
+                        time = System.currentTimeMillis() - time;
+                        json.put("decompression_time", Long.toString(time));
 
                         json.put("message", "");
                         json.put("format", format);
                         json.put("compression", Integer.toString(index));
-                        json.put("compression_time", Long.toString(time));
                         json.put("initial_size", Long.toString(item.length()));
                         json.put("compressed_size", Long.toString(compressed.length()));
                         String newPath = foldersPath + "/../Statistics/" + algName.get(alg) + "/" + compressed + item.getName() + ".data";
@@ -95,10 +101,12 @@ public class StatsCollector {
                     }
                 }
             }
+
+//        Scanner sc = new Scanner(stats_compression_json);
+//        JSONParser parser = new JSONParser();
+//        while (sc.hasNextLine()) {
+//            JSONObject json = (JSONObject) parser.parse(sc.nextLine());
+//
 //        }
-
-//        Collection<JSONObject> values = statisticsCompression.values();
-
-//        for (JSONObject json: values)
     }
 }

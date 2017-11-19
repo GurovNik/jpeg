@@ -44,12 +44,14 @@ public class StatsCollector {
         int success = 0;
         int counter = 0;
         int items_amount = 0;
-        File stats_compression_json = new File(foldersPath + "/../stats/compression.data");
 
+
+        int index = 2;
+        File stats_compression_json = new File(foldersPath + "/../stats/compression" + algName.get(comprNames[index]) + ".data");
         FileWriter fw = new FileWriter(stats_compression_json, true);
 
 //        for (int i = 0; i < compressionAlgorithms.length - 2; i++) {
-            CompressionAlgorithm alg = compressionAlgorithms[0];
+            CompressionAlgorithm alg = compressionAlgorithms[index];
             for (File folder: folders.listFiles()) {
                 for (File subfolder: folder.listFiles()) {
                     File files[] = subfolder.listFiles();
@@ -61,6 +63,7 @@ public class StatsCollector {
                         items_amount++;
 
                         System.out.printf("Before compression :: ");
+                        System.out.printf(item.getAbsolutePath());
                         JSONObject json = new JSONObject();
                         long time = System.currentTimeMillis();
                         File compressed = alg.compress(item);
@@ -68,23 +71,27 @@ public class StatsCollector {
 
                         json.put("message", "");
                         json.put("format", format);
-                        json.put("compression", Integer.toString(0));
+                        json.put("compression", Integer.toString(index));
                         json.put("compression_time", Long.toString(time));
                         json.put("initial_size", Long.toString(item.length()));
                         json.put("compressed_size", Long.toString(compressed.length()));
                         String newPath = foldersPath + "/../Statistics/" + algName.get(alg) + "/" + compressed + item.getName() + ".data";
+//                        String newPath = foldersPath + "/../Statistics/" + comprNames[2] + "/" + compressed + item.getName() + ".data";
                         boolean t = compressed.renameTo(new File(newPath));
                         if (t) {
                             success++;
                             statisticsCompression.put(compressed.getName(), json);
-                            fw = new FileWriter(stats_compression_json, true);
-                            fw.write(json.toJSONString() + "\n");
-                            fw.close();
 
-                            System.out.printf("Success ");
+
+                            System.out.printf(" :: Success :: ");
                         }
+
+                        fw = new FileWriter(stats_compression_json, true);
+                        fw.write(json.toJSONString() + "\n");
+                        fw.close();
+
                         counter++;
-                        System.out.println("Done :: " + counter);
+                        System.out.println(":: Done :: " + counter);
                     }
                 }
             }

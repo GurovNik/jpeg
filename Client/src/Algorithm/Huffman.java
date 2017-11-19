@@ -11,7 +11,7 @@ public class Huffman implements CompressionAlgorithm {
     private HashMap<String, String> table;                   // A table with symbols and their codewords
 
     // The constructor reads file and makes a string to work with
-    public Huffman() throws FileNotFoundException {
+    public Huffman()  {
     }
 
     // Decompresses a file and returns a result file
@@ -40,11 +40,9 @@ public class Huffman implements CompressionAlgorithm {
             }
             ++counter;
         }
-        System.out.println("DECODING DONE!");
 
 
         String s = result.toString();
-        System.out.println(s);
         byte outs[] = Base64.getDecoder().decode(s);
         return FileProcessor.writeBytes("huffmanDecompressed.data", outs);
     }
@@ -54,7 +52,6 @@ public class Huffman implements CompressionAlgorithm {
         File result = new File("compressedHuffman.data");
         string = Base64.getEncoder().encodeToString(FileProcessor.readBytes(input));
 
-        System.out.println(string);
         table = new HashMap<>();
         makeTable();
         FileWriter fw = null;

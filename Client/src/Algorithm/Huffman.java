@@ -1,5 +1,6 @@
 package Algorithm;
 
+import sun.misc.BASE64Encoder;
 import sun.misc.IOUtils;
 import sun.security.util.BitArray;
 
@@ -11,113 +12,97 @@ public class Huffman implements CompressionAlgorithm {
 
     private String string;                                 // The string we are working with
     private HuffmanNode root;                              // The root of the huffman tree
-    private HashMap<String, Long> table;                   // A table with symbols and their codewords
+    private HashMap<String, String> table;                   // A table with symbols and their codewords
 
     // The constructor reads file and makes a string to work with
     public Huffman() throws FileNotFoundException {
-        byte mas[] = FileProcessor.readBytes(new File("input"));
-        char arr[] = new char[mas.length];
-        for (int i = 0; i < mas.length; i++) {
-            arr[i] = (char) mas[i];
-        }
-        string = new String(arr);
-        table = new HashMap<>();
     }
 
     // Decompresses a file and returns a result file
     public File decompress(File input) {
-        byte[] code = FileProcessor.readBytes(input);
-        HashMap<Long, String> hashMap = new HashMap<>();
-        Set<String> set = table.keySet();
-        String[] array = new String[set.size()];
-        int k = 0;
-        for (String t: set) {
-            array[k] = t;
-            ++k;
+        Scanner scan = null;
+        try {
+            scan = new Scanner(input);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-        for (int i = 0; i < array.length; i++) {
-            hashMap.put(table.get(array[i]), array[i]);
-        }
-//        BufferedReader rr = new BufferedReader(new StringReader(code));
-        ArrayList<Byte> result = new ArrayList<>(1024);
-        int counter = 0;
-        int n = 8;
-        while (counter < code.length){
-            for (int i = 0; i < n; i++) {
 
+        String code = scan.nextLine();
+        StringBuilder result = new StringBuilder();
+        StringBuilder codeword = new StringBuilder();
+        int counter = 0;
+        HashMap<String, String> hash = new HashMap<>();
+        Set<String> keys = table.keySet();
+        for (String k: keys) {
+            hash.put(table.get(k), k);
+        }
+        while (counter < code.length()){
+            codeword.append(code.charAt(counter));
+            if(hash.containsKey(codeword.toString())){
+                result.append(hash.get(codeword.toString()));
+                codeword = new StringBuilder();
             }
-            long temp = code[counter];
-            for (int i = 0; i < 64; i++) {
-                long tmp =  temp & (long)Math.pow(2,i)-1;
-                if(hashMap.containsKey(tmp)){
-                    String s = hashMap.get(tmp);
-                    byte[] temBytes = s.getBytes();
-                    for (int j = 0; j < temBytes.length; j++) {
-                        result.add(temBytes[j]);
-                    }
-                }
-                --n;
-            }
-            counter+=8;
+            ++counter;
         }
         System.out.println("DECODING DONE!");
+
+
         String s = result.toString();
-        return FileProcessor.writeBytes("huffmanDecompressed.data", s.getBytes());
+        System.out.println(s);
+        byte outs[] = Base64.getDecoder().decode(s);
+        return FileProcessor.writeBytes("huffmanDecompressed.data", outs);
     }
 
     // Compresses an input file and returns a result file
     public File compress(File input) {
-        byte[] arr = FileProcessor.readBytes(input);
+        File result = new File("compressedHuffman.data");
+        string = Base64.getEncoder().encodeToString(FileProcessor.readBytes(input));
 
-        string = new String(arr);
-//        BufferedReader rr = new BufferedReader(new StringReader(string));
-//        rr.lines().forEach(string1 -> string1.replaceAll("\b", "\\b"));
-
+        System.out.println(string);
+        table = new HashMap<>();
         makeTable();
-        StringBuilder result = new StringBuilder();
-        for (int  i = 0; i < string.length(); i++){
-            String s = "" + string.charAt(i);
-            int code = 0;
-            if (table.containsKey(s)) {
-                code = table.get(s);
-            }
-            result.append(code);
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(result);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        String s = result.toString();
 
-        return FileProcessor.writeBytes("huffmanCompressed.data", s.getBytes());
+        for (int i = 0; i < string.length(); i++) {
+            String s = "" + string.charAt(i);
+            try {
+            if (table.containsKey(s)) {
+                fw.write(table.get(s));
+            }
+                fw.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     // Makes a table with symbols and their codewords
     void makeTable() {
         PriorityQueue<HuffmanNode> queue = countFrequency();
         root = makeTree(queue);
-        makeCode(table, root, 0L);
+        makeCode(table, root, "0");
     }
 
     // Creates codewords for each symbol in the huffman tree
-    void makeCode(HashMap<String, Long> table, HuffmanNode node, Long currentCode) {
+    void makeCode(HashMap<String, String> table, HuffmanNode node, String currentCode) {
         if (node.getValue() != '\u0000'){
-            int i = 0;
-
-            //            for (int j = 0; j < table.length; j++){
-//                if (table[j][0] == null) {
-//                    i = j;
-//                    break;
-//                }
-//            }
-            if (node.getParent() == null) currentCode = 0L;
+            if (node.getParent() == null) currentCode = "0";
             String value = "" + node.getValue();
             table.put(value, currentCode);
         }
-        if (node.getLeftchild() != null) {
-            currentCode = currentCode << 1;
-            makeCode(table, node.getLeftchild(), currentCode);
-        }
-        if (node.getRightchild() != null){
-            currentCode = ((currentCode << 1) | 1);
-            makeCode(table, node.getRightchild(), currentCode);
-        }
+        if (node.getLeftchild() != null) makeCode(table, node.getLeftchild(), currentCode + "0");
+        if (node.getRightchild() != null) makeCode(table, node.getRightchild(), currentCode + "1");
     }
 
     // Makes a tree of symbols with the most frequent in the root

@@ -25,25 +25,29 @@ public class ChatClientThread extends Thread {
         }
     }
 
-    public File readFile(){
+    public File readFile(int allocationSize){
+        System.out.println("WE AVE REFEVED A FAILE MA LORDO!");
         File output = new File("receivedFile");
-        BufferedOutputStream streamOut = null;
+        DataOutputStream streamOut = null;
         try {
-            streamOut = new BufferedOutputStream(new FileOutputStream(output));
+            streamOut = new DataOutputStream(new FileOutputStream(output));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         int count;
         byte bytes[] = new byte[8192];
         try {
-            while((count = streamIn.read(bytes))>0){
+            while((count = streamIn.read(bytes, 0, Math.min(bytes.length, allocationSize)))>0){
                 streamOut.write(bytes);
                 streamOut.flush();
+                System.out.println("count received file == " + count);
+                allocationSize -= count;
             }
             streamOut.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("DONE");
         return output;
     }
 

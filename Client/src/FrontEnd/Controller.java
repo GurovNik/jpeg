@@ -135,8 +135,8 @@ public class Controller {
                     public void handle(final ActionEvent e) {
                         final FileChooser fileChooser = new FileChooser();
                         final File selectedFile = fileChooser.showOpenDialog(null);
-                        String format = getFilenameExtension(selectedFile);
                         if (selectedFile != null) {
+                            String format = getFilenameExtension(selectedFile);
                             sendData(selectedFile, format);
                         }
                     }

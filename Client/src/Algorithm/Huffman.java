@@ -1,5 +1,6 @@
 package Algorithm;
 
+
 import java.io.*;
 import java.util.*;
 
@@ -7,99 +8,94 @@ public class Huffman implements CompressionAlgorithm {
 
     private String string;                                 // The string we are working with
     private HuffmanNode root;                              // The root of the huffman tree
-    private String[][] table;                              // A table with symbols and their codewords
+    private HashMap<String, String> table;                   // A table with symbols and their codewords
 
     // The constructor reads file and makes a string to work with
-    public Huffman() {}
+    public Huffman() throws FileNotFoundException {
+    }
 
     // Decompresses a file and returns a result file
     public File decompress(File input) {
-        byte inp[] = FileProcessor.readBytes(input);
-        char arr[] = new char[inp.length];
-        for (int i = 0; i < inp.length; i++) {
-            arr[i] = (char) inp[i];
+        Scanner scan = null;
+        try {
+            scan = new Scanner(input);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-        String code = new String(arr);
+
+        String code = scan.nextLine();
         StringBuilder result = new StringBuilder();
         StringBuilder codeword = new StringBuilder();
         int counter = 0;
+        HashMap<String, String> hash = new HashMap<>();
+        Set<String> keys = table.keySet();
+        for (String k: keys) {
+            hash.put(table.get(k), k);
+        }
         while (counter < code.length()){
             codeword.append(code.charAt(counter));
-            for (int i = 0; i < table.length; i++){
-                if (Objects.equals(table[i][1], codeword.toString())){
-                    result.append(table[i][0]);
-                    codeword = new StringBuilder();
-                }
+            if(hash.containsKey(codeword.toString())){
+                result.append(hash.get(codeword.toString()));
+                codeword = new StringBuilder();
             }
             ++counter;
         }
         System.out.println("DECODING DONE!");
+
+
         String s = result.toString();
         System.out.println(s);
-        s = s.replace(Character.toString(s.charAt(0)), "");
-        s = s.replace(Character.toString(s.charAt(s.length() - 1)), "");
-        System.out.println(s);
-        byte outs[] = new byte[s.length()];
-        for (int i = 0; i < s.length(); i++) {
-            outs[i] = (byte) s.charAt(i);
-        }
-        return FileProcessor.writeBytes("huffmanCompressed.data", outs);
+        byte outs[] = Base64.getDecoder().decode(s);
+        return FileProcessor.writeBytes("huffmanDecompressed.data", outs);
     }
 
     // Compresses an input file and returns a result file
     public File compress(File input) {
-        byte inp[] = FileProcessor.readBytes(input);
-        char arr[] = new char[inp.length];
-        for (int i = 0; i < inp.length; i++) {
-            arr[i] = (char) inp[i];
+        File result = new File("compressedHuffman.data");
+        string = Base64.getEncoder().encodeToString(FileProcessor.readBytes(input));
+
+        System.out.println(string);
+        table = new HashMap<>();
+        makeTable();
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(result);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        string = arr.toString();
-        table = makeTable();
-        StringBuilder result = new StringBuilder();
-        for (int  i = 0; i < string.length(); i++){
+
+        for (int i = 0; i < string.length(); i++) {
             String s = "" + string.charAt(i);
-            String code = "";
-            for (int j = 0; j < table.length; j++){
-                if (Objects.equals(table[j][0], s)){
-                    code = table[j][1];
-                    break;
-                }
+            try {
+            if (table.containsKey(s)) {
+                fw.write(table.get(s));
             }
-            result.append(code);
+                fw.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        String s = result.toString();
-        s = s.replace(Character.toString(s.charAt(0)), "");
-        s = s.replace(Character.toString(s.charAt(s.length() - 1)), "");
-        byte outs[] = new byte[s.length()];
-        for (int i = 0; i < s.length(); i++) {
-            outs[i] = (byte) s.charAt(i);
+        try {
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return FileProcessor.writeBytes("huffmanCompressed.data", outs);
+        return result;
     }
 
     // Makes a table with symbols and their codewords
-    String[][] makeTable() {
+    void makeTable() {
         PriorityQueue<HuffmanNode> queue = countFrequency();
-        String[][] table = new String[queue.size()][2];
         root = makeTree(queue);
-        makeCode(table, root, "");
-        return table;
+        makeCode(table, root, "0");
     }
 
     // Creates codewords for each symbol in the huffman tree
-    void makeCode(String[][] table, HuffmanNode node, String currentCode) {
+    void makeCode(HashMap<String, String> table, HuffmanNode node, String currentCode) {
         if (node.getValue() != '\u0000'){
-            int i = 0;
-            for (int j = 0; j < table.length; j++){
-                if (table[j][0] == null) {
-                    i = j;
-                    break;
-                }
-            }
             if (node.getParent() == null) currentCode = "0";
             String value = "" + node.getValue();
-            table[i][0] = value;
-            table[i][1] = currentCode;
+            table.put(value, currentCode);
         }
         if (node.getLeftchild() != null) makeCode(table, node.getLeftchild(), currentCode + "0");
         if (node.getRightchild() != null) makeCode(table, node.getRightchild(), currentCode + "1");
@@ -148,11 +144,11 @@ public class Huffman implements CompressionAlgorithm {
     }
 
     public static void main(String[] args) {
-        Huffman huf = new Huffman();
-        System.out.println("CODING!");
-        File f = huf.compress(new File("input"));
-        System.out.println("DECODING!");
-        huf.decompress(f);
+//        Huffman huf = new Huffman();
+//        System.out.println("CODING!");
+//        File f = huf.compress(new File("input"));
+//        System.out.println("DECODING!");
+//        huf.decompress(f);
     }
 
     public String getString() {

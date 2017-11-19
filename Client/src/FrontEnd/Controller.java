@@ -29,6 +29,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 
+import static Algorithm.FileProcessor.getFilenameExtension;
 import static Algorithm.FileProcessor.writeBytes;
 
 public class Controller {
@@ -134,8 +135,8 @@ public class Controller {
                     public void handle(final ActionEvent e) {
                         final FileChooser fileChooser = new FileChooser();
                         final File selectedFile = fileChooser.showOpenDialog(null);
-                        String format = getFilenameExtension(selectedFile);
                         if (selectedFile != null) {
+                            String format = getFilenameExtension(selectedFile);
                             sendData(selectedFile, format);
                         }
                     }
@@ -176,7 +177,7 @@ public class Controller {
      * @param vBox - hbox to work with
      * @return index of item
      */
-    public int getVBOXindex(VBox vBox) {
+    private int getVBOXindex(VBox vBox) {
         ObservableList<Node> ol = vBox.getChildren();
         for (int i = 0; i < ol.size(); i++) {
             RadioButton rb = (RadioButton) ol.get(i);
@@ -184,21 +185,6 @@ public class Controller {
                 return i;
         }
         return -1;
-    }
-
-    /**
-     * Method for getting extension of the file
-     * @param link - link to file
-     * @return extension
-     */
-    private String getFilenameExtension(File link) {
-        String name = link.getName();
-        try {
-            return name.substring(name.lastIndexOf(".") + 1);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
     }
 
     /**
@@ -254,11 +240,15 @@ public class Controller {
 
         String json = createJSON(eFile, format, stats_size, stats_time);
 
-        /* Send by socket JSON string */
-        try {
-            socket.write(json);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(!format.equals("text")){
+            socket.sendFile(link, json);
+        }else{
+            /* Send by socket JSON string */
+            try {
+                socket.write(json);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -356,6 +346,28 @@ public class Controller {
         jsonObject.put("database", 1);
         return jsonObject;
     }
+
+
+    /**
+     * Do not accept this!!!
+     * @param f - file kotoriy ne nado accept.
+     */
+    public synchronized void receiveFile(File f) {
+        JSONParser parser = new JSONParser();
+//        try {
+//            obj.put("message", Base64.getDecoder().decode((String)obj.get("message")));
+        String room = "evgerher";
+        /* Select tab to apply to */
+        Tab tab = selectDialogue(room);
+        if (tab != null)
+            /* If tab is found - apply */
+        applyMessage(tab, new JSONObject());
+//        } catch (ParseException pe) {
+//            System.err.println("Invalid json");
+//            pe.printStackTrace();
+//        }
+    }
+
 
     /**
      * Method for external service (socket) - called when message came, applies message somewhere in GUI.
@@ -496,7 +508,12 @@ public class Controller {
         jsonObject.put("address", sendTo);
         jsonObject.put("compression", Long.toString(getVBOXindex(compressionHBOX)));
         jsonObject.put("encoding", Long.toString(getVBOXindex(encodingHBOX)));
-        jsonObject.put("message", readFile(link));
+        if(format.equals("text")){
+            jsonObject.put("message", readFile(link));
+        }else{
+            jsonObject.put("message", link.getName());
+        }
+
         /* Size stats for server */
         jsonObject.put("initial_size", Long.toString(sizes[0]));
         jsonObject.put("compressed_size", Long.toString(sizes[1]));
@@ -518,18 +535,7 @@ public class Controller {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-//        int data;
-//        StringBuilder factory = new StringBuilder();
-//        try {
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-
         String s = bin.nextLine();
-//        s = s.replace(Character.toString(s.charAt(0)), "");
-//        s = s.replace(Character.toString(s.charAt(s.length()-1)), "");
 
         return s;
     }

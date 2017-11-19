@@ -1,10 +1,11 @@
 package Network;
 
 import FrontEnd.Controller;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -38,6 +39,40 @@ public class ChatClient extends Thread {
 
     }
 
+    public void sendFile(File file, String msg){
+        try {
+            streamOut.writeUTF(msg);
+            streamOut.flush();
+            System.out.println("CALL FOR FILE :: " + msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        int count;
+        byte bytes[] = new byte[8192];
+        DataInputStream inputStream = null;
+        try {
+            inputStream = new DataInputStream(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            while((count = inputStream.read(bytes))>0){
+                streamOut.write(bytes);
+                streamOut.flush();
+                System.out.println("Count :: " + count);
+            }
+            streamOut.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void write(String msg) throws IOException {
         streamOut.writeUTF(msg);
         streamOut.flush();
@@ -45,7 +80,27 @@ public class ChatClient extends Thread {
     }
 
     public void handle(String msg) throws IOException {
-        frontEndController.receiveMessage(msg);
+        JSONParser parser = new JSONParser();
+        JSONObject obj= null;
+        try {
+            obj = (JSONObject) parser.parse(msg);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        System.out.println("RECEIVED :: " + obj.toJSONString());
+        if(obj.containsKey("database")){
+            frontEndController.receiveMessage(msg);
+        }else{
+            if(!((String)obj.get("format")).equals("text")){
+                System.out.println("FILE RECEIVED!");
+
+                File f = client.readFile(Integer.parseInt((String) obj.get("initial_size")), msg);
+                //TODO: Call method for receiving a file
+                frontEndController.receiveFile(f);
+            }else{
+                frontEndController.receiveMessage(msg);
+            }
+        }
     }
 
     @Deprecated

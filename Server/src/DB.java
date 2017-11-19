@@ -115,21 +115,21 @@ public class DB {
                 "INSERT INTO messages (id, intial_size, compressed, encoded, coding_time, user, recepient, compression, coding, compres_time, format, content, noises) " +
                         "VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?, ?)";
 
-        Double dTime = new Double((int) encodedTime);
-        Double cTime = new Double((int) compressedTime);
+//        Double dTime = new Double((int) encodedTime);
+//        Double cTime = new Double((int) compressedTime);
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, ++ID);                           //id
             pstmt.setInt(2, Integer.parseInt((String) size));                     //initial_size
             pstmt.setInt(3, Integer.parseInt((String) compressed));                //compressed
 //            pstmt.setInt(4, Integer.parseInt((String) encoded));                   //encoded
-            pstmt.setInt(4, (int) encoded);
-            pstmt.setDouble(5, dTime);                          //coding_time
+            pstmt.setInt(4, Integer.parseInt((String) encoded));
+            pstmt.setDouble(5, Double.parseDouble((String)encodedTime));                          //coding_time
             pstmt.setString(6, (String) user);                  //user
             pstmt.setString(7, (String) recipient);             //recepient
             pstmt.setInt(8, Integer.parseInt((String) compression));               //compression
             pstmt.setInt(9, Integer.parseInt((String) coding));                    //coding
-            pstmt.setDouble(10, cTime);                         //compres_time
+            pstmt.setDouble(10, Double.parseDouble((String)compressedTime));                         //compres_time
             pstmt.setString(11, (String) format);               //format
             pstmt.setString(12, (String) content);              //message
             pstmt.setInt(13, noiseTimes);                    //noises

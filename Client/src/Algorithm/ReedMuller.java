@@ -11,8 +11,8 @@ public class ReedMuller implements EncodeAlgorithm {
     public static final int r = 1;
     public static final int m = 4;
     //encoding transforms 5 bits to 16
-    public static final int K=5;
-    public static final int N=16;
+    public static final int K = 5;
+    public static final int N = 16;
     //Generating matrix G
     private int decodeMx[][];
     //Hadamard matrix
@@ -51,11 +51,16 @@ public class ReedMuller implements EncodeAlgorithm {
             }
         }
     }
+
     //Default constructor
     public ReedMuller() {
         //initialise Hadamard matrix with param m.
         hadamardMatrix(m);
         //matrix for encoding massages
+        allocateEncodeMx();
+    }
+
+    private void allocateEncodeMx() {
         encodeMx = new int[][]
                 //first row consist of 1s. Columns (except 1 char) is binary representation of the 0-15 numbers
                 {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -63,15 +68,14 @@ public class ReedMuller implements EncodeAlgorithm {
                         {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1},
                         {0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1},
                         {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1}};
-
     }
 
     /**
-     *
      * @param link file to decode
      * @return decoded file
      */
     public File decode(File link) {
+        hadamardMatrix(m);
         //read file as array of bytes
         byte[] bytes = Algorithm.FileProcessor.readBytes(link);
         //decompose bytes to bits
@@ -85,11 +89,11 @@ public class ReedMuller implements EncodeAlgorithm {
     }
 
     /**
-     *
      * @param link file to encode
      * @return encoded file
      */
     public File encode(File link) {
+        allocateEncodeMx();
         //read file as array of the bytes
         byte[] data = FileProcessor.readBytes(link);
         //decompose bytes to bits
@@ -103,7 +107,6 @@ public class ReedMuller implements EncodeAlgorithm {
     }
 
     /**
-     *
      * @param bytes array of bytes consist of 0s and 1s
      * @return transformed bits to bytes array
      */
@@ -125,7 +128,6 @@ public class ReedMuller implements EncodeAlgorithm {
     }
 
     /**
-     *
      * @param data array of bytes  in range of -128 and 127
      * @return array of bytes which consist of 0s and 1s
      */
@@ -149,7 +151,6 @@ public class ReedMuller implements EncodeAlgorithm {
     }
 
     /**
-     *
      * @param bytes array of bits (bytes have to contain 0s and 1s)
      * @return array of bytes (in range of -128 and 127)
      */
@@ -165,15 +166,15 @@ public class ReedMuller implements EncodeAlgorithm {
         }
         return result;
     }
+
     /**
-     *
      * @param bytes take sequence of bits (bytes have to consist of 0s and 1s)
      *              each 5 bits will be encoded to 16
      * @return encoded array of bits
      */
     private byte[] encode(byte bytes[]) {
         //initialise new array of bits in order length of array is multiple of 5
-        byte ar[] = new byte[(int) Math.ceil(bytes.length / 1.0 / K) *K];
+        byte ar[] = new byte[(int) Math.ceil(bytes.length / 1.0 / K) * K];
         //copy initial array
         for (int i = 0; i < bytes.length; i++) {
             ar[i] = bytes[i];
@@ -199,14 +200,14 @@ public class ReedMuller implements EncodeAlgorithm {
     }
 
     /**
-     *
      * @param bytes accept array of bits
      *              //each 16 bits will be decoded to 5 bits
      * @return decoded massage
      */
     private byte[] decode(byte bytes[]) {
+        allocateEncodeMx();
         //initialise new array with length |bytes|/16*5
-        byte out[] = new byte[bytes.length / N *K];
+        byte out[] = new byte[bytes.length / N * K];
         int ind = 0;
         //for each block with length = 16
         for (int i = 0; i < bytes.length / (N); i++) {
@@ -216,7 +217,7 @@ public class ReedMuller implements EncodeAlgorithm {
             for (int f = 0; f < N; f++) {
                 byte sum = 0;
                 for (int j = 0; j < N; j++) {
-                    sum += decodeMx[f][j] * (2 * bytes[N* i + j] - 1);
+                    sum += decodeMx[f][j] * (2 * bytes[N * i + j] - 1);
                 }
                 //save the product
                 value[f] = sum;

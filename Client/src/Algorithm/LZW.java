@@ -2,6 +2,7 @@ package Algorithm;
 
 import javafx.util.Pair;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.*;
 
 import static Algorithm.FileProcessor.writeBytes;
@@ -32,7 +33,7 @@ public class LZW implements CompressionAlgorithm {
         List<Integer> values = getValues(bitSet, bytes.length*8);
 
         byte data[] = decompress(values);
-
+//        data = data[data.length - 1] == null ? Arrays.copyOfRange(data, 0, data.length - 2): data;
         return writeBytes("decompressedLZW.data", data);
     }
 

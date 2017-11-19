@@ -3,6 +3,8 @@ package FrontEnd;
 import Algorithm.*;
 import Algorithm.JPEG.JpegCompression;
 import Network.ChatClient;
+import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -267,7 +269,7 @@ public class Controller {
      */
     private File saveObjectOnSend(JSONObject json) {
         String s = (String) json.get("message");
-        String fileName = "temporary" + Integer.toString(temporaryIndex++);
+        String fileName = "temporary" + Integer.toString(temporaryIndex);
         File link = new File(fileName);
 
         try {
@@ -288,8 +290,13 @@ public class Controller {
      * @return link to the stored file
      */
     private File saveObjectOnReceive(JSONObject json) {
-        byte[] bytes = Base64.getDecoder().decode((String) json.get("message"));
-        String fileName = "temporary" + Integer.toString(temporaryIndex++);
+        byte[] bytes = new byte[0];
+        try {
+            bytes = Base64.decode((String) json.get("message"));
+        } catch (Base64DecodingException e) {
+            e.printStackTrace();
+        }
+        String fileName = "temporary" + Integer.toString(temporaryIndex);
 
         return writeBytes(fileName, bytes);
     }
@@ -556,7 +563,7 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String data = Base64.getEncoder().encodeToString(bytes);
+        String data = Base64.encode(bytes);
 
 //        String s = factory.toString();
 //        s = s.replace(Character.toString(s.charAt(0)), "");

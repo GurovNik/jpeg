@@ -94,7 +94,7 @@ public class ChatClient extends Thread {
             if(!((String)obj.get("format")).equals("text")){
                 System.out.println("FILE RECEIVED!");
 
-                File f = client.readFile(Integer.parseInt((String) obj.get("initial_size")));
+                File f = client.readFile(Integer.parseInt((String) obj.get("initial_size")), msg);
                 //TODO: Call method for receiving a file
                 frontEndController.receiveFile(f);
             }else{

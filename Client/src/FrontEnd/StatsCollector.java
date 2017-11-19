@@ -5,7 +5,9 @@ import Algorithm.JPEG.JpegCompression;
 import org.json.simple.JSONObject;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -25,6 +27,7 @@ public class StatsCollector {
     private static HashSet<JSONObject> statisticsFull = new HashSet<>();
 
     private static String foldersPath = "C:/cygwin64/home/evger/DATA";
+    private static String foldersPath1 = "C:/cygwin64/small_data";
     private static File folders = new File(foldersPath);
     public static String compressed = "compressed_";
     public static String decompressed = "decompressed_";
@@ -40,14 +43,24 @@ public class StatsCollector {
 
         int success = 0;
         int counter = 0;
+        int items_amount = 0;
+        File stats_compression_json = new File(foldersPath + "/../stats/compression.data");
 
-        for (int i = 0; i < compressionAlgorithms.length - 2; i++) {
-            CompressionAlgorithm alg = compressionAlgorithms[i];
+        FileWriter fw = new FileWriter(stats_compression_json, true);
+
+//        for (int i = 0; i < compressionAlgorithms.length - 2; i++) {
+            CompressionAlgorithm alg = compressionAlgorithms[0];
             for (File folder: folders.listFiles()) {
                 for (File subfolder: folder.listFiles()) {
                     File files[] = subfolder.listFiles();
                     format = getFilenameExtension(files[0]);
+                    items_amount = 0;
                     for (File item : files) {
+                        if (items_amount == 5)
+                            break;
+                        items_amount++;
+
+                        System.out.printf("Before compression :: ");
                         JSONObject json = new JSONObject();
                         long time = System.currentTimeMillis();
                         File compressed = alg.compress(item);
@@ -55,23 +68,30 @@ public class StatsCollector {
 
                         json.put("message", "");
                         json.put("format", format);
-                        json.put("compression", Integer.toString(i));
+                        json.put("compression", Integer.toString(0));
                         json.put("compression_time", Long.toString(time));
-                        json.put("initial_size", Long.toString(item.getTotalSpace()));
-                        json.put("compressed_size", Long.toString(compressed.getTotalSpace()));
-                        String newPath = foldersPath + "/../home/evger/Statistics/" + algName.get(alg) + "/" + compressed + item.getName();
+                        json.put("initial_size", Long.toString(item.length()));
+                        json.put("compressed_size", Long.toString(compressed.length()));
+                        String newPath = foldersPath + "/../Statistics/" + algName.get(alg) + "/" + compressed + item.getName() + ".data";
                         boolean t = compressed.renameTo(new File(newPath));
                         if (t) {
                             success++;
                             statisticsCompression.put(compressed.getName(), json);
+                            fw = new FileWriter(stats_compression_json, true);
+                            fw.write(json.toJSONString() + "\n");
+                            fw.close();
+
+                            System.out.printf("Success ");
                         }
                         counter++;
                         System.out.println("Done :: " + counter);
                     }
                 }
             }
-        }
+//        }
 
+//        Collection<JSONObject> values = statisticsCompression.values();
 
+//        for (JSONObject json: values)
     }
 }

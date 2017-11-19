@@ -66,6 +66,7 @@ public class ChatServerThread extends Thread {
                         send.put("address", "null");
                         send.put("format", "null");
                         send.put("message", "null");
+                        send.put("database", "1");
 
                         server.handle(send.toJSONString(), getName());
                     } else {
@@ -79,6 +80,7 @@ public class ChatServerThread extends Thread {
                             send.put("message", db.get("content"));
                             send.put("encoding", db.get("coding"));
                             send.put("compression", db.get("compression"));
+                            send.put("database", db.get("1"));
 
                             System.out.println("SENDING THIS SHIT :: " + send.toJSONString());
                             server.handle(send.toJSONString(), getName());
@@ -99,29 +101,37 @@ public class ChatServerThread extends Thread {
                         notification.put("message", obj.get("message"));
                         notification.put("compression", obj.get("compression"));
                         notification.put("encoding", obj.get("encoding"));
+                        notification.put("initial_size", obj.get("initial_size"));
 
+                        int allocationSize = Integer.parseInt((String)obj.get("initial_size"));
                         server.handle(notification.toJSONString(), receiver);
-
+                        System.out.println("Sended");
 
                         int count;
                         byte bytes[] = new byte[8192];
                         Object[] noise = {null, 0};
-                        while((count = streamIn.read(bytes))>0){
+                        while((count = streamIn.read(bytes, 0, Math.min(bytes.length, allocationSize)))>0){
                             noise[1] = (int) noise[1] + (int)makeSomeNoise(bytes, 0.00)[1];
                             streamOut.write(bytes);
                             streamOut.flush();
+                            System.out.println("Imma busi, cunt u see?");
+                            System.out.println("Count :: " + count);
+                            allocationSize -= count;
                         }
+                        streamOut.flush();
 
+                        System.out.println("LIFE AFTER SENDING FILE");
                         db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1],
-                                -1, -1, -1, getName(), (String) obj.get("address"),
-                                (String) obj.get("compression"), (String) obj.get("encoding"),
-                                (String) obj.get("format"), (String) obj.get("message"));
+                                (String)obj.get("initial_size"), (String) obj.get("encoding_time"), (String) obj.get("compression_time"),
+                                getName(), (String) obj.get("address"), (String) obj.get("compression"),
+                                (String) obj.get("encoding"), (String) obj.get("format"), (String) obj.get("message"));
 
                         notification.put("chat", getName());
                         notification.put("address", getName());
+                        notification.put("database" , "0");
 
                         server.handle(notification.toJSONString(), receiver);
-
+                        System.out.println("ITS FINE");
                     }else {
 //                    Or send message to user.
 //                    (size, compressed, encoded, encodedTime, compressedTime,
@@ -139,9 +149,9 @@ public class ChatServerThread extends Thread {
                         send.put("encoding", obj.get("encoding"));
 
                         db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1],
-                                -1, -1, -1, getName(), (String) obj.get("address"),
-                                (String) obj.get("compression"), (String) obj.get("encoding"),
-                                (String) obj.get("format"), (String) obj.get("message"));
+                                (String)obj.get("initial_size"), (String) obj.get("encoding_time"), (String) obj.get("compression_time"),
+                                getName(), (String) obj.get("address"), (String) obj.get("compression"),
+                                (String) obj.get("encoding"), (String) obj.get("format"), (String) obj.get("message"));
 
 
                         server.handle(send.toJSONString(), getName());

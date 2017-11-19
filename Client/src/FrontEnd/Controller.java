@@ -288,7 +288,7 @@ public class Controller {
      * @return link to the stored file
      */
     private File saveObjectOnReceive(JSONObject json) {
-        byte[] bytes = Base64.getDecoder().decode((String) json.get("message"));
+        byte[] bytes = Base64.getDecoder().decode(((String) json.get("message")));
         String fileName = "temporary" + Integer.toString(temporaryIndex++);
 
         return writeBytes(fileName, bytes);

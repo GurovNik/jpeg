@@ -3,6 +3,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Base64;
 import java.util.Random;
 
 public class ChatServerThread extends Thread {
@@ -32,6 +33,17 @@ public class ChatServerThread extends Thread {
         }
     }
 
+    public void send(byte[] msg) {
+        try {
+            streamOut.write(msg);
+            streamOut.flush();
+        } catch (IOException ioe) {
+            System.out.println(ID + " ERROR sending: " + ioe.getMessage());
+            server.remove(ID);
+            stop();
+        }
+    }
+
     public int getID() {
         return ID;
     }
@@ -50,7 +62,10 @@ public class ChatServerThread extends Thread {
                     e.printStackTrace();
                 }
 
+
+
                 DB db = new DB();
+
                 //If it is for database synchronisation
                 if (obj.containsKey("database")) {
                     System.out.println("Got database request.");
@@ -83,33 +98,50 @@ public class ChatServerThread extends Thread {
                     }
                     db.reset();
                 } else {
+                    if(!obj.get("format").equals("text")){
+                        byte bytes[] = new byte[0];
+                        streamIn.read(bytes);
+                        JSONObject send = new JSONObject();
+                        String receiver = (String) obj.get("address");
+                        send.put("chat", obj.get("address"));
+                        send.put("address", getName());
+                        send.put("format", obj.get("format"));
+                        Object[] noise = makeSomeNoise(bytes, 0.00);
+                        send.put("message", (String) noise[0]);
+                        send.put("compression", obj.get("compression"));
+                        send.put("encoding", obj.get("encoding"));
+
+                        server.handle(send.toJSONString(), receiver);
+                        server.handleFile(bytes, receiver);
+                    }else {
 //                    Or send message to user.
 //                    (size, compressed, encoded, encodedTime, compressedTime,
 //                     user, recipient, compression, coding,
 //                     format, content)
-                    JSONObject send = new JSONObject();
-                    String receiver = (String) obj.get("address");
+                        JSONObject send = new JSONObject();
+                        String receiver = (String) obj.get("address");
 
-                    send.put("chat", obj.get("address"));
-                    send.put("address", getName());
-                    send.put("format", obj.get("format"));
-                    Object[] noise = makeSomeNoise((String) obj.get("message"), 0.00);
-                    send.put("message", (String) noise[0]);
-                    send.put("compression", obj.get("compression"));
-                    send.put("encoding", obj.get("encoding"));
+                        send.put("chat", obj.get("address"));
+                        send.put("address", getName());
+                        send.put("format", obj.get("format"));
+                        Object[] noise = makeSomeNoise((String) obj.get("message"), 0.00);
+                        send.put("message", (String) noise[0]);
+                        send.put("compression", obj.get("compression"));
+                        send.put("encoding", obj.get("encoding"));
 
-                    db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1],
-                            -1, -1, -1, getName(), (String) obj.get("address"),
-                            (String) obj.get("compression"), (String) obj.get("encoding"),
-                            (String) obj.get("format"), (String) obj.get("message"));
+                        db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1],
+                                -1, -1, -1, getName(), (String) obj.get("address"),
+                                (String) obj.get("compression"), (String) obj.get("encoding"),
+                                (String) obj.get("format"), (String) obj.get("message"));
 
 
-                    server.handle(send.toJSONString(), getName());
+                        server.handle(send.toJSONString(), getName());
 
-                    send.put("chat", getName());
-                    send.put("address", getName());
+                        send.put("chat", getName());
+                        send.put("address", getName());
 
-                    server.handle(send.toJSONString(), receiver);
+                        server.handle(send.toJSONString(), receiver);
+                    }
                 }
                 db.close();
             } catch (IOException ioe) {
@@ -140,6 +172,22 @@ public class ChatServerThread extends Thread {
             seq[i] = (char) store[i];
         }
         Object[] res = {new String(seq), n};
+        return res;
+    }
+
+    public Object[] makeSomeNoise(byte message[], double thr) {
+        int n = 0;
+        for (int i = 0; i < message.length; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                if(rand.nextDouble() < thr){
+                    message[i] ^= (byte)~(message[i] & (1 << j));
+                    ++n;
+                }
+
+            }
+        }
+
+        Object[] res = {message, n};
         return res;
     }
 

@@ -1,13 +1,17 @@
+
 package Algorithm;
 
 import java.io.File;
 
 import static Algorithm.FileProcessor.writeBytes;
+import java.io.File;
+
+
 
 /**
  * This algorithms is implementation of Reed-Muller coding with params r=1 and m=4
  */
-public class ReedMuller implements EncodeAlgorithm {
+public class ReedMuller {
     public static final int r = 1;
     public static final int m = 4;
     //encoding transforms 5 bits to 16
@@ -73,7 +77,7 @@ public class ReedMuller implements EncodeAlgorithm {
      */
     public File decode(File link) {
         //read file as array of bytes
-        byte[] bytes = Algorithm.FileProcessor.readBytes(link);
+        byte[] bytes = FileProcessor.readBytes(link);
         //decompose bytes to bits
         byte[] transformed = bytesToBits(bytes);
         //decode the bits
@@ -81,7 +85,7 @@ public class ReedMuller implements EncodeAlgorithm {
         //compose these bits to bytes
         byte result[] = decodedToResult(decoded);
         //create file from bytes and return it
-        return writeBytes("decodedReedmuller.data", result);
+        return FileProcessor.writeBytes("decoded.data", result);
     }
 
     /**
@@ -99,7 +103,7 @@ public class ReedMuller implements EncodeAlgorithm {
         //compose bytes from these bits
         byte result[] = encodedToResult(encoded);
         //create file from bytes and return it
-        return writeBytes("encodedMuller.data", result);
+        return FileProcessor.writeBytes("encodedMuller.data", result);
     }
 
     /**
@@ -155,7 +159,7 @@ public class ReedMuller implements EncodeAlgorithm {
      */
     private byte[] decodedToResult(byte[] bytes) {
         byte result[] = new byte[(int) Math.floor(bytes.length / 1.0 / 8)];
-        for (int i = 0; i < Math.floor(result.length / 1.0 / 8) * 8; i += 8) {
+        for (int i = 0; i < Math.floor(bytes.length / 1.0 / 8) * 8; i += 8) {
             for (int j = 1; j < 8; j++) {
                 result[i / 8] += bytes[i + j] * Math.pow(2, 7 - j);
             }

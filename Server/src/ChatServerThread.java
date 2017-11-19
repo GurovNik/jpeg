@@ -107,6 +107,12 @@ public class ChatServerThread extends Thread {
                         server.handle(notification.toJSONString(), receiver);
                         System.out.println("Sended");
 
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
                         int count;
                         byte bytes[] = new byte[8192];
                         Object[] noise = {null, 0};
@@ -130,7 +136,7 @@ public class ChatServerThread extends Thread {
                         notification.put("address", getName());
                         notification.put("database" , "0");
 
-                        server.handle(notification.toJSONString(), receiver);
+//                        server.handle(notification.toJSONString(), receiver);
                         System.out.println("ITS FINE");
                     }else {
 //                    Or send message to user.

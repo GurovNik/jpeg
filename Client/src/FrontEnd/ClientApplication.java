@@ -2,9 +2,7 @@ package FrontEnd;
 
 import Network.ChatClient;
 import Network.ChatClientThread;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,16 +11,18 @@ import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import javax.annotation.Resource;
 import java.util.Optional;
 
-public class Main extends Application {
+public class ClientApplication extends javafx.application.Application {
     static Controller myController;
     static ChatClient chatClient;
     static ChatClientThread chatClientThread;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("sample.fxml"));
         Parent root = loader.load();
         myController = (Controller)loader.getController();
 

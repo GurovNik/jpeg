@@ -1,107 +1,114 @@
 package Algorithm;
 
-import java.io.*;
+import java.io.File;
+import java.util.BitSet;
 
+/**
+ * Class Repetition represents N repetition code
+ * where N could be any integer. Take bits and
+ * repeat it N times in file.
+ *
+ */
 public class Repetition implements EncodeAlgorithm {
 
-    int n;
+    /**
+     * Number of repetitions.
+     */
+    private int N;
 
+    /**
+     * Constructor that specify n
+     * @param n - numberof repetition.
+     */
     public Repetition(int n) {
-        this.n = n;
+        this.N = n;
     }
 
+
+//
+//    public static void main(String[] args) {
+//        Repetition rep = new Repetition(5);
+//        System.out.println("ENCODE!");
+//        File f = rep.encode(new File("input"));
+//        System.out.println("DECODE!");
+//        rep.decode(f);
+//        System.out.println("Yay!");
+//    }
+
+    /**
+     * Encoding file by repetition of each bit N times.
+     * Writing encoded bits into new file.
+     *
+     * @param input - file for encoding
+     * @return - new File with encoded bits.
+     */
     public File encode(File input) {
-        BufferedInputStream read = null;
-        BufferedOutputStream write = null;
-        File out = new File("outerf");
-        try {
-            out.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            read = new BufferedInputStream(new FileInputStream(input));
-            write = new BufferedOutputStream(new FileOutputStream(out));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        byte store[] = FileProcessor.readBytes(input);
+        BitSet set = createBitSet(store);
+        BitSet out = new BitSet(store.length * N);
 
-        int data;
-        try {
-            while ((data = read.read()) != -1) {
-                for (int i = 0; i < n; i++) {
-                    write.write((char) data);
-                }
-                write.flush();
+        for (int i = 0; i < store.length * 8; ++i) {
+            for (int j = 0; j < N; ++j) {
+                out.set(i * N + j, set.get(i));
             }
-            read.close();
-            write.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
-        return out;
+        byte output[] = out.toByteArray();
+
+        return FileProcessor.writeBytes("repetitionCompressed.data", output);
     }
 
-    public static void main(String[] args) {
-        System.out.println();
-        System.out.println((char) 40);
-        Repetition r = new Repetition(5);
-        File fin = new File("fin");
-        fin = r.encode(fin);
-        File f = new File("outerf");
-        f = r.decode(f);
-        System.out.println(f.getAbsoluteFile());
+
+    /**
+     * Helper function. Fill bitset with bits of given byte array.
+     * @param bytes - array of bytes.
+     * @return - BitSet with bits of byte array.
+     */
+    private BitSet createBitSet(byte[] bytes) {
+        BitSet bitSet = new BitSet(bytes.length * 8);
+        for (int i = 0; i < bytes.length; i++) {
+            for (int j = 0; j < 8; j++) {
+                bitSet.set(i * 8 + j, (bytes[i] & (1 << j)) > 0);
+            }
+        }
+
+        return bitSet;
     }
 
-    public File decode(File in) {
-        BufferedInputStream read = null;
-        BufferedOutputStream write = null;
-        File out = new File("outerfc");
-        try {
-            out.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            read = new BufferedInputStream(new FileInputStream(in));
-            write = new BufferedOutputStream(new FileOutputStream(out));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        int counter = 0;
-        int[] data = new int[n];
 
-        try {
-            while ((data[0] = read.read()) != -1) {
-                int zero = 0;
-                int one = 0;
-                if ((char) data[0] == '0') {
-                    ++zero;
-                } else {
+    /**
+     * Decoding file taking the majority of bits out of N.
+     *
+     * @param input - file with encoded bytes.
+     * @return - decoded file.
+     */
+    public File decode(File input) {
+        byte store[] = FileProcessor.readBytes(input);
+        BitSet set = createBitSet(store);
+        // Calculating threshold her, to not make recalculation each loop iteration.
+        int thresh = (int) Math.ceil((double) store.length * (8.0 / N));
+
+        BitSet out = new BitSet(thresh);
+        int k = 0;
+
+        for (int i = 0; i < thresh; ++i) {
+
+            byte zero = 0;
+            byte one = 0;
+            for (int j = 0; j < N; ++j) {
+                if (set.get(i * N + j)) {
                     ++one;
-                }
-                for (int i = 1; i < data.length; i++) {
-                    data[i] = read.read();
-                    if ((char) data[i] == '0') {
-                        ++zero;
-                    } else {
-                        ++one;
-                    }
-                }
-                if (zero > one) {
-                    write.write((byte) '0');
                 } else {
-                    write.write((byte) '1');
+                    ++zero;
                 }
-                write.flush();
             }
-            write.close();
-            read.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (zero < one) {
+                out.set(k, true);
+            }
+            ++k;
         }
-        return out;
+        byte output[] = out.toByteArray();
+        return FileProcessor.writeBytes("decodedRepetition.data", output);
     }
+
 }

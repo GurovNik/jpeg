@@ -3,8 +3,8 @@ package Algorithm;
 import java.io.*;
 import java.nio.file.Files;
 
-public class Hamming {
-    public static byte[] readBytes(File link) {
+public class Hamming implements EncodeAlgorithm {
+    public byte[] readBytes(File link) {
         byte[] bytes = null;
         try {
             bytes = Files.readAllBytes(link.toPath());
@@ -17,7 +17,7 @@ public class Hamming {
 
 
 
-    public static File writeBytes(String filename, byte[] bytes) {
+    public File writeBytes(String filename, byte[] bytes) {
         File link = new File(filename);
         try {
             FileOutputStream fos = new FileOutputStream(link);
@@ -30,22 +30,22 @@ public class Hamming {
         return link;
     }
 
-    static byte log2(int x) {
+    byte log2(int x) {
         return (byte) (Math.log((x)) / Math.log(2)); //log with the base 2, only integer value
     }
 
-    static double log22(int x) {
+    double log22(int x) {
         return (Math.log((x)) / Math.log(2));  //log with the base 2
     }
 
-    static void insert(byte[] array, byte where, byte what, int currentSize) {
+    void insert(byte[] array, byte where, byte what, int currentSize) {
         //function for inserting element in the array in the paticular place
         for (int i = currentSize; i > where; i--)
             array[i] = array[i - 1];
         array[where] = what;
     }
 
-    private static byte[] code(byte[] input_byte) {
+    private byte[] code(byte[] input_byte) {
         int numberOfAddiditionalBits = 4;
         //for the message of length 8 we need additional 4 bits (trunc(log2(N)) + 1 in general, since we ooded 1 byte, this number is 4)
         byte result[] = new byte[8 + numberOfAddiditionalBits];
@@ -84,7 +84,7 @@ public class Hamming {
         return writeBytes("encodedHamming.data", result);
     }
 
-    private static byte[] decoding(byte[] input) {
+    private byte[] decoding(byte[] input) {
         //for (int i = 0; i < input.length; i++)
         //  System.out.print(input[i]);
         //System.out.println();
@@ -123,7 +123,14 @@ public class Hamming {
         return result;
     }
 
-    public File decode(File link, byte[] correct) {
+    public File decode(File link) {
+        byte[] data = readBytes(link);
+        byte[] notTransformed = bytesToBits(data);
+
+        return decode(link, notTransformed);
+    }
+
+    private File decode(File link, byte[] correct) {
         byte[] bytes = readBytes(link);
         byte[] transformed = bytesToBits(bytes);
         byte[] decoded = new byte[transformed.length * 2 / 3]; //decoded should be in 1,5 times smaller (since coded message is less then decoded in 3/2 times)
@@ -139,14 +146,14 @@ public class Hamming {
         byte[] correctDecoded = new byte[decoded.length];
         for (int i = 0; i < correctDecoded.length - 2; i++) {
             correctDecoded[i] = decoded[i];
-            if (Math.abs(correctDecoded[i] - correct[i]) > 0)
-                System.out.println("WTF1");
+//            if (Math.abs(correctDecoded[i] - correct[i]) > 0)
+//                System.out.println("WTF1");
         }
         byte result[] = decodedToResult(decoded);
         return writeBytes("decodedHamming.data", result);
     }
 
-    private static byte[] encodedToResult(byte[] bytes) { //this feature converts bits to bytes
+    private byte[] encodedToResult(byte[] bytes) { //this feature converts bits to bytes
         byte result[] = new byte[(int) Math.ceil(bytes.length / 1.0 / 8)];
         byte bytesExtended[] = new byte[bytes.length + 300];
 
@@ -162,7 +169,7 @@ public class Hamming {
         return result;
     }
 
-    private static byte[] bytesToBits(byte[] data) { //converts bytes to bits
+    private byte[] bytesToBits(byte[] data) { //converts bytes to bits
         int b;
         byte transofrmed[] = new byte[data.length * 8];
         for (int i = 0; i < data.length; i++) {
@@ -184,7 +191,7 @@ public class Hamming {
         return transofrmed;
     }
 
-    private static byte[] decodedToResult(byte[] decoded) { //converts bits in bytes
+    private byte[] decodedToResult(byte[] decoded) { //converts bits in bytes
         double temp = Math.floor(decoded.length / 1.0 / 8);
         byte result[] = new byte[(int) temp];
         for (int i = 0; i < temp * 8; i += 8) {
@@ -206,9 +213,8 @@ public class Hamming {
     public static void main(String[] args) {
         Hamming coding = new Hamming();
         Hamming decoding = new Hamming();
-        File f = new File("in.data");
-        byte[] data = readBytes(f);
-        byte[] notTransformed = bytesToBits(data);
-        File fprev = decoding.decode(coding.encode(f), notTransformed);
+        File f = new File("img.jpg");
+        File l = coding.encode(f);
+        File fprev = decoding.decode(l);
     }
 }

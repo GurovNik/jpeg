@@ -48,7 +48,7 @@ public class ChatClient extends Thread {
             e.printStackTrace();
         }
         try {
-            Thread.sleep(1000);
+            Thread.sleep(510);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -62,10 +62,12 @@ public class ChatClient extends Thread {
             e.printStackTrace();
         }
         try {
-            while((count = inputStream.read(bytes))>0){
+            int allocationSize = (int)file.length();
+            while((count = inputStream.read(bytes, 0, Math.min(8192, allocationSize)))>0){
                 streamOut.write(bytes);
                 streamOut.flush();
-                System.out.println("Count :: " + count);
+                System.out.println("Left :: " + allocationSize);
+                allocationSize -= count;
             }
             streamOut.flush();
         } catch (IOException e) {
@@ -93,10 +95,9 @@ public class ChatClient extends Thread {
         }else{
             if(!((String)obj.get("format")).equals("text")){
                 System.out.println("FILE RECEIVED!");
-
-                File f = client.readFile(Integer.parseInt((String) obj.get("initial_size")), msg);
-                //TODO: Call method for receiving a file
-                frontEndController.receiveFile(f);
+                File f = client.readFile(Integer.parseInt((String) obj.get("encoded_size")), msg);
+                System.out.println("Huina");
+                frontEndController.receiveMessage(msg,f);
             }else{
                 frontEndController.receiveMessage(msg);
             }

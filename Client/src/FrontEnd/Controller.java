@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.util.*;
 
 import static Algorithm.FileProcessor.getFilenameExtension;
+import static Algorithm.FileProcessor.readBytes;
 import static Algorithm.FileProcessor.writeBytes;
 
 public class Controller {
@@ -242,7 +243,7 @@ public class Controller {
         String json = createJSON(eFile, format, stats_size, stats_time);
 
         if(!format.equals("text")){
-            socket.sendFile(link, json);
+            socket.sendFile(eFile, json);
         }else{
             /* Send by socket JSON string */
             try {
@@ -283,7 +284,11 @@ public class Controller {
     private File saveObjectOnReceive(JSONObject json) {
         byte[] bytes = new byte[0];
         try {
-            bytes = Base64.decode((String) json.get("message"));
+            if((!((String)json.get("format")).equals("text"))){
+                return new File((String)json.get("message"));
+            }else{
+                bytes = Base64.decode((String) json.get("message"));
+            }
         } catch (Base64DecodingException e) {
             e.printStackTrace();
         }
@@ -348,25 +353,21 @@ public class Controller {
         return jsonObject;
     }
 
-
-    /**
-     * Do not accept this!!!
-     * @param f - file kotoriy ne nado accept.
-     */
-    public synchronized void receiveFile(File f) {
+    public synchronized void receiveMessage(String text, File f) {
         JSONParser parser = new JSONParser();
-//        try {
+        try {
+            JSONObject obj = (JSONObject) parser.parse(text);
 //            obj.put("message", Base64.getDecoder().decode((String)obj.get("message")));
-        String room = "evgerher";
-        /* Select tab to apply to */
-        Tab tab = selectDialogue(room);
-        if (tab != null)
-            /* If tab is found - apply */
-        applyMessage(tab, new JSONObject());
-//        } catch (ParseException pe) {
-//            System.err.println("Invalid json");
-//            pe.printStackTrace();
-//        }
+            String room = (String) obj.get("chat");
+            /* Select tab to apply to */
+            Tab tab = selectDialogue(room);
+            if (tab != null)
+                /* If tab is found - apply */
+                applyMessage(tab, obj);
+        } catch (ParseException pe) {
+            System.err.println("Invalid json");
+            pe.printStackTrace();
+        }
     }
 
 

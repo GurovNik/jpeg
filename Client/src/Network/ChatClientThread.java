@@ -56,7 +56,7 @@ public class ChatClientThread extends Thread {
             while((count = streamIn.read(bytes, 0, Math.min(bytes.length, allocationSize)))>0){
                 streamOut.write(bytes);
                 streamOut.flush();
-                System.out.print(" count received file == " + count);
+                System.out.print("count left == " + allocationSize);
                 allocationSize -= count;
             }
             streamOut.close();

@@ -83,6 +83,7 @@ public class Controller {
      */
     @FXML
     public void initialize() {
+        com.sun.org.apache.xml.internal.security.Init.init();
         lzw = new LZW();
         huffman = new Huffman();
         repetition3 = new Repetition(3);

@@ -11,6 +11,7 @@ import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import javax.annotation.Resource;
 import java.util.Optional;
 
 public class ClientApplication extends javafx.application.Application {
@@ -20,7 +21,8 @@ public class ClientApplication extends javafx.application.Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("sample.fxml"));
         Parent root = loader.load();
         myController = (Controller)loader.getController();
 

@@ -30,7 +30,6 @@ public class ChatClientThread extends Thread {
     }
 
     public File readFile(int allocationSize, String msg){
-        System.out.println("WE AVE REFEVED A FAILE MA LORDO!");
         JSONParser parser = new JSONParser();
         JSONObject obj= null;
         try {
@@ -38,33 +37,32 @@ public class ChatClientThread extends Thread {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        System.out.print(".");
         File output = new File((String) obj.get("message"));
-        System.out.println(msg);
 
-
-        System.out.print("Start doin file::");
         DataOutputStream streamOut = null;
         try {
             streamOut = new DataOutputStream(new FileOutputStream(output));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
+        System.out.print(".");
         int count;
         byte bytes[] = new byte[8192];
         try {
             while((count = streamIn.read(bytes, 0, Math.min(bytes.length, allocationSize)))>0){
                 streamOut.write(bytes);
                 streamOut.flush();
-                System.out.print(" count received file == " + count);
                 allocationSize -= count;
+                System.out.println("Size" + count);
             }
             streamOut.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("::sucessfuly");
+        System.out.print(".");
         System.out.println("DONE");
+
         return output;
     }
 

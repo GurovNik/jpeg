@@ -61,13 +61,18 @@ public class ChatClient extends Thread {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+        long size = file.length();
+        System.out.println("Size :: " + size);
+
         try {
             while((count = inputStream.read(bytes))>0){
                 streamOut.write(bytes);
                 streamOut.flush();
-                System.out.println("Count :: " + count);
+                System.out.println("Left :: " + (size - count));
             }
             streamOut.flush();
+            inputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -87,16 +92,12 @@ public class ChatClient extends Thread {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        System.out.println("RECEIVED :: " + obj.toJSONString());
         if(obj.containsKey("database")){
             frontEndController.receiveMessage(msg);
         }else{
             if(!((String)obj.get("format")).equals("text")){
                 System.out.println("FILE RECEIVED!");
-
-                File f = client.readFile(Integer.parseInt((String) obj.get("initial_size")), msg);
-                //TODO: Call method for receiving a file
-                frontEndController.receiveFile(f);
+                File f = client.readFile(Integer.parseInt((String) obj.get("encoded_size")), msg);
             }else{
                 frontEndController.receiveMessage(msg);
             }

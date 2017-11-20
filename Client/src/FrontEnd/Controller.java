@@ -241,7 +241,7 @@ public class Controller {
         String json = createJSON(eFile, format, stats_size, stats_time);
 
         if(!format.equals("text")){
-            socket.sendFile(link, json);
+            socket.sendFile(eFile, json);
         }else{
             /* Send by socket JSON string */
             try {

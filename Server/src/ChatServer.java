@@ -40,7 +40,6 @@ public class ChatServer implements Runnable {
     public void start() {
         if (thread == null) {
             thread = new Thread(this);
-
             thread.start();
         }
     }
@@ -60,13 +59,16 @@ public class ChatServer implements Runnable {
     }
 
 
-    public synchronized void handle(String input, String receiver) {
+    public synchronized boolean handle(String input, String receiver) {
         for (int i = 0; i < clientCount; i++) {
             if (clients[i].getName().equalsIgnoreCase(receiver)) {
                 clients[i].send(input);
+                return true;
             }
         }
+        return false;
     }
+
 
     public synchronized void remove(int ID) {
         int pos = findClient(ID);

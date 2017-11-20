@@ -354,6 +354,7 @@ public class Controller {
     }
 
     public synchronized void receiveMessage(String text, File f) {
+        System.out.println("After receiving file :: " + text);
         JSONParser parser = new JSONParser();
         try {
             JSONObject obj = (JSONObject) parser.parse(text);
@@ -399,12 +400,13 @@ public class Controller {
      * @param obj - message to apply
      */
     private void applyMessage(Tab tab, JSONObject obj) {
-        System.out.println(obj.toJSONString());
+        System.out.println("APPLIED MESSAGE :: " + obj.toJSONString());
 
         /* Task object is used to perform GUI changes :: necessary for JavaFX */
         Task<Node> task = new Task<Node>() {
             @Override
             public Node call() throws Exception {
+                System.out.println("STARTUEM");
                 String encode_item = (String) obj.get("encoding");
                 String compress_item = (String) obj.get("compression");
 

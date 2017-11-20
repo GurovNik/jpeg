@@ -69,7 +69,6 @@ public class ChatClient extends Thread {
                 System.out.println("Left :: " + allocationSize);
                 allocationSize -= count;
             }
-            streamOut.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,7 +77,6 @@ public class ChatClient extends Thread {
     public void write(String msg) throws IOException {
         streamOut.writeUTF(msg);
         streamOut.flush();
-        System.out.println(msg);
     }
 
     public void handle(String msg) throws IOException {

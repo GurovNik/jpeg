@@ -436,14 +436,14 @@ public class JPEG {
         int size = x * y;
         height = y;
         width = x;
-        universalDecompositionFromFile();
+        universalDecompositionFromFile(file);
     }
 
-    public void universalDecompositionFromFile() throws IOException {       // reads data and transforms it into matrices for future restructuring
+    public void universalDecompositionFromFile(File file) throws IOException {       // reads data and transforms it into matrices for future restructuring
 
         Scanner scan = null;
         try {
-            scan = new Scanner(new File("compressedFile.data"));
+            scan = new Scanner(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -505,10 +505,10 @@ public class JPEG {
         decompress(decodedMatrixY, decodedMatrixCb, decodedMatrixCr);
     }
 
-    public void decompositionFromFile() throws IOException {            //for debugging
+    public void decompositionFromFile(File file) throws IOException {            //for debugging
         Scanner scan = null;
         try {
-            scan = new Scanner(new File("data.txt"));
+            scan = new Scanner(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

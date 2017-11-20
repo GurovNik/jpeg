@@ -32,6 +32,17 @@ public class ChatServerThread extends Thread {
         }
     }
 
+    public void send(byte[] msg) {
+        try {
+            streamOut.write(msg);
+            streamOut.flush();
+        } catch (IOException ioe) {
+            System.out.println(ID + " ERROR sending: " + ioe.getMessage());
+            server.remove(ID);
+            stop();
+        }
+    }
+
     public int getID() {
         return ID;
     }
@@ -89,7 +100,7 @@ public class ChatServerThread extends Thread {
                         JSONObject notification = new JSONObject();
 
                         String receiver = (String) obj.get("address");
-                        notification.put("chat", receiver);
+                        notification.put("chat", getName());
                         notification.put("address", getName());
                         notification.put("format", obj.get("format"));
                         notification.put("message", obj.get("message")+"received");
@@ -134,8 +145,9 @@ public class ChatServerThread extends Thread {
                         }
                         System.out.println("Done.");
 
-
+                        System.out.println("NOtification before " + notification.toJSONString());
                         boolean isSent = server.handle(notification.toJSONString(), receiver);
+
                         System.out.println("Sended notification.");
                         if(isSent) {
                             allocationSize = Integer.parseInt((String)obj.get("encoded_size"));
@@ -151,31 +163,34 @@ public class ChatServerThread extends Thread {
                                 byte buf[] = new byte[8192];
                                 while ((count = fileIn.read(buf, 0, Math.min(allocationSize, 8192))) > 0) {
                                     System.out.println("got " + count);
-                                    streamOut.write(buf);
-                                    streamOut.flush();
+                                    server.sendBytes(buf, receiver);
                                     allocationSize -= count;
                                     System.out.println(allocationSize + " bytes left.");
                                 }
                             } catch (IOException e) {
+                                System.out.println(allocationSize);
                                 e.printStackTrace();
                             }
                         }
+
 
                         db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1],
                                 (String)obj.get("initial_size"), (String) obj.get("encoding_time"), (String) obj.get("compression_time"),
                                 getName(), (String) obj.get("address"), (String) obj.get("compression"),
                                 (String) obj.get("encoding"), (String) obj.get("format"), (String) obj.get("message"));
 
-                        notification.put("chat", getName());
+                        notification.put("chat", receiver);
                         notification.put("address", getName());
 
+                        System.out.println("NOtification after " + notification.toJSONString());
                         try {
-                            Thread.sleep(100);
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
                         server.handle(notification.toJSONString(), receiver);
+                        System.out.println("Done resending file");
                     }else {
 //                    Or send message to user.
 //                    (size, compressed, encoded, encodedTime, compressedTime,

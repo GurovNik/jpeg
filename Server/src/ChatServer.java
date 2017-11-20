@@ -59,6 +59,16 @@ public class ChatServer implements Runnable {
         return -1;
     }
 
+    public synchronized boolean sendBytes(byte[] input, String receiver) {
+        for (int i = 0; i < clientCount; i++) {
+            if (clients[i].getName().equalsIgnoreCase(receiver)) {
+                clients[i].send(input);
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public synchronized boolean handle(String input, String receiver) {
         for (int i = 0; i < clientCount; i++) {

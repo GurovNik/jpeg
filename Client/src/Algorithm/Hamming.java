@@ -132,8 +132,7 @@ public class Hamming {
             for (int j = 0; j < 12; j++)
                 temp[j] = transformed[j + i*12];
             byte[] answer = new byte[8];
-            for (int z = 0; z < answer.length; z++)
-                answer[z] = decoding(temp)[z];
+            answer = decoding(temp);
             for (int j = 0; j < answer.length; j++)
                 decoded[i * 8 + j] = answer[j];
         }

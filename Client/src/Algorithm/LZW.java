@@ -11,7 +11,7 @@ public class LZW implements CompressionAlgorithm {
     private int size;
     private int bits;
     private final int initialDictionarySize = 256;
-    private final int initialBitsAmount = (int)Math.round(Math.log(initialDictionarySize)/Math.log(2)) + 1; //9
+    private final int initialBitsAmount = (int)Math.round(Math.log(initialDictionarySize)/Math.log(2)) + 1; //(number of bits for each simbol from initial state) 9 for initial dictionary size = 256
 
     public LZW() {}
 
@@ -141,6 +141,7 @@ public class LZW implements CompressionAlgorithm {
     }
 
     private BitSet createBitSet(int value, int bits) {
+        //creating a bitset
         BitSet bitSet = new BitSet(bits);
         for (int i = 0; i < bits; i++) {
             bitSet.set(i, (value & (1 << i)) > 0);
@@ -150,6 +151,7 @@ public class LZW implements CompressionAlgorithm {
     }
 
     private BitSet createBitSet(byte[] bytes) {
+        //creating a bitset
         BitSet bitSet = new BitSet(bytes.length * 8);
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < 8; j++) {
@@ -161,6 +163,7 @@ public class LZW implements CompressionAlgorithm {
     }
 
     private Map<Integer, List<Byte>> loadIntegerByteDictionary() {
+        //this feature initializes the dictionary with initial alphabet using integer
         Map<Integer, List<Byte>> dict = new HashMap<>();
         for (int i = 0; i < size; i++) {
             ArrayList<Byte> list = new ArrayList<>();
@@ -172,6 +175,7 @@ public class LZW implements CompressionAlgorithm {
     }
 
     private Map<List<Byte>, Integer> loadByteIntegerDictionary() {
+        //this feature initializes the dictionary with initial alphabet using bytes
         Map<List<Byte>, Integer> dict = new HashMap<>();
         for (int i = 0; i < size; i++) {
             ArrayList<Byte> list = new ArrayList<>();
@@ -206,6 +210,7 @@ public class LZW implements CompressionAlgorithm {
     }
 
     private File writeData(List<Pair<Integer, Integer>> data) {
+        //feature that is responsible for writing the answer in the format that can be written in file (and it returns file)
         BitSet bitSets[] = new BitSet[data.size()];
         int index = 0;
         int bits_amount = 0;

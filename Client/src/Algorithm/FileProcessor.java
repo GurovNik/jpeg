@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by evger on 17-Nov-17.
  */
 public class FileProcessor {
+//    static int index = 0;
+
     public static byte[] readBytes(File link) {
         byte[] bytes = null;
         try {
@@ -21,7 +24,8 @@ public class FileProcessor {
     }
 
     public static File writeBytes(String filename, byte[] bytes) {
-        File link = new File(filename);
+        File link = new File(filename+Double.toString(
+                ThreadLocalRandom.current().nextDouble()));
         try {
             FileOutputStream fos = new FileOutputStream(link);
             fos.write(bytes);

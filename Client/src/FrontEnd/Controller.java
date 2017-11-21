@@ -281,13 +281,19 @@ public class Controller {
      * @param json - object to be stored
      * @return link to the stored file
      */
-    private File saveObjectOnReceive(JSONObject json) {
+    private File saveObjectOnReceive(JSONObject json, int val) {
         byte[] bytes = new byte[0];
         try {
-            if((!((String)json.get("format")).equals("text"))){
-                return new File((String)json.get("message"));
+            String s = (String)json.get("format");
+            if(s.compareTo("text") != 0){
+                File came = new File((String)json.get("message"));
+                byte data[] = FileProcessor.readBytes(came);
+                data = Arrays.copyOfRange(data,0, val);
+                System.out.println("File "+ data.length);
+                return FileProcessor.writeBytes("CuttedData.data", data);
             }else{
                 bytes = Base64.decode((String) json.get("message"));
+                System.out.println("Message" + bytes.length);
             }
         } catch (Base64DecodingException e) {
             e.printStackTrace();
@@ -422,7 +428,7 @@ public class Controller {
 
                 System.out.println("Ya ne sdoh0");
 
-                File link = saveObjectOnReceive(obj);
+                File link = saveObjectOnReceive(obj, Integer.parseInt((String)obj.get("encoded_size")));
                 System.out.println("Ya ne sdoh1");
                 File eFile = eAlg.decode(link);
                 System.out.println("Ya ne sdoh2");

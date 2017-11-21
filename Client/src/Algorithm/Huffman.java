@@ -140,14 +140,6 @@ public class Huffman implements CompressionAlgorithm {
         return queue;
     }
 
-    public static void main(String[] args) {
-//        Huffman huf = new Huffman();
-//        System.out.println("CODING!");
-//        File f = huf.compress(new File("input"));
-//        System.out.println("DECODING!");
-//        huf.decompress(f);
-    }
-
     public String getString() {
         return string;
     }

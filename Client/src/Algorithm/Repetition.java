@@ -25,16 +25,6 @@ public class Repetition implements EncodeAlgorithm {
     }
 
 
-//
-//    public static void main(String[] args) {
-//        Repetition rep = new Repetition(5);
-//        System.out.println("ENCODE!");
-//        File f = rep.encode(new File("input"));
-//        System.out.println("DECODE!");
-//        rep.decode(f);
-//        System.out.println("Yay!");
-//    }
-
     /**
      * Encoding file by repetition of each bit N times.
      * Writing encoded bits into new file.

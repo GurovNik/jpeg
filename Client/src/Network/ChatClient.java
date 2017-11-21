@@ -43,7 +43,6 @@ public class ChatClient extends Thread {
         try {
             streamOut.writeUTF(msg);
             streamOut.flush();
-            System.out.println("CALL FOR FILE :: " + msg);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -66,7 +65,6 @@ public class ChatClient extends Thread {
             while((count = inputStream.read(bytes, 0, Math.min(8192, allocationSize)))>0){
                 streamOut.write(bytes);
                 streamOut.flush();
-                System.out.println("Left :: " + allocationSize);
                 allocationSize -= count;
             }
         } catch (IOException e) {
@@ -87,14 +85,11 @@ public class ChatClient extends Thread {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        System.out.println("RECEIVED :: " + obj.toJSONString());
         if(obj.containsKey("database")){
             frontEndController.receiveMessage(msg);
         }else{
             if(!((String)obj.get("format")).equals("text")){
-                System.out.println("FILE RECEIVED!");
                 File f = client.readFile(Integer.parseInt((String) obj.get("encoded_size")), msg);
-                System.out.println("Huina");
                 frontEndController.receiveMessage(msg,f);
             }else{
                 frontEndController.receiveMessage(msg);

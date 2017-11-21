@@ -52,7 +52,6 @@ public class ChatServerThread extends Thread {
         while (true) {
             try {
                 String s = streamIn.readUTF();  //read data
-                System.out.println(s);
                 JSONObject obj = null;  //Create and setup JSON object
                 org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
                 try {
@@ -96,7 +95,7 @@ public class ChatServerThread extends Thread {
                 } else {
                     //If sended file:
                     if(!obj.get("format").equals("text")){
-                        System.out.println("Got a file from " + getName());
+
                         JSONObject notification = new JSONObject();
 
                         String receiver = (String) obj.get("address");
@@ -107,6 +106,15 @@ public class ChatServerThread extends Thread {
                         notification.put("compression", obj.get("compression"));
                         notification.put("encoding", obj.get("encoding"));
                         notification.put("encoded_size", obj.get("encoded_size"));
+
+
+                        File output = new File((String) obj.get("message") + "col");
+                        DataOutputStream fileOut = null;
+                        try {
+                            fileOut = new DataOutputStream(new FileOutputStream(output));
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
 
                         try {
                             Thread.sleep(1000);
@@ -119,56 +127,42 @@ public class ChatServerThread extends Thread {
                         byte bytes[] = new byte[8192];
                         Object[] noise = {null, 0};
 
-                        File output = new File((String) obj.get("message") + "Huina");
-
-                        DataOutputStream fileOut = null;
-                        try {
-                            fileOut = new DataOutputStream(new FileOutputStream(output));
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
-
                         System.out.println(receiver + " received notification. Start collecting file.");
-
                         try {
                             while((count = streamIn.read(bytes, 0, Math.min(bytes.length, allocationSize)))>0){
-                                System.out.println("got " + count);
                                 noise[1] = (int) noise[1] + (int)makeSomeNoise(bytes, 0.00)[1];
                                 fileOut.write(bytes);
                                 fileOut.flush();
                                 allocationSize -= count;
-                                System.out.println(allocationSize + " bytes left.");
                             }
                             fileOut.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        System.out.println("Done.");
 
-                        System.out.println("NOtification before " + notification.toJSONString());
+                        System.out.println("Done.");
                         boolean isSent = server.handle(notification.toJSONString(), receiver);
 
-                        System.out.println("Sended notification.");
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         if(isSent) {
                             allocationSize = Integer.parseInt((String)obj.get("encoded_size"));
-                            System.out.println("Sending file");
                             DataInputStream fileIn = null;
                             try {
                                 fileIn = new DataInputStream(new FileInputStream(output));
                             } catch (FileNotFoundException e) {
                                 e.printStackTrace();
                             }
-                            System.out.println("Size = " + output.length());
                             try {
                                 byte buf[] = new byte[8192];
                                 while ((count = fileIn.read(buf, 0, Math.min(allocationSize, 8192))) > 0) {
-                                    System.out.println("got " + count);
                                     server.sendBytes(buf, receiver);
                                     allocationSize -= count;
-                                    System.out.println(allocationSize + " bytes left.");
                                 }
                             } catch (IOException e) {
-                                System.out.println(allocationSize);
                                 e.printStackTrace();
                             }
                         }
@@ -181,8 +175,6 @@ public class ChatServerThread extends Thread {
 
                         notification.put("chat", receiver);
                         notification.put("address", getName());
-
-                        System.out.println("NOtification after " + notification.toJSONString());
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException e) {
@@ -190,7 +182,6 @@ public class ChatServerThread extends Thread {
                         }
 
                         server.handle(notification.toJSONString(), receiver);
-                        System.out.println("Done resending file");
                     }else {
 //                    Or send message to user.
 //                    (size, compressed, encoded, encodedTime, compressedTime,
@@ -205,6 +196,8 @@ public class ChatServerThread extends Thread {
                         send.put("message", (String) noise[0]);
                         send.put("compression", obj.get("compression"));
                         send.put("encoding", obj.get("encoding"));
+
+                        send.put("encoded_size", obj.get("encoded_size"));
 
                         db.insert((String) obj.get("encoded_size"), (String) obj.get("compressed_size"), (int) noise[1],
                                 (String)obj.get("initial_size"), (String) obj.get("encoding_time"), (String) obj.get("compression_time"),
@@ -232,11 +225,8 @@ public class ChatServerThread extends Thread {
 
     public Object[] makeSomeNoise(String message, double thr) {
         int n = 0;
-        char[] seq = message.toCharArray();
-        byte store[] = new byte[seq.length];
-        for (int i = 0; i < seq.length; i++) {
-            store[i] = (byte) seq[i];
-        }
+        byte store[] = message.getBytes();
+
         for (int i = 0; i < store.length; ++i) {
             for (int j = 0; j < 8; ++j) {
                 if(rand.nextDouble() < thr){
@@ -246,10 +236,8 @@ public class ChatServerThread extends Thread {
 
             }
         }
-        for (int i = 0; i < seq.length; i++) {
-            seq[i] = (char) store[i];
-        }
-        Object[] res = {new String(seq), n};
+
+        Object[] res = {new String(store), n};
         return res;
     }
 
